@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import {
-  orbitTangentRotation,
+  orbitRadialRotation,
   polarToCartesian,
 } from "@/lib/compass/polar";
 import {
@@ -40,7 +40,7 @@ export function CompassDial({ heading }: CompassDialProps) {
     COMPASS_OUTER_RADIUS,
     orbitAngle,
   );
-  const tangentRotation = orbitTangentRotation(orbitAngle);
+  const radialRotation = orbitRadialRotation(orbitAngle);
 
   return (
     <div className="relative mx-auto h-[240px] w-[240px]">
@@ -97,7 +97,7 @@ export function CompassDial({ heading }: CompassDialProps) {
         ))}
 
         <motion.g
-          animate={{ x, y, rotate: tangentRotation }}
+          animate={{ x, y, rotate: radialRotation }}
           transition={arrowTransition}
           style={{ transformOrigin: "0px 0px" }}
         >

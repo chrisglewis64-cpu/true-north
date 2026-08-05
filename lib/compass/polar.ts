@@ -12,7 +12,7 @@ export function polarToCartesian(
   };
 }
 
-/** Tangent rotation (degrees) for clockwise travel at a given orbit angle. */
-export function orbitTangentRotation(angleDegFromNorthClockwise: number): number {
-  return angleDegFromNorthClockwise + 90;
+/** Radial rotation (degrees) — arrow points outward from the centre at a given orbit angle. */
+export function orbitRadialRotation(angleDegFromNorthClockwise: number): number {
+  return angleDegFromNorthClockwise;
 }
