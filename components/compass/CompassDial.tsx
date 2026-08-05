@@ -2,12 +2,13 @@
 
 import { motion } from "framer-motion";
 import {
+  HEADING_ARROW_FILL_CLASS,
   HEADING_ARROW_ROTATION,
   type CompassHeading,
 } from "@/types/compass";
 import {
+  arrowTransition,
   centerDotBreathingTransition,
-  needleTransition,
 } from "@/lib/motion/transitions";
 
 type CompassDialProps = {
@@ -15,7 +16,9 @@ type CompassDialProps = {
 };
 
 const CENTER = 100;
-const ARROW_TIP_Y = 30;
+
+/** Arrowhead only — inner vertex at centre; tip points north at 0°. */
+const ARROWHEAD_PATH = `M ${CENTER} 78 L 91 106 L ${CENTER} ${CENTER} L 109 106 Z`;
 
 const CARDINALS = [
   { label: "N", x: 100, y: 14 },
@@ -83,13 +86,17 @@ export function CompassDial({ heading }: CompassDialProps) {
 
         <motion.g
           animate={{ rotate: rotation }}
-          transition={needleTransition}
+          transition={arrowTransition}
           style={{ transformOrigin: `${CENTER}px ${CENTER}px` }}
         >
-          <path
-            d={`M ${CENTER} ${ARROW_TIP_Y} L ${CENTER - 4} ${ARROW_TIP_Y + 12} L ${CENTER - 1.5} ${ARROW_TIP_Y + 12} L ${CENTER - 1.5} ${CENTER} L ${CENTER + 1.5} ${CENTER} L ${CENTER + 1.5} ${ARROW_TIP_Y + 12} L ${CENTER + 4} ${ARROW_TIP_Y + 12} Z`}
+          <motion.path
+            key={heading}
+            d={ARROWHEAD_PATH}
             fill="currentColor"
-            className="text-accent"
+            initial={{ opacity: 0.85 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className={HEADING_ARROW_FILL_CLASS[heading]}
           />
         </motion.g>
 

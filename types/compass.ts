@@ -46,4 +46,12 @@ export const HEADING_ACCENT_CLASS: Record<CompassHeading, string> = {
   lost: "text-red-400/90",
 };
 
+/** Muted arrow fill per heading — matches status colours. */
+export const HEADING_ARROW_FILL_CLASS: Record<CompassHeading, string> = {
+  "true-north": "text-accent",
+  drifting: "text-yellow-500/70",
+  "off-course": "text-orange-400/75",
+  lost: "text-red-400/75",
+};
+
 export const COMPASS_LAYOUT_ID = "compass-dial";
