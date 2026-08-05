@@ -45,7 +45,7 @@ export function useCompassAlignment() {
       placeholders,
       activeMission,
     };
-  }, [todaysCommitment, todaysDebrief, activeMission, hasWeeklyReview]);
+  }, [todaysCommitment, todaysDebrief, activeMission, hasWeeklyReview, user]);
 }
 
 export type CompassAlignmentView = ReturnType<typeof useCompassAlignment>;
