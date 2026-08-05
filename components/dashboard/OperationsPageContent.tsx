@@ -1,6 +1,6 @@
 "use client";
 
-import { CourseStatus } from "@/components/dashboard/CourseStatus";
+import { CompassDashboard } from "@/components/compass/CompassDashboard";
 import { CurrentMission } from "@/components/dashboard/CurrentMission";
 import { TodaysOnePercent } from "@/components/dashboard/TodaysOnePercent";
 import { TodaysCommitment } from "@/components/dashboard/TodaysCommitment";
@@ -23,6 +23,8 @@ export function OperationsPageContent() {
     <>
       <main className="mx-auto w-full max-w-lg flex-1 px-6 pb-28 pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
         <div className="space-y-10 sm:space-y-12">
+          <CompassDashboard />
+
           <TodaysCommitment />
 
           <time
@@ -32,7 +34,6 @@ export function OperationsPageContent() {
             {formatDate()}
           </time>
 
-          <CourseStatus />
           <CurrentMission mission={activeMission} />
           <TodaysOnePercent />
           <Evidence />
