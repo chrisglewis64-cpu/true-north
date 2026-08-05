@@ -4,18 +4,18 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { hasCompletedMorningCommit } from "@/lib/morning-flow/commit-state";
 import { useHydrated } from "@/hooks/useHydrated";
+import { useApp } from "@/context/AppContext";
 
 type LandingGateProps = {
   children: React.ReactNode;
 };
 
-/**
- * Skips landing and mission intent when the morning commit is already complete.
- */
 export function LandingGate({ children }: LandingGateProps) {
   const router = useRouter();
   const hydrated = useHydrated();
-  const shouldRedirect = hydrated && hasCompletedMorningCommit();
+  const { isReady, morningCommitCompleted } = useApp();
+  const committed = isReady ? morningCommitCompleted : hasCompletedMorningCommit();
+  const shouldRedirect = hydrated && isReady && committed;
 
   useEffect(() => {
     if (shouldRedirect) {
@@ -23,7 +23,7 @@ export function LandingGate({ children }: LandingGateProps) {
     }
   }, [router, shouldRedirect]);
 
-  if (!hydrated || shouldRedirect) {
+  if (!hydrated || !isReady || shouldRedirect) {
     return null;
   }
 

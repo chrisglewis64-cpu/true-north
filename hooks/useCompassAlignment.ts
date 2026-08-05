@@ -1,21 +1,38 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { createClient } from "@/lib/supabase/client";
 import { calculateCompassAlignment } from "@/lib/compass/calculate-heading";
 import { getCompassGuidance } from "@/lib/compass/guidance";
 import { getAlignmentPlaceholders } from "@/lib/compass/placeholders";
-import { hasCompletedWeeklyReviewThisWeek } from "@/lib/storage/review-state";
+import { hasCompletedWeeklyReviewThisWeek } from "@/lib/data/reviews";
 import { useApp } from "@/context/AppContext";
 import { useMissions } from "@/hooks/useMissions";
-import { useMemo } from "react";
 
 export function useCompassAlignment() {
+  const { user } = useAuth();
+  const supabase = useMemo(() => createClient(), []);
   const { todaysCommitment, todaysDebrief } = useApp();
   const { activeMission } = useMissions();
+  const [hasWeeklyReview, setHasWeeklyReview] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    void hasCompletedWeeklyReviewThisWeek(supabase, user.id).then(
+      setHasWeeklyReview,
+    );
+  }, [supabase, user, todaysDebrief]);
 
   return useMemo(() => {
     const signals = {
       hasMissionIntent: Boolean(todaysCommitment.trim()),
       hasDailyDebrief: todaysDebrief !== null,
       hasActiveMission: Boolean(activeMission),
-      hasWeeklyReview: hasCompletedWeeklyReviewThisWeek(),
+      hasWeeklyReview: user ? hasWeeklyReview : false,
     };
 
     const alignment = calculateCompassAlignment(signals);
@@ -28,7 +45,7 @@ export function useCompassAlignment() {
       placeholders,
       activeMission,
     };
-  }, [todaysCommitment, todaysDebrief, activeMission]);
+  }, [todaysCommitment, todaysDebrief, activeMission, hasWeeklyReview, user]);
 }
 
 export type CompassAlignmentView = ReturnType<typeof useCompassAlignment>;

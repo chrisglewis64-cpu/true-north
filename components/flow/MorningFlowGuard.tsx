@@ -4,18 +4,18 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { hasCompletedMorningCommit } from "@/lib/morning-flow/commit-state";
 import { useHydrated } from "@/hooks/useHydrated";
+import { useApp } from "@/context/AppContext";
 
 type MorningFlowGuardProps = {
   children: React.ReactNode;
 };
 
-/**
- * Requires the morning commit before entering the main application.
- */
 export function MorningFlowGuard({ children }: MorningFlowGuardProps) {
   const router = useRouter();
   const hydrated = useHydrated();
-  const shouldRedirect = hydrated && !hasCompletedMorningCommit();
+  const { isReady, morningCommitCompleted } = useApp();
+  const committed = isReady ? morningCommitCompleted : hasCompletedMorningCommit();
+  const shouldRedirect = hydrated && isReady && !committed;
 
   useEffect(() => {
     if (shouldRedirect) {
@@ -23,7 +23,7 @@ export function MorningFlowGuard({ children }: MorningFlowGuardProps) {
     }
   }, [router, shouldRedirect]);
 
-  if (!hydrated || shouldRedirect) {
+  if (!hydrated || !isReady || shouldRedirect) {
     return null;
   }
 
