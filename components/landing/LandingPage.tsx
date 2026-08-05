@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SectionCard, SectionLabel } from "@/components/ui/SectionCard";
-import { theCode, mission } from "@/lib/placeholder-data";
+import { LandingMissionSummary } from "@/components/landing/LandingMissionSummary";
+import { theCode } from "@/lib/placeholder-data";
 
 export function LandingPage() {
   return (
@@ -36,12 +37,7 @@ export function LandingPage() {
             </ul>
           </SectionCard>
 
-          <div className="animate-fade-in [animation-delay:160ms]">
-            <SectionLabel>Current Mission</SectionLabel>
-            <p className="text-[17px] font-medium leading-relaxed tracking-tight text-foreground/90 sm:text-lg">
-              {mission.statement}
-            </p>
-          </div>
+          <LandingMissionSummary />
         </div>
       </main>
 
