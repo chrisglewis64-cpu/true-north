@@ -2,24 +2,24 @@ import type { CompassHeading } from "@/types/compass";
 
 const GUIDANCE: Record<CompassHeading, string[]> = {
   "true-north": [
-    "Your daily rhythms are aligned — hold the line.",
-    "Intent, mission, debrief, and review are in place.",
-    "Stay the course; consistency is your edge today.",
+    "Stay the course.",
+    "Hold the line.",
+    "Keep your rhythm.",
   ],
   drifting: [
-    "You are close — tighten one loose thread before it frays.",
-    "Most signals are strong; one habit needs attention.",
-    "A small correction now prevents drift tomorrow.",
+    "One decision changes your heading.",
+    "Correct course today.",
+    "Tighten one thread.",
   ],
   "off-course": [
-    "Several anchors are missing — re-establish your morning intent.",
-    "Return to your standard before the day runs you.",
-    "Pause, recommit, and take the next right action.",
+    "Return to your Standard.",
+    "Choose discipline today.",
+    "Re-anchor your intent.",
   ],
   lost: [
-    "Start with Mission Intent — rebuild direction one step at a time.",
-    "The compass resets when you return to your standard.",
-    "Today is recoverable. Begin with one commitment.",
+    "Return to your Standard.",
+    "Begin with Mission Intent.",
+    "One decision changes your heading.",
   ],
 };
 

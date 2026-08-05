@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { CompassDisplay } from "@/components/compass/CompassDisplay";
 import { AlignmentModal } from "@/components/compass/AlignmentModal";
-import { SectionLabel } from "@/components/ui/SectionCard";
 import { useCompassAlignment } from "@/hooks/useCompassAlignment";
 
 export function CompassDashboard() {
@@ -12,19 +11,17 @@ export function CompassDashboard() {
 
   return (
     <>
-      <section className="animate-fade-in py-2 text-center sm:py-4">
-        <SectionLabel>Compass</SectionLabel>
-
+      <section className="animate-fade-in py-4 text-center sm:py-6">
         <CompassDisplay heading={alignmentView.alignment.heading} />
 
-        <p className="mx-auto mt-6 max-w-sm text-[15px] leading-relaxed text-muted">
+        <p className="mx-auto mt-8 max-w-xs text-[16px] font-medium leading-snug tracking-tight text-foreground/85 sm:text-[17px]">
           {alignmentView.guidance}
         </p>
 
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="mt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-accent transition-colors hover:text-foreground"
+          className="mx-auto mt-8 flex h-12 min-w-[11rem] items-center justify-center rounded-2xl border border-border-subtle bg-surface px-6 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-foreground transition-colors hover:border-accent/40 hover:bg-surface-elevated sm:h-[3.25rem] sm:text-xs"
         >
           View Alignment
         </button>

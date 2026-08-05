@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { CompassDisplay } from "@/components/compass/CompassDisplay";
+import { CompassNeedle } from "@/components/compass/CompassNeedle";
 import { SectionLabel } from "@/components/ui/SectionCard";
 import { modalTransition } from "@/lib/motion/transitions";
 import {
@@ -37,7 +37,9 @@ export function AlignmentModal({
           <div className="mx-auto flex w-full max-w-lg flex-1 flex-col overflow-y-auto px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
             <header className="text-center">
               <SectionLabel>Alignment Report</SectionLabel>
-              <CompassDisplay heading={heading} />
+              <div className="mt-4">
+                <CompassNeedle heading={heading} />
+              </div>
             </header>
 
             <div className="mt-10 space-y-8">

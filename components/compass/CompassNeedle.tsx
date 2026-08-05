@@ -15,7 +15,7 @@ export function CompassNeedle({ heading }: CompassNeedleProps) {
   const rotation = HEADING_NEEDLE_ROTATION[heading];
 
   return (
-    <div className="relative mx-auto flex h-44 w-44 items-center justify-center sm:h-52 sm:w-52">
+    <div className="relative mx-auto h-[240px] w-[240px]">
       <svg
         viewBox="0 0 200 200"
         fill="none"
@@ -25,7 +25,7 @@ export function CompassNeedle({ heading }: CompassNeedleProps) {
         <circle
           cx="100"
           cy="100"
-          r="88"
+          r="92"
           stroke="currentColor"
           strokeWidth="1"
           className="text-border-subtle"
@@ -33,7 +33,7 @@ export function CompassNeedle({ heading }: CompassNeedleProps) {
         <circle
           cx="100"
           cy="100"
-          r="72"
+          r="76"
           stroke="currentColor"
           strokeWidth="0.5"
           className="text-border"
@@ -42,9 +42,9 @@ export function CompassNeedle({ heading }: CompassNeedleProps) {
           <line
             key={angle}
             x1="100"
-            y1="18"
+            y1="14"
             x2="100"
-            y2="30"
+            y2="28"
             stroke="currentColor"
             strokeWidth="1"
             className="text-border-subtle"
@@ -54,10 +54,20 @@ export function CompassNeedle({ heading }: CompassNeedleProps) {
         <motion.g
           animate={{ rotate: rotation }}
           transition={compassTransition}
-          style={{ originX: "100px", originY: "100px" }}
+          style={{ transformOrigin: "100px 100px" }}
         >
+          <line
+            x1="100"
+            y1="100"
+            x2="100"
+            y2="34"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="text-accent"
+          />
           <polygon
-            points="100,36 94,58 100,52 106,58"
+            points="100,28 95,40 100,36 105,40"
             fill="currentColor"
             className="text-accent"
           />
@@ -65,16 +75,11 @@ export function CompassNeedle({ heading }: CompassNeedleProps) {
         <circle
           cx="100"
           cy="100"
-          r="4"
+          r="5"
           fill="currentColor"
           className="text-accent"
         />
       </svg>
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center pt-6">
-        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-muted sm:text-[11px]">
-          True North
-        </span>
-      </div>
     </div>
   );
 }
