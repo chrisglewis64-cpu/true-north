@@ -6,6 +6,7 @@ export function createInitialAppState(): AppState {
     todaysCommitment: "",
     todaysOnePercent: todaysOnePercent.improvement,
     todaysDebrief: null,
+    debriefHistory: [],
     currentMission: {
       title: mission.title,
       purpose: mission.purpose,
