@@ -27,14 +27,8 @@ export const flowSteps: FlowStep[] = [
   {
     path: "/debrief",
     title: "Daily Debrief",
-    nextPath: "/mission-complete",
-    nextLabel: "Complete Mission",
-  },
-  {
-    path: "/mission-complete",
-    title: "Mission Complete",
-    nextPath: "/",
-    nextLabel: "Return to Landing",
+    nextPath: "/operations",
+    nextLabel: "Return to Operations",
   },
 ];
 

@@ -1,4 +1,5 @@
-import { mission, todaysOnePercent } from "@/lib/placeholder-data";
+import { createDefaultMissions } from "@/lib/missions/default-missions";
+import { todaysOnePercent } from "@/lib/placeholder-data";
 import type { AppState } from "@/types/app";
 
 export function createInitialAppState(): AppState {
@@ -6,13 +7,7 @@ export function createInitialAppState(): AppState {
     todaysCommitment: "",
     todaysOnePercent: todaysOnePercent.improvement,
     todaysDebrief: null,
-    currentMission: {
-      title: mission.title,
-      purpose: mission.purpose,
-      progress: mission.progress,
-      nextAction: mission.nextAction,
-      statement: mission.statement,
-      roles: mission.roles,
-    },
+    debriefHistory: [],
+    missions: createDefaultMissions(),
   };
 }

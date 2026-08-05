@@ -1,5 +1,10 @@
 import { MissionCompletePage } from "@/components/mission-complete/MissionCompletePage";
+import { MorningFlowGuard } from "@/components/flow/MorningFlowGuard";
 
 export default function MissionComplete() {
-  return <MissionCompletePage />;
+  return (
+    <MorningFlowGuard>
+      <MissionCompletePage />
+    </MorningFlowGuard>
+  );
 }
