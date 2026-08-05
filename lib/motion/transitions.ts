@@ -1,7 +1,10 @@
-export const needleTransition = {
-  duration: 0.8,
-  ease: [0.4, 0, 0.2, 1] as const,
+export const arrowTransition = {
+  duration: 0.75,
+  ease: "easeInOut" as const,
 };
+
+/** @deprecated Use arrowTransition */
+export const needleTransition = arrowTransition;
 
 export const compassTextTransition = {
   duration: 0.4,

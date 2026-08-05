@@ -31,19 +31,32 @@ export const HEADING_DOT_CLASS: Record<CompassHeading, string> = {
   lost: "bg-red-400/90",
 };
 
-/** Needle rotation in degrees — 0° points to north. */
-export const HEADING_NEEDLE_ROTATION: Record<CompassHeading, number> = {
+/** Orbit angle in degrees clockwise from north — arrow sits on the outer ring. */
+export const HEADING_ORBIT_ANGLE: Record<CompassHeading, number> = {
   "true-north": 0,
   drifting: 20,
   "off-course": 45,
   lost: 90,
 };
 
+/** @deprecated Use HEADING_ORBIT_ANGLE */
+export const HEADING_ARROW_ROTATION = HEADING_ORBIT_ANGLE;
+
+export const COMPASS_OUTER_RADIUS = 92;
+
 export const HEADING_ACCENT_CLASS: Record<CompassHeading, string> = {
   "true-north": "text-accent",
   drifting: "text-yellow-400/90",
   "off-course": "text-orange-400/90",
   lost: "text-red-400/90",
+};
+
+/** Muted arrow fill per heading — matches status colours. */
+export const HEADING_ARROW_FILL_CLASS: Record<CompassHeading, string> = {
+  "true-north": "text-accent",
+  drifting: "text-yellow-500/70",
+  "off-course": "text-orange-400/75",
+  lost: "text-red-400/75",
 };
 
 export const COMPASS_LAYOUT_ID = "compass-dial";

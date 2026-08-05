@@ -1,36 +1,31 @@
 import type { CompassHeading } from "@/types/compass";
 
-type AlignmentPlaceholders = {
-  strongestStandard: string;
-  areaToImprove: string;
-  todaysRecommendation: string;
+export type AlignmentExplanation = {
+  why: string;
+  recommendation: string;
 };
 
-const PLACEHOLDERS: Record<CompassHeading, AlignmentPlaceholders> = {
+const EXPLANATIONS: Record<CompassHeading, AlignmentExplanation> = {
   "true-north": {
-    strongestStandard: "Keep My Word",
-    areaToImprove: "Choose Discipline Over Comfort",
-    todaysRecommendation: "Review every purchase before spending.",
+    why: "You have been consistently following your Standard.",
+    recommendation: "Stay the course today.",
   },
   drifting: {
-    strongestStandard: "Keep My Word",
-    areaToImprove: "Choose Discipline Over Comfort",
-    todaysRecommendation: "Review every purchase before spending.",
+    why: "Your recent actions have not matched today's Mission Intent.",
+    recommendation: "Recommit to today's Mission Intent.",
   },
   "off-course": {
-    strongestStandard: "Keep My Word",
-    areaToImprove: "Choose Discipline Over Comfort",
-    todaysRecommendation: "Review every purchase before spending.",
+    why: "You have missed several Daily Debriefs this week.",
+    recommendation: "Complete today's Daily Debrief.",
   },
   lost: {
-    strongestStandard: "Keep My Word",
-    areaToImprove: "Choose Discipline Over Comfort",
-    todaysRecommendation: "Review every purchase before spending.",
+    why: "Your recent actions have not matched today's Mission Intent.",
+    recommendation: "Return to your Standard.",
   },
 };
 
-export function getAlignmentPlaceholders(
+export function getAlignmentExplanation(
   heading: CompassHeading
-): AlignmentPlaceholders {
-  return PLACEHOLDERS[heading];
+): AlignmentExplanation {
+  return EXPLANATIONS[heading];
 }
