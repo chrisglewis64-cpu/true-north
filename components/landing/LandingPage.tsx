@@ -1,7 +1,7 @@
+import { LandingMissionSummary } from "@/components/landing/LandingMissionSummary";
+import { LandingStandards } from "@/components/landing/LandingStandards";
 import Link from "next/link";
 import { SectionCard, SectionLabel } from "@/components/ui/SectionCard";
-import { LandingMissionSummary } from "@/components/landing/LandingMissionSummary";
-import { theCode } from "@/lib/placeholder-data";
 
 export function LandingPage() {
   return (
@@ -22,19 +22,7 @@ export function LandingPage() {
         <div className="mt-12 space-y-10 sm:mt-16 sm:space-y-12">
           <SectionCard className="animate-fade-in [animation-delay:80ms]">
             <SectionLabel>My Standard</SectionLabel>
-            <ul className="space-y-4">
-              {theCode.map((principle) => (
-                <li
-                  key={principle}
-                  className="flex gap-3 text-[15px] leading-relaxed text-foreground/90 sm:text-base"
-                >
-                  <span className="shrink-0 text-muted" aria-hidden>
-                    •
-                  </span>
-                  <span>{principle}</span>
-                </li>
-              ))}
-            </ul>
+            <LandingStandards />
           </SectionCard>
 
           <LandingMissionSummary />

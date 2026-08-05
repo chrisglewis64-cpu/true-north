@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { DebriefCompleteStep } from "@/components/debrief/DebriefCompleteStep";
-import { theCode } from "@/lib/placeholder-data";
+import { useProfile } from "@/context/ProfileContext";
 import {
   createInitialDebriefState,
   serializeDebrief,
@@ -70,18 +70,41 @@ function AnswerButton({
 const EMPTY_ERRORS: DebriefFieldErrors = { standards: {} };
 
 export function DailyDebriefPage() {
+  const { standardStatements, isLoading: standardsLoading } = useProfile();
+  const standards = standardStatements;
+
+  if (standardsLoading) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center text-muted">
+        Loading your standard…
+      </div>
+    );
+  }
+
+  if (standards.length === 0) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center px-6 text-center text-muted">
+        Add standards in Settings before completing a debrief.
+      </div>
+    );
+  }
+
+  return <DailyDebriefForm standards={standards} />;
+}
+
+function DailyDebriefForm({ standards }: { standards: string[] }) {
   const router = useRouter();
   const { completeDebrief, todaysCommitment } = useApp();
   const [step, setStep] = useState<DebriefStep>(1);
   const [standardIndex, setStandardIndex] = useState(0);
   const [form, setForm] = useState(() =>
-    createInitialDebriefState(theCode.length)
+    createInitialDebriefState(standards.length),
   );
   const [errors, setErrors] = useState<DebriefFieldErrors>(EMPTY_ERRORS);
   const [summary, setSummary] = useState<string>();
   const [completedOnePercent, setCompletedOnePercent] = useState("");
 
-  const currentStandard = theCode[standardIndex];
+  const currentStandard = standards[standardIndex] ?? "";
   const currentEntry = form.standards[standardIndex];
   const currentStandardErrors = errors.standards[standardIndex];
   const hasAnswerError = Boolean(currentStandardErrors?.answer);
@@ -139,7 +162,7 @@ export function DailyDebriefPage() {
 
     if (step === 2) {
       setStep(1);
-      setStandardIndex(theCode.length - 1);
+      setStandardIndex(standards.length - 1);
       return;
     }
 
@@ -160,7 +183,7 @@ export function DailyDebriefPage() {
 
       clearErrors();
 
-      if (standardIndex < theCode.length - 1) {
+      if (standardIndex < standards.length - 1) {
         setStandardIndex((current) => current + 1);
         return;
       }
@@ -192,10 +215,12 @@ export function DailyDebriefPage() {
 
       clearErrors();
 
-      const completed = serializeDebrief(form, theCode);
-      completeDebrief(completed);
-      setCompletedOnePercent(completed.tomorrowOnePercent);
-      setStep(4);
+      const completed = serializeDebrief(form, standards);
+      void completeDebrief(completed).then(() => {
+        setCompletedOnePercent(completed.tomorrowOnePercent);
+        setStep(4);
+      });
+      return;
     }
   }
 
@@ -223,7 +248,7 @@ export function DailyDebriefPage() {
           <section className="animate-fade-in [animation-delay:60ms]">
             <SectionLabel>My Standard</SectionLabel>
             <p className="mb-6 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-              Standard {standardIndex + 1} of {theCode.length}
+              Standard {standardIndex + 1} of {standards.length}
             </p>
 
             <article

@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { SectionLabel } from "@/components/ui/SectionCard";
+import { AccountSection } from "@/components/settings/AccountSection";
 import { NotificationReminderCard } from "@/components/settings/NotificationReminderCard";
+import { ProfileSection } from "@/components/settings/ProfileSection";
+import { StandardsSection } from "@/components/settings/StandardsSection";
 import { useNotificationSettings } from "@/hooks/useNotificationSettings";
 
 export function SettingsPage() {
@@ -24,35 +27,48 @@ export function SettingsPage() {
             Preferences
           </h1>
           <p className="mt-3 max-w-md text-[15px] leading-relaxed text-muted">
-            Configure reminders to stay aligned with your standard and review
-            rhythm.
+            Manage your profile, standards, account, and reminders.
           </p>
         </header>
 
-        <section className="mt-12 animate-fade-in [animation-delay:80ms]">
-          <SectionLabel>Notifications</SectionLabel>
-          <p className="mb-6 text-[14px] leading-relaxed text-muted">
-            Each reminder can be enabled independently. Adjust frequency and
-            timing to match your operating rhythm.
-          </p>
-
-          <div className="space-y-5">
-            {settings.reminders.map((reminder, index) => (
-              <div
-                key={reminder.id}
-                className="animate-fade-in"
-                style={{ animationDelay: `${120 + index * 60}ms` }}
-              >
-                <NotificationReminderCard
-                  reminder={reminder}
-                  onEnabledChange={setEnabled}
-                  onFrequencyChange={setFrequency}
-                  onScheduleChange={updateSchedule}
-                />
-              </div>
-            ))}
+        <div className="mt-12 space-y-12">
+          <div className="animate-fade-in [animation-delay:40ms]">
+            <ProfileSection />
           </div>
-        </section>
+
+          <div className="animate-fade-in [animation-delay:80ms]">
+            <StandardsSection />
+          </div>
+
+          <div className="animate-fade-in [animation-delay:120ms]">
+            <AccountSection />
+          </div>
+
+          <section className="animate-fade-in [animation-delay:160ms]">
+            <SectionLabel>Notifications</SectionLabel>
+            <p className="mb-6 text-[14px] leading-relaxed text-muted">
+              Each reminder can be enabled independently. Adjust frequency and
+              timing to match your operating rhythm.
+            </p>
+
+            <div className="space-y-5">
+              {settings.reminders.map((reminder, index) => (
+                <div
+                  key={reminder.id}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${200 + index * 60}ms` }}
+                >
+                  <NotificationReminderCard
+                    reminder={reminder}
+                    onEnabledChange={setEnabled}
+                    onFrequencyChange={setFrequency}
+                    onScheduleChange={updateSchedule}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
       </main>
     </div>
   );

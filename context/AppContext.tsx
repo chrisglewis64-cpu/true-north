@@ -5,175 +5,277 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { createClient } from "@/lib/supabase/client";
 import { createInitialAppState } from "@/lib/app-defaults";
 import {
-  completeMissionRecord,
-  createUpcomingMission,
-  deleteMissionRecord,
-  moveUpcomingMission,
-  startMissionRecord,
-  updateMissionRecord,
-} from "@/lib/missions/mission-actions";
+  fetchDebriefHistory,
+  fetchTodaysDebrief,
+  fetchTomorrowOnePercent,
+  upsertDebrief,
+} from "@/lib/data/debriefs";
 import {
-  getDailySession,
-  markMorningCommitComplete,
-  updateDailySession,
-} from "@/lib/morning-flow/commit-state";
+  fetchTodaysIntent,
+  upsertMissionIntent,
+} from "@/lib/data/mission-intents";
 import {
-  getCalendarDateKey,
-  readDebriefHistory,
-  writeDebriefHistory,
-  type DebriefRecord,
-} from "@/lib/storage/local-session";
-import {
-  readMissions,
-  writeMissions,
-} from "@/lib/storage/mission-store";
+  completeMission as completeMissionRemote,
+  createActiveMission as createActiveMissionRemote,
+  createMission as createMissionRemote,
+  deleteMission as deleteMissionRemote,
+  fetchMissions,
+  reorderMission,
+  startMission as startMissionRemote,
+  updateMission as updateMissionRemote,
+} from "@/lib/data/missions";
 import type { DebriefSubmission } from "@/lib/debrief-form";
 import type { MissionDraft } from "@/types/mission";
-import type { AppContextValue } from "@/types/app";
+import type { AppContextValue, AppState } from "@/types/app";
 
 const AppContext = createContext<AppContextValue | null>(null);
 
-function loadInitialState() {
-  const defaults = createInitialAppState();
-
-  if (typeof window === "undefined") {
-    return defaults;
-  }
-
-  const session = getDailySession();
-  const debriefHistory = readDebriefHistory();
-  const storedMissions = readMissions();
-
-  return {
-    ...defaults,
-    todaysCommitment: session.todaysCommitment || defaults.todaysCommitment,
-    todaysOnePercent: session.todaysOnePercent || defaults.todaysOnePercent,
-    todaysDebrief: session.todaysDebrief,
-    debriefHistory,
-    missions: storedMissions.length > 0 ? storedMissions : defaults.missions,
-  };
-}
+const initialState: AppState = {
+  ...createInitialAppState(),
+  isReady: false,
+  morningCommitCompleted: false,
+};
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState(loadInitialState);
+  const { user } = useAuth();
+  const supabase = useMemo(() => createClient(), []);
+  const [state, setState] = useState<AppState>(initialState);
 
   useEffect(() => {
-    writeDebriefHistory(state.debriefHistory);
-  }, [state.debriefHistory]);
+    let cancelled = false;
 
-  useEffect(() => {
-    writeMissions(state.missions);
-  }, [state.missions]);
+    async function loadUserData() {
+      if (!user) {
+        setState({ ...initialState, isReady: true });
+        return;
+      }
+
+      setState((current) => ({ ...current, isReady: false }));
+
+      try {
+        const [
+          missions,
+          debriefHistory,
+          todaysCommitment,
+          todaysDebrief,
+          todaysOnePercent,
+        ] = await Promise.all([
+          fetchMissions(supabase, user.id),
+          fetchDebriefHistory(supabase, user.id),
+          fetchTodaysIntent(supabase, user.id),
+          fetchTodaysDebrief(supabase, user.id),
+          fetchTomorrowOnePercent(supabase, user.id),
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          isReady: true,
+          morningCommitCompleted: Boolean(todaysCommitment?.trim()),
+          todaysCommitment: todaysCommitment ?? "",
+          todaysOnePercent,
+          todaysDebrief,
+          debriefHistory,
+          missions,
+        });
+      } catch {
+        if (!cancelled) {
+          setState({ ...initialState, isReady: true });
+        }
+      }
+    }
+
+    void loadUserData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase, user]);
 
   const setTodaysCommitment = useCallback((value: string) => {
-    setState((current) => {
-      updateDailySession({ todaysCommitment: value });
-      return { ...current, todaysCommitment: value };
-    });
+    setState((current) => ({ ...current, todaysCommitment: value }));
   }, []);
 
   const setTodaysOnePercent = useCallback((value: string) => {
-    setState((current) => {
-      updateDailySession({ todaysOnePercent: value });
-      return { ...current, todaysOnePercent: value };
-    });
+    setState((current) => ({ ...current, todaysOnePercent: value }));
   }, []);
 
   const setTodaysDebrief = useCallback((value: DebriefSubmission | null) => {
-    setState((current) => {
-      updateDailySession({ todaysDebrief: value });
-      return { ...current, todaysDebrief: value };
-    });
+    setState((current) => ({ ...current, todaysDebrief: value }));
   }, []);
 
-  const completeMorningCommit = useCallback((commitment: string) => {
-    markMorningCommitComplete(commitment);
-    setState((current) => ({
-      ...current,
-      todaysCommitment: commitment,
-    }));
-  }, []);
+  const completeMorningCommit = useCallback(
+    async (commitment: string) => {
+      if (!user) {
+        return;
+      }
 
-  const completeDebrief = useCallback((debrief: DebriefSubmission) => {
-    const record: DebriefRecord = {
-      ...debrief,
-      date: getCalendarDateKey(),
-      completedAt: new Date().toISOString(),
-    };
+      await upsertMissionIntent(supabase, user.id, commitment);
 
-    setState((current) => {
-      const debriefHistory = [
-        record,
-        ...current.debriefHistory.filter((entry) => entry.date !== record.date),
-      ];
-
-      updateDailySession({
-        todaysDebrief: debrief,
-        todaysOnePercent: debrief.tomorrowOnePercent,
-      });
-
-      return {
-        ...current,
-        todaysDebrief: debrief,
-        todaysOnePercent: debrief.tomorrowOnePercent,
-        debriefHistory,
-      };
-    });
-  }, []);
-
-  const createMission = useCallback((draft: MissionDraft) => {
-    setState((current) => ({
-      ...current,
-      missions: createUpcomingMission(current.missions, draft),
-    }));
-  }, []);
-
-  const updateMission = useCallback((id: string, draft: MissionDraft) => {
-    setState((current) => ({
-      ...current,
-      missions: updateMissionRecord(current.missions, id, draft),
-    }));
-  }, []);
-
-  const deleteMission = useCallback((id: string) => {
-    setState((current) => ({
-      ...current,
-      missions: deleteMissionRecord(current.missions, id),
-    }));
-  }, []);
-
-  const reorderUpcomingMission = useCallback(
-    (id: string, direction: "up" | "down") => {
       setState((current) => ({
         ...current,
-        missions: moveUpcomingMission(current.missions, id, direction),
+        morningCommitCompleted: true,
+        todaysCommitment: commitment,
       }));
     },
-    []
+    [supabase, user],
   );
 
-  const startMission = useCallback((id: string) => {
-    setState((current) => ({
-      ...current,
-      missions: startMissionRecord(current.missions, id),
-    }));
-  }, []);
+  const completeDebrief = useCallback(
+    async (debrief: DebriefSubmission) => {
+      if (!user) {
+        return;
+      }
 
-  const completeMission = useCallback((id: string, missionReview: string) => {
-    setState((current) => ({
-      ...current,
-      missions: completeMissionRecord(current.missions, id, missionReview),
-    }));
-  }, []);
+      const record = await upsertDebrief(supabase, user.id, debrief);
+
+      setState((current) => ({
+        ...current,
+        todaysDebrief: debrief,
+        todaysOnePercent: debrief.tomorrowOnePercent,
+        debriefHistory: [
+          record,
+          ...current.debriefHistory.filter((entry) => entry.date !== record.date),
+        ],
+      }));
+    },
+    [supabase, user],
+  );
+
+  const createMission = useCallback(
+    async (draft: MissionDraft) => {
+      if (!user) {
+        return;
+      }
+
+      const missions = await createMissionRemote(
+        supabase,
+        user.id,
+        state.missions,
+        draft,
+      );
+      setState((current) => ({ ...current, missions }));
+    },
+    [supabase, user, state.missions],
+  );
+
+  const createActiveMission = useCallback(
+    async (draft: MissionDraft) => {
+      if (!user) {
+        return;
+      }
+
+      const missions = await createActiveMissionRemote(
+        supabase,
+        user.id,
+        draft,
+      );
+      setState((current) => ({ ...current, missions }));
+    },
+    [supabase, user],
+  );
+
+  const updateMission = useCallback(
+    async (id: string, draft: MissionDraft) => {
+      if (!user) {
+        return;
+      }
+
+      const missions = await updateMissionRemote(
+        supabase,
+        user.id,
+        state.missions,
+        id,
+        draft,
+      );
+      setState((current) => ({ ...current, missions }));
+    },
+    [supabase, user, state.missions],
+  );
+
+  const deleteMission = useCallback(
+    async (id: string) => {
+      if (!user) {
+        return;
+      }
+
+      const missions = await deleteMissionRemote(
+        supabase,
+        user.id,
+        state.missions,
+        id,
+      );
+      setState((current) => ({ ...current, missions }));
+    },
+    [supabase, user, state.missions],
+  );
+
+  const reorderUpcomingMission = useCallback(
+    async (id: string, direction: "up" | "down") => {
+      if (!user) {
+        return;
+      }
+
+      const missions = await reorderMission(
+        supabase,
+        user.id,
+        state.missions,
+        id,
+        direction,
+      );
+      setState((current) => ({ ...current, missions }));
+    },
+    [supabase, user, state.missions],
+  );
+
+  const startMission = useCallback(
+    async (id: string) => {
+      if (!user) {
+        return;
+      }
+
+      const missions = await startMissionRemote(
+        supabase,
+        user.id,
+        state.missions,
+        id,
+      );
+      setState((current) => ({ ...current, missions }));
+    },
+    [supabase, user, state.missions],
+  );
+
+  const completeMission = useCallback(
+    async (id: string, missionReview: string) => {
+      if (!user) {
+        return;
+      }
+
+      const missions = await completeMissionRemote(
+        supabase,
+        user.id,
+        state.missions,
+        id,
+        missionReview,
+      );
+      setState((current) => ({ ...current, missions }));
+    },
+    [supabase, user, state.missions],
+  );
 
   const getMissionById = useCallback(
     (id: string) => state.missions.find((mission) => mission.id === id),
-    [state.missions]
+    [state.missions],
   );
 
   const value: AppContextValue = {
@@ -184,6 +286,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     completeMorningCommit,
     completeDebrief,
     createMission,
+    createActiveMission,
     updateMission,
     deleteMission,
     reorderUpcomingMission,

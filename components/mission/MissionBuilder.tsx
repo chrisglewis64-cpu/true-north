@@ -26,7 +26,12 @@ const STEP_LABELS: Record<MissionBuilderStep, string> = {
 type MissionBuilderProps = {
   mode: "create" | "edit";
   initialDraft: MissionDraft;
-  onSave: (draft: MissionDraft) => void;
+  onSave: (draft: MissionDraft) => void | Promise<void>;
+  cancelHref?: string;
+  successHref?: string;
+  onComplete?: () => void;
+  embedded?: boolean;
+  sectionLabel?: string;
 };
 
 const EMPTY_ERRORS: MissionFieldErrors = {};
@@ -35,6 +40,11 @@ export function MissionBuilder({
   mode,
   initialDraft,
   onSave,
+  cancelHref = "/mission",
+  successHref = "/mission",
+  onComplete,
+  embedded = false,
+  sectionLabel,
 }: MissionBuilderProps) {
   const router = useRouter();
   const [step, setStep] = useState<MissionBuilderStep>(1);
@@ -72,7 +82,10 @@ export function MissionBuilder({
 
   function handleBack() {
     if (step === 1) {
-      router.push("/mission");
+      if (embedded) {
+        return;
+      }
+      router.push(cancelHref);
       return;
     }
 
@@ -81,7 +94,7 @@ export function MissionBuilder({
     setSummary(undefined);
   }
 
-  function handleNext() {
+  async function handleNext() {
     const result = validateMissionStep(step, draft);
     if (!result.isValid) {
       setErrors(result.errors);
@@ -103,22 +116,31 @@ export function MissionBuilder({
       return;
     }
 
-    onSave(draft);
-    router.push("/mission");
+    await onSave(draft);
+
+    if (embedded) {
+      onComplete?.();
+      return;
+    }
+
+    router.push(successHref);
   }
 
   return (
     <div className="flex min-h-dvh flex-col">
       <main className="mx-auto w-full max-w-lg flex-1 px-6 pb-36 pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
         <header className="animate-fade-in">
-          <Link
-            href="/mission"
-            className="inline-flex items-center font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-foreground"
-          >
-            ← Mission
-          </Link>
+          {!embedded ? (
+            <Link
+              href={cancelHref}
+              className="inline-flex items-center font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-foreground"
+            >
+              ← Mission
+            </Link>
+          ) : null}
           <SectionLabel>
-            {mode === "create" ? "Create Mission" : "Edit Mission"}
+            {sectionLabel ??
+              (mode === "create" ? "Create Mission" : "Edit Mission")}
           </SectionLabel>
           <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
             Step {step} of 4

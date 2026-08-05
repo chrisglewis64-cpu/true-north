@@ -76,8 +76,9 @@ export function MissionIntentPage() {
     const finalCommitment =
       mode === "custom" ? customText.trim() : suggestion.trim();
 
-    completeMorningCommit(finalCommitment);
-    router.push("/operations");
+    void completeMorningCommit(finalCommitment).then(() => {
+      router.push("/operations");
+    });
   }
 
   const commitmentError = errors.commitment;
