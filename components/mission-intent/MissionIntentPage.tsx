@@ -21,7 +21,7 @@ type Mode = "suggest" | "custom";
 
 export function MissionIntentPage() {
   const router = useRouter();
-  const { setTodaysCommitment } = useApp();
+  const { completeMorningCommit } = useApp();
 
   const [mode, setMode] = useState<Mode>("suggest");
   const [suggestion, setSuggestion] = useState(getInitialSuggestion);
@@ -76,7 +76,7 @@ export function MissionIntentPage() {
     const finalCommitment =
       mode === "custom" ? customText.trim() : suggestion.trim();
 
-    setTodaysCommitment(finalCommitment);
+    completeMorningCommit(finalCommitment);
     router.push("/operations");
   }
 

@@ -3,9 +3,26 @@ import { SectionLabel } from "@/components/ui/SectionCard";
 import { BottomNav } from "@/components/navigation/BottomNav";
 
 const reviewLinks = [
-  { label: "Weekly Review" },
-  { label: "Monthly Review" },
-  { label: "Annual Review" },
+  {
+    href: "/review/daily",
+    label: "Daily Review",
+    description: "Reflect on today before the debrief closes the loop.",
+  },
+  {
+    href: "/review/weekly",
+    label: "Weekly Review",
+    description: "Assess the week and identify course corrections.",
+  },
+  {
+    href: "/review/monthly",
+    label: "Monthly Review",
+    description: "Evaluate progress against your mission.",
+  },
+  {
+    href: "/review/annual",
+    label: "Annual Review",
+    description: "A full accounting of the year.",
+  },
 ];
 
 export default function ReviewPage() {
@@ -24,17 +41,23 @@ export default function ReviewPage() {
 
         <section className="mt-12 space-y-3 animate-fade-in [animation-delay:80ms]">
           {reviewLinks.map((link) => (
-            <div
-              key={link.label}
-              className="flex items-center justify-between rounded-2xl border border-border bg-surface px-5 py-4 sm:px-6"
+            <Link
+              key={link.href}
+              href={link.href}
+              className="flex items-center justify-between rounded-2xl border border-border bg-surface px-5 py-4 transition-colors hover:border-border-subtle sm:px-6"
             >
-              <span className="text-[15px] font-medium text-foreground/90">
-                {link.label}
+              <div className="min-w-0 pr-4 text-left">
+                <span className="block text-[15px] font-medium text-foreground/90">
+                  {link.label}
+                </span>
+                <span className="mt-1 block text-[14px] text-muted">
+                  {link.description}
+                </span>
+              </div>
+              <span aria-hidden className="shrink-0 text-muted">
+                →
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">
-                Soon
-              </span>
-            </div>
+            </Link>
           ))}
         </section>
 
