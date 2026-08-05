@@ -2,8 +2,13 @@
 
 import { motion } from "framer-motion";
 import {
+  orbitTangentRotation,
+  polarToCartesian,
+} from "@/lib/compass/polar";
+import {
+  COMPASS_OUTER_RADIUS,
   HEADING_ARROW_FILL_CLASS,
-  HEADING_ARROW_ROTATION,
+  HEADING_ORBIT_ANGLE,
   type CompassHeading,
 } from "@/types/compass";
 import {
@@ -17,8 +22,8 @@ type CompassDialProps = {
 
 const CENTER = 100;
 
-/** Arrowhead only — inner vertex at centre; tip points north at 0°. */
-const ARROWHEAD_PATH = `M ${CENTER} 78 L 91 106 L ${CENTER} ${CENTER} L 109 106 Z`;
+/** Arrowhead centred at origin; tip points up before orbit rotation is applied. */
+const ARROWHEAD_PATH = "M 0 -11 L -6.5 8.5 L 0 4.5 L 6.5 8.5 Z";
 
 const CARDINALS = [
   { label: "N", x: 100, y: 14 },
@@ -28,7 +33,14 @@ const CARDINALS = [
 ] as const;
 
 export function CompassDial({ heading }: CompassDialProps) {
-  const rotation = HEADING_ARROW_ROTATION[heading];
+  const orbitAngle = HEADING_ORBIT_ANGLE[heading];
+  const { x, y } = polarToCartesian(
+    CENTER,
+    CENTER,
+    COMPASS_OUTER_RADIUS,
+    orbitAngle,
+  );
+  const tangentRotation = orbitTangentRotation(orbitAngle);
 
   return (
     <div className="relative mx-auto h-[240px] w-[240px]">
@@ -57,7 +69,7 @@ export function CompassDial({ heading }: CompassDialProps) {
         <circle
           cx={CENTER}
           cy={CENTER}
-          r="92"
+          r={COMPASS_OUTER_RADIUS}
           stroke="currentColor"
           strokeWidth="1"
           className="text-border-subtle"
@@ -71,11 +83,11 @@ export function CompassDial({ heading }: CompassDialProps) {
           className="text-border"
         />
 
-        {CARDINALS.map(({ label, x, y }) => (
+        {CARDINALS.map(({ label, x: labelX, y: labelY }) => (
           <text
             key={label}
-            x={x}
-            y={y}
+            x={labelX}
+            y={labelY}
             textAnchor="middle"
             dominantBaseline="middle"
             className="fill-muted/25 font-mono text-[9px] font-medium"
@@ -85,9 +97,9 @@ export function CompassDial({ heading }: CompassDialProps) {
         ))}
 
         <motion.g
-          animate={{ rotate: rotation }}
+          animate={{ x, y, rotate: tangentRotation }}
           transition={arrowTransition}
-          style={{ transformOrigin: `${CENTER}px ${CENTER}px` }}
+          style={{ transformOrigin: "0px 0px" }}
         >
           <motion.path
             key={heading}

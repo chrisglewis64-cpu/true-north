@@ -31,13 +31,18 @@ export const HEADING_DOT_CLASS: Record<CompassHeading, string> = {
   lost: "bg-red-400/90",
 };
 
-/** Arrow rotation in degrees — 0° points to north. */
-export const HEADING_ARROW_ROTATION: Record<CompassHeading, number> = {
+/** Orbit angle in degrees clockwise from north — arrow sits on the outer ring. */
+export const HEADING_ORBIT_ANGLE: Record<CompassHeading, number> = {
   "true-north": 0,
   drifting: 20,
   "off-course": 45,
   lost: 90,
 };
+
+/** @deprecated Use HEADING_ORBIT_ANGLE */
+export const HEADING_ARROW_ROTATION = HEADING_ORBIT_ANGLE;
+
+export const COMPASS_OUTER_RADIUS = 92;
 
 export const HEADING_ACCENT_CLASS: Record<CompassHeading, string> = {
   "true-north": "text-accent",
