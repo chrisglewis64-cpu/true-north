@@ -87,12 +87,9 @@ export function CompassDial({ heading }: CompassDialProps) {
           style={{ transformOrigin: `${CENTER}px ${CENTER}px` }}
         >
           <path
-            d={`M ${CENTER} ${CENTER} L ${CENTER} ${ARROW_TIP_Y + 10} M ${CENTER} ${ARROW_TIP_Y} L ${CENTER - 3.5} ${ARROW_TIP_Y + 8} M ${CENTER} ${ARROW_TIP_Y} L ${CENTER + 3.5} ${ARROW_TIP_Y + 8}`}
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-foreground/70"
+            d={`M ${CENTER} ${ARROW_TIP_Y} L ${CENTER - 4} ${ARROW_TIP_Y + 12} L ${CENTER - 1.5} ${ARROW_TIP_Y + 12} L ${CENTER - 1.5} ${CENTER} L ${CENTER + 1.5} ${CENTER} L ${CENTER + 1.5} ${ARROW_TIP_Y + 12} L ${CENTER + 4} ${ARROW_TIP_Y + 12} Z`}
+            fill="currentColor"
+            className="text-accent"
           />
         </motion.g>
 
