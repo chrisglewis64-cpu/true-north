@@ -31,8 +31,8 @@ export const HEADING_DOT_CLASS: Record<CompassHeading, string> = {
   lost: "bg-red-400/90",
 };
 
-/** Needle rotation in degrees — 0° points to north. */
-export const HEADING_NEEDLE_ROTATION: Record<CompassHeading, number> = {
+/** Arrow rotation in degrees — 0° points to north. */
+export const HEADING_ARROW_ROTATION: Record<CompassHeading, number> = {
   "true-north": 0,
   drifting: 20,
   "off-course": 45,

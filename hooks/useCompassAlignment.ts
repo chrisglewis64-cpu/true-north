@@ -1,6 +1,6 @@
 import { calculateCompassAlignment } from "@/lib/compass/calculate-heading";
 import { getCompassGuidance } from "@/lib/compass/guidance";
-import { getAlignmentPlaceholders } from "@/lib/compass/placeholders";
+import { getAlignmentExplanation } from "@/lib/compass/placeholders";
 import { hasCompletedWeeklyReviewThisWeek } from "@/lib/storage/review-state";
 import { useApp } from "@/context/AppContext";
 import { useMissions } from "@/hooks/useMissions";
@@ -20,12 +20,12 @@ export function useCompassAlignment() {
 
     const alignment = calculateCompassAlignment(signals);
     const guidance = getCompassGuidance(alignment.heading);
-    const placeholders = getAlignmentPlaceholders(alignment.heading);
+    const explanation = getAlignmentExplanation(alignment.heading);
 
     return {
       alignment,
       guidance,
-      placeholders,
+      explanation,
       activeMission,
     };
   }, [todaysCommitment, todaysDebrief, activeMission]);
