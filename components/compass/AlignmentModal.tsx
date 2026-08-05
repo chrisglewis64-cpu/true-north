@@ -2,11 +2,13 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { CompassDisplay } from "@/components/compass/CompassDisplay";
+import { StatusDot } from "@/components/compass/StatusDot";
 import { SectionLabel } from "@/components/ui/SectionCard";
 import {
   modalContentTransition,
   modalTransition,
 } from "@/lib/motion/transitions";
+import { HEADING_LABELS } from "@/types/compass";
 import type { CompassAlignmentView } from "@/hooks/useCompassAlignment";
 
 type AlignmentModalProps = {
@@ -34,7 +36,7 @@ export function AlignmentModal({
           transition={modalTransition}
         >
           <div className="mx-auto flex w-full max-w-lg flex-1 flex-col overflow-y-auto px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
-            <header className="text-center">
+            <header className="flex flex-col items-center text-center">
               <CompassDisplay heading={heading} />
             </header>
 
@@ -45,6 +47,14 @@ export function AlignmentModal({
               exit={{ opacity: 0, y: 8 }}
               transition={modalContentTransition}
             >
+              <section>
+                <SectionLabel>Current Heading</SectionLabel>
+                <p className="inline-flex items-center gap-2.5 text-[15px] leading-relaxed text-foreground/90">
+                  <StatusDot heading={heading} />
+                  {HEADING_LABELS[heading]}
+                </p>
+              </section>
+
               <section>
                 <SectionLabel>Strongest Standard</SectionLabel>
                 <p className="text-[15px] leading-relaxed text-foreground/90">

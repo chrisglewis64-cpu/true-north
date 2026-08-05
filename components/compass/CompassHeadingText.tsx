@@ -16,7 +16,7 @@ type CompassHeadingTextProps = {
 export function CompassHeadingText({ heading }: CompassHeadingTextProps) {
   return (
     <>
-      <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+      <p className="mt-7 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
         Current Heading
       </p>
       <AnimatePresence mode="wait">
