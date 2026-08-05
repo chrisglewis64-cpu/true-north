@@ -10,6 +10,8 @@ export type DebriefFormState = {
   biggestWin: string;
   biggestLesson: string;
   tomorrowOnePercent: string;
+  tomorrowPriority: string;
+  courseCorrection: string;
 };
 
 export type DebriefSubmission = {
@@ -21,7 +23,11 @@ export type DebriefSubmission = {
   biggestWin: string;
   biggestLesson: string;
   tomorrowOnePercent: string;
+  tomorrowPriority: string;
+  courseCorrection: string;
 };
+
+export type DebriefStep = 1 | 2 | 3 | 4;
 
 export function createInitialDebriefState(
   standardCount: number
@@ -34,6 +40,8 @@ export function createInitialDebriefState(
     biggestWin: "",
     biggestLesson: "",
     tomorrowOnePercent: "",
+    tomorrowPriority: "",
+    courseCorrection: "",
   };
 }
 
@@ -50,5 +58,7 @@ export function serializeDebrief(
     biggestWin: form.biggestWin,
     biggestLesson: form.biggestLesson,
     tomorrowOnePercent: form.tomorrowOnePercent,
+    tomorrowPriority: form.tomorrowPriority,
+    courseCorrection: form.courseCorrection,
   };
 }
