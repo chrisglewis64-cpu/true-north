@@ -8,28 +8,24 @@ type AlignmentPlaceholders = {
 
 const PLACEHOLDERS: Record<CompassHeading, AlignmentPlaceholders> = {
   "true-north": {
-    strongestStandard: "I keep my word.",
-    areaToImprove: "Protect the evening debrief window.",
-    todaysRecommendation:
-      "Maintain your current rhythm. Document one piece of evidence before close.",
+    strongestStandard: "Keep My Word",
+    areaToImprove: "Choose Discipline Over Comfort",
+    todaysRecommendation: "Review every purchase before spending.",
   },
   drifting: {
-    strongestStandard: "I choose discipline over comfort.",
-    areaToImprove: "Complete today's Daily Debrief before tomorrow begins.",
-    todaysRecommendation:
-      "Close the loop on today with a brief debrief.",
+    strongestStandard: "Keep My Word",
+    areaToImprove: "Choose Discipline Over Comfort",
+    todaysRecommendation: "Review every purchase before spending.",
   },
   "off-course": {
-    strongestStandard: "I walk with God.",
-    areaToImprove: "Re-anchor to your active mission.",
-    todaysRecommendation:
-      "Set Mission Intent now and name one action tied to your mission.",
+    strongestStandard: "Keep My Word",
+    areaToImprove: "Choose Discipline Over Comfort",
+    todaysRecommendation: "Review every purchase before spending.",
   },
   lost: {
-    strongestStandard: "I finish what I start.",
-    areaToImprove: "Restore the morning commit ritual.",
-    todaysRecommendation:
-      "Begin with Mission Intent — one sentence is enough to reset heading.",
+    strongestStandard: "Keep My Word",
+    areaToImprove: "Choose Discipline Over Comfort",
+    todaysRecommendation: "Review every purchase before spending.",
   },
 };
 

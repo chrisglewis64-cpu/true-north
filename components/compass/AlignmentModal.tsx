@@ -1,13 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { CompassNeedle } from "@/components/compass/CompassNeedle";
+import { CompassDisplay } from "@/components/compass/CompassDisplay";
 import { SectionLabel } from "@/components/ui/SectionCard";
-import { modalTransition } from "@/lib/motion/transitions";
 import {
-  HEADING_INDICATORS,
-  HEADING_LABELS,
-} from "@/types/compass";
+  modalContentTransition,
+  modalTransition,
+} from "@/lib/motion/transitions";
 import type { CompassAlignmentView } from "@/hooks/useCompassAlignment";
 
 type AlignmentModalProps = {
@@ -36,21 +35,16 @@ export function AlignmentModal({
         >
           <div className="mx-auto flex w-full max-w-lg flex-1 flex-col overflow-y-auto px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
             <header className="text-center">
-              <SectionLabel>Alignment Report</SectionLabel>
-              <div className="mt-4">
-                <CompassNeedle heading={heading} />
-              </div>
+              <CompassDisplay heading={heading} />
             </header>
 
-            <div className="mt-10 space-y-8">
-              <section>
-                <SectionLabel>Current Heading</SectionLabel>
-                <p className="text-[17px] font-medium leading-relaxed text-foreground/90">
-                  <span aria-hidden>{HEADING_INDICATORS[heading]} </span>
-                  {HEADING_LABELS[heading]}
-                </p>
-              </section>
-
+            <motion.div
+              className="mt-10 space-y-8"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={modalContentTransition}
+            >
               <section>
                 <SectionLabel>Strongest Standard</SectionLabel>
                 <p className="text-[15px] leading-relaxed text-foreground/90">
@@ -68,7 +62,7 @@ export function AlignmentModal({
               <section>
                 <SectionLabel>Current Mission</SectionLabel>
                 <p className="text-[15px] leading-relaxed text-foreground/90">
-                  {activeMission?.name ?? "No active mission."}
+                  {activeMission?.name ?? "Lead My Family With Integrity"}
                 </p>
               </section>
 
@@ -78,13 +72,13 @@ export function AlignmentModal({
                   {placeholders.todaysRecommendation}
                 </p>
               </section>
-            </div>
+            </motion.div>
 
             <footer className="mt-12">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex h-14 w-full items-center justify-center rounded-2xl border border-border bg-surface font-mono text-sm font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:border-border-subtle sm:h-16"
+                className="flex h-16 w-full items-center justify-center rounded-2xl border border-border bg-surface font-mono text-sm font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:border-border-subtle"
               >
                 Close
               </button>

@@ -24,19 +24,19 @@ export const HEADING_LABELS: Record<CompassHeading, string> = {
   lost: "LOST",
 };
 
-export const HEADING_INDICATORS: Record<CompassHeading, string> = {
-  "true-north": "🟢",
-  drifting: "🟡",
-  "off-course": "🟠",
-  lost: "🔴",
+export const HEADING_DOT_CLASS: Record<CompassHeading, string> = {
+  "true-north": "bg-accent",
+  drifting: "bg-yellow-400/90",
+  "off-course": "bg-orange-400/90",
+  lost: "bg-red-400/90",
 };
 
-/** Needle rotation in degrees — 0 points north. */
+/** Needle rotation in degrees — 0° points to north. */
 export const HEADING_NEEDLE_ROTATION: Record<CompassHeading, number> = {
   "true-north": 0,
-  drifting: 22,
-  "off-course": 48,
-  lost: 72,
+  drifting: 20,
+  "off-course": 45,
+  lost: 90,
 };
 
 export const HEADING_ACCENT_CLASS: Record<CompassHeading, string> = {
@@ -45,3 +45,5 @@ export const HEADING_ACCENT_CLASS: Record<CompassHeading, string> = {
   "off-course": "text-orange-400/90",
   lost: "text-red-400/90",
 };
+
+export const COMPASS_LAYOUT_ID = "compass-dial";
