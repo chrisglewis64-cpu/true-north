@@ -63,7 +63,7 @@ const EMPTY_ERRORS: DebriefFieldErrors = { standards: {} };
 
 export function DailyDebriefPage() {
   const router = useRouter();
-  const { setTodaysDebrief, setTodaysOnePercent } = useApp();
+  const { completeDebrief } = useApp();
   const [form, setForm] = useState(() =>
     createInitialDebriefState(theCode.length)
   );
@@ -147,8 +147,7 @@ export function DailyDebriefPage() {
     const completed = serializeDebrief(form, theCode);
     console.log("Daily Debrief — completed values:", completed);
 
-    setTodaysDebrief(completed);
-    setTodaysOnePercent(form.tomorrowOnePercent.trim());
+    completeDebrief(completed);
 
     router.push("/mission-complete");
   }

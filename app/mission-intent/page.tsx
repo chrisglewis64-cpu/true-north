@@ -1,5 +1,10 @@
 import { MissionIntentPage } from "@/components/mission-intent/MissionIntentPage";
+import { LandingGate } from "@/components/flow/LandingGate";
 
 export default function MissionIntent() {
-  return <MissionIntentPage />;
+  return (
+    <LandingGate>
+      <MissionIntentPage />
+    </LandingGate>
+  );
 }
