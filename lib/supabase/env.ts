@@ -1,11 +1,21 @@
 export function getSupabaseUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co"
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_URL. Set it in .env.local and restart the dev server.",
+    );
+  }
+  return url;
 }
 
 export function getSupabaseAnonKey(): string {
-  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder-anon-key";
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!key) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_ANON_KEY. Set it in .env.local and restart the dev server.",
+    );
+  }
+  return key;
 }
 
 export function isSupabaseConfigured(): boolean {
