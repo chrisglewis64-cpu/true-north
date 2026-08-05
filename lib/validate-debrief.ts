@@ -1,89 +1,84 @@
-import type { DebriefFormState } from "@/lib/debrief-form";
+import type { DailyDebriefDraft } from "@/types/daily-debrief";
 
-export type StandardFieldErrors = {
+export type Step1Errors = {
   answer?: string;
-  evidence?: string;
 };
 
-export type DebriefFieldErrors = {
-  standards: Record<number, StandardFieldErrors>;
+export type Step2Errors = {
   biggestWin?: string;
   biggestLesson?: string;
+};
+
+export type Step3Errors = {
   tomorrowOnePercent?: string;
+  tomorrowPriority?: string;
 };
 
-export type DebriefValidationResult = {
-  isValid: boolean;
-  errors: DebriefFieldErrors;
-  summary?: string;
-};
+export function validateStep1Standard(
+  draft: DailyDebriefDraft
+): { isValid: boolean; errors: Step1Errors } {
+  const entry = draft.standards[draft.standardIndex];
 
-const EMPTY_ERRORS: DebriefFieldErrors = { standards: {} };
+  if (entry.answer === null) {
+    return {
+      isValid: false,
+      errors: { answer: "Select Yes or No before continuing." },
+    };
+  }
 
-export function validateDebrief(form: DebriefFormState): DebriefValidationResult {
-  const errors: DebriefFieldErrors = { standards: {} };
+  return { isValid: true, errors: {} };
+}
+
+export function validateStep2(
+  draft: DailyDebriefDraft
+): { isValid: boolean; errors: Step2Errors; summary?: string } {
+  const errors: Step2Errors = {};
   let issueCount = 0;
 
-  form.standards.forEach((entry, index) => {
-    const fieldErrors: StandardFieldErrors = {};
-
-    if (entry.answer === null) {
-      fieldErrors.answer = "Select Yes or No.";
-      issueCount += 1;
-    }
-
-    if (!entry.evidence.trim()) {
-      fieldErrors.evidence = "Provide evidence for this standard.";
-      issueCount += 1;
-    }
-
-    if (Object.keys(fieldErrors).length > 0) {
-      errors.standards[index] = fieldErrors;
-    }
-  });
-
-  if (!form.biggestWin.trim()) {
+  if (!draft.biggestWin.trim()) {
     errors.biggestWin = "Name your biggest win today.";
     issueCount += 1;
   }
 
-  if (!form.biggestLesson.trim()) {
+  if (!draft.biggestLesson.trim()) {
     errors.biggestLesson = "Name your biggest lesson today.";
     issueCount += 1;
   }
 
-  if (!form.tomorrowOnePercent.trim()) {
-    errors.tomorrowOnePercent = "Set one improvement for tomorrow.";
-    issueCount += 1;
-  }
-
   if (issueCount === 0) {
-    return { isValid: true, errors: EMPTY_ERRORS };
+    return { isValid: true, errors: {} };
   }
 
   return {
     isValid: false,
     errors,
-    summary:
-      issueCount === 1
-        ? "One required field needs your attention."
-        : `${issueCount} required fields need your attention.`,
+    summary: "Both reflection fields are required.",
   };
 }
 
-export function getFirstDebriefErrorId(
-  errors: DebriefFieldErrors,
-  standardCount: number
-): string | null {
-  for (let index = 0; index < standardCount; index += 1) {
-    const standardErrors = errors.standards[index];
-    if (standardErrors?.answer) return `standard-${index}-answer`;
-    if (standardErrors?.evidence) return `standard-${index}-evidence`;
+export function validateStep3(
+  draft: DailyDebriefDraft
+): { isValid: boolean; errors: Step3Errors; summary?: string } {
+  const errors: Step3Errors = {};
+  let issueCount = 0;
+
+  if (!draft.tomorrowOnePercent.trim()) {
+    errors.tomorrowOnePercent = "Set one improvement for tomorrow.";
+    issueCount += 1;
   }
 
-  if (errors.biggestWin) return "field-biggestWin";
-  if (errors.biggestLesson) return "field-biggestLesson";
-  if (errors.tomorrowOnePercent) return "field-tomorrowOnePercent";
+  if (!draft.tomorrowPriority.trim()) {
+    errors.tomorrowPriority = "Set one priority for tomorrow.";
+    issueCount += 1;
+  }
 
-  return null;
+  if (issueCount === 0) {
+    return { isValid: true, errors: {} };
+  }
+
+  return {
+    isValid: false,
+    errors,
+    summary: "Both tomorrow fields are required.",
+  };
 }

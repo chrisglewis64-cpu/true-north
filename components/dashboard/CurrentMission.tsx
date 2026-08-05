@@ -1,42 +1,29 @@
 "use client";
 
-import { useApp } from "@/context/AppContext";
+import { useTrueNorth } from "@/context/TrueNorthContext";
+import { CurrentMissionCard } from "@/components/mission/CurrentMissionCard";
 import { SectionCard, SectionLabel } from "@/components/ui/SectionCard";
+import Link from "next/link";
 
 export function CurrentMission() {
-  const { currentMission } = useApp();
+  const { currentMission } = useTrueNorth();
 
-  return (
-    <SectionCard className="animate-fade-in border-border-subtle p-6 sm:p-8 [animation-delay:80ms]">
-      <SectionLabel>Current Mission</SectionLabel>
+  if (!currentMission) {
+    return (
+      <SectionCard className="border-border-subtle p-6 sm:p-8">
+        <SectionLabel>Current Mission</SectionLabel>
+        <p className="mt-3 text-[15px] text-muted">
+          No active mission.
+        </p>
+        <Link
+          href="/mission/new"
+          className="mt-4 inline-block font-mono text-[11px] uppercase tracking-[0.14em] text-accent"
+        >
+          Create Mission →
+        </Link>
+      </SectionCard>
+    );
+  }
 
-      <h2 className="text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">
-        {currentMission.title}
-      </h2>
-
-      <p className="mt-4 text-[15px] leading-relaxed text-muted sm:text-base">
-        {currentMission.purpose}
-      </p>
-
-      <div className="mt-8 space-y-5 border-t border-border pt-6">
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Progress
-          </p>
-          <p className="mt-1.5 text-[15px] text-foreground/90">
-            {currentMission.progress}
-          </p>
-        </div>
-
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Next Action
-          </p>
-          <p className="mt-1.5 text-[15px] font-medium text-foreground">
-            {currentMission.nextAction}
-          </p>
-        </div>
-      </div>
-    </SectionCard>
-  );
+  return <CurrentMissionCard mission={currentMission} />;
 }

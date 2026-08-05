@@ -8,7 +8,7 @@ import {
 } from "@/lib/mission-intent-suggestions";
 import { validateMissionIntent } from "@/lib/validate-mission-intent";
 import type { MissionIntentFieldErrors } from "@/lib/validate-mission-intent";
-import { useApp } from "@/context/AppContext";
+import { useTrueNorth } from "@/context/TrueNorthContext";
 import { SectionLabel } from "@/components/ui/SectionCard";
 import {
   ValidationMessage,
@@ -21,7 +21,7 @@ type Mode = "suggest" | "custom";
 
 export function MissionIntentPage() {
   const router = useRouter();
-  const { setTodaysCommitment } = useApp();
+  const { setTodaysMissionIntent } = useTrueNorth();
 
   const [mode, setMode] = useState<Mode>("suggest");
   const [suggestion, setSuggestion] = useState(getInitialSuggestion);
@@ -76,7 +76,11 @@ export function MissionIntentPage() {
     const finalCommitment =
       mode === "custom" ? customText.trim() : suggestion.trim();
 
-    setTodaysCommitment(finalCommitment);
+    setTodaysMissionIntent({
+      commitment: finalCommitment,
+      source: mode === "custom" ? "custom" : "suggested",
+      createdAt: new Date().toISOString(),
+    });
     router.push("/operations");
   }
 

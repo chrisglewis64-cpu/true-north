@@ -1,4 +1,4 @@
-import { CourseStatus } from "@/components/dashboard/CourseStatus";
+import { CompassDashboard } from "@/components/dashboard/CourseStatus";
 import { CurrentMission } from "@/components/dashboard/CurrentMission";
 import { TodaysOnePercent } from "@/components/dashboard/TodaysOnePercent";
 import { TodaysCommitment } from "@/components/dashboard/TodaysCommitment";
@@ -27,7 +27,7 @@ export default function OperationsPage() {
             {formatDate()}
           </time>
 
-          <CourseStatus />
+          <CompassDashboard />
           <CurrentMission />
           <TodaysOnePercent />
           <Evidence />

@@ -1,15 +1,5 @@
-import { BottomNav } from "@/components/navigation/BottomNav";
+import { EvidencePageContent } from "@/components/evidence/EvidencePageContent";
 
 export default function EvidencePage() {
-  return (
-    <>
-      <main className="mx-auto flex max-w-lg flex-1 flex-col items-center justify-center px-5 pb-28 pt-8 text-center sm:max-w-2xl">
-        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          Coming soon
-        </p>
-        <h1 className="mt-2 text-2xl font-semibold">Evidence</h1>
-      </main>
-      <BottomNav />
-    </>
-  );
+  return <EvidencePageContent />;
 }

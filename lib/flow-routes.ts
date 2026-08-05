@@ -5,6 +5,7 @@ export type FlowStep = {
   nextLabel: string;
 };
 
+// NOTE: `/` uses LandingPage — not FlowPage. See docs/NON_NEGOTIABLES.md.txt
 export const flowSteps: FlowStep[] = [
   {
     path: "/",

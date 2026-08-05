@@ -1,18 +1,12 @@
-import { FlowPage } from "@/components/flow/FlowPage";
-import { getFlowStep } from "@/lib/flow-routes";
+import { LandingGate } from "@/components/landing/LandingGate";
+import { LandingPage } from "@/components/landing/LandingPage";
 
-export default function Landing() {
-  const step = getFlowStep("/");
-
-  if (!step) {
-    return null;
-  }
-
+// Landing is a full page — not a FlowPage placeholder.
+// Required content: docs/NON_NEGOTIABLES.md.txt
+export default function Home() {
   return (
-    <FlowPage
-      title={step.title}
-      nextPath={step.nextPath}
-      nextLabel={step.nextLabel}
-    />
+    <LandingGate>
+      <LandingPage />
+    </LandingGate>
   );
 }

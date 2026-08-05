@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { SectionCard, SectionLabel } from "@/components/ui/SectionCard";
-import { theCode, mission } from "@/lib/placeholder-data";
+import { SectionLabel } from "@/components/ui/SectionCard";
+import { MyStandardCard } from "@/components/landing/MyStandardCard";
+import { currentCampaign } from "@/lib/placeholder-data";
 
 export function LandingPage() {
   return (
@@ -19,27 +20,12 @@ export function LandingPage() {
         </header>
 
         <div className="mt-12 space-y-10 sm:mt-16 sm:space-y-12">
-          <SectionCard className="animate-fade-in [animation-delay:80ms]">
-            <SectionLabel>My Standard</SectionLabel>
-            <ul className="space-y-4">
-              {theCode.map((principle) => (
-                <li
-                  key={principle}
-                  className="flex gap-3 text-[15px] leading-relaxed text-foreground/90 sm:text-base"
-                >
-                  <span className="shrink-0 text-muted" aria-hidden>
-                    •
-                  </span>
-                  <span>{principle}</span>
-                </li>
-              ))}
-            </ul>
-          </SectionCard>
+          <MyStandardCard />
 
           <div className="animate-fade-in [animation-delay:160ms]">
-            <SectionLabel>Current Mission</SectionLabel>
+            <SectionLabel>Current Campaign</SectionLabel>
             <p className="text-[17px] font-medium leading-relaxed tracking-tight text-foreground/90 sm:text-lg">
-              {mission.statement}
+              {currentCampaign.statement}
             </p>
           </div>
         </div>

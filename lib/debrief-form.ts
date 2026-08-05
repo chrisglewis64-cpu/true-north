@@ -1,32 +1,25 @@
-export type StandardAnswer = "yes" | "no" | null;
+import type {
+  DailyDebrief,
+  DailyDebriefDraft,
+} from "@/types/daily-debrief";
+import type { Standard } from "@/types/standard";
 
-export type StandardEntry = {
-  answer: StandardAnswer;
-  evidence: string;
-};
+export type {
+  DailyDebrief,
+  DailyDebriefDraft,
+  DailyDebriefStandardEntry,
+  DailyDebriefState,
+  DebriefStep,
+  StandardAnswer,
+  StandardReviewEntry,
+} from "@/types/daily-debrief";
 
-export type DebriefFormState = {
-  standards: StandardEntry[];
-  biggestWin: string;
-  biggestLesson: string;
-  tomorrowOnePercent: string;
-};
-
-export type DebriefSubmission = {
-  standards: {
-    statement: string;
-    answer: StandardAnswer;
-    evidence: string;
-  }[];
-  biggestWin: string;
-  biggestLesson: string;
-  tomorrowOnePercent: string;
-};
-
-export function createInitialDebriefState(
+export function createInitialDebriefDraft(
   standardCount: number
-): DebriefFormState {
+): DailyDebriefDraft {
   return {
+    step: 1,
+    standardIndex: 0,
     standards: Array.from({ length: standardCount }, () => ({
       answer: null,
       evidence: "",
@@ -34,21 +27,26 @@ export function createInitialDebriefState(
     biggestWin: "",
     biggestLesson: "",
     tomorrowOnePercent: "",
+    tomorrowPriority: "",
+    courseCorrection: "",
   };
 }
 
 export function serializeDebrief(
-  form: DebriefFormState,
-  statements: readonly string[]
-): DebriefSubmission {
+  draft: DailyDebriefDraft,
+  standards: readonly Standard[]
+): DailyDebrief {
   return {
-    standards: form.standards.map((entry, index) => ({
-      statement: statements[index],
+    standards: draft.standards.map((entry, index) => ({
+      statement: standards[index]?.statement ?? "",
       answer: entry.answer,
       evidence: entry.evidence,
     })),
-    biggestWin: form.biggestWin,
-    biggestLesson: form.biggestLesson,
-    tomorrowOnePercent: form.tomorrowOnePercent,
+    biggestWin: draft.biggestWin,
+    biggestLesson: draft.biggestLesson,
+    tomorrowOnePercent: draft.tomorrowOnePercent,
+    tomorrowPriority: draft.tomorrowPriority,
+    courseCorrection: draft.courseCorrection,
+    completedAt: new Date().toISOString(),
   };
 }

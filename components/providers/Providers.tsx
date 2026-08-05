@@ -1,7 +1,13 @@
 "use client";
 
-import { AppProvider } from "@/context/AppContext";
+import { TrueNorthProvider } from "@/context/TrueNorthContext";
+import { PwaInstallPrompt } from "@/components/pwa/PwaInstallPrompt";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <AppProvider>{children}</AppProvider>;
+  return (
+    <TrueNorthProvider>
+      {children}
+      <PwaInstallPrompt />
+    </TrueNorthProvider>
+  );
 }

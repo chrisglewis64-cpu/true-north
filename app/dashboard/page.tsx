@@ -1,4 +1,4 @@
-import { CourseStatus } from "@/components/dashboard/CourseStatus";
+import { CompassDashboard } from "@/components/dashboard/CourseStatus";
 import { CurrentMission } from "@/components/dashboard/CurrentMission";
 import { TodaysOnePercent } from "@/components/dashboard/TodaysOnePercent";
 import { TodaysCommitment } from "@/components/dashboard/TodaysCommitment";
@@ -26,7 +26,7 @@ export default function DashboardPage() {
 
         <div className="space-y-10 sm:space-y-12">
           <TodaysCommitment />
-          <CourseStatus />
+          <CompassDashboard />
           <CurrentMission />
           <TodaysOnePercent />
           <Evidence />
