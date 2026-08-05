@@ -1,5 +1,5 @@
-import { CurrentMissionPageContent } from "@/components/mission/CurrentMissionPageContent";
+import { MissionHubPage } from "@/components/mission/MissionHubPage";
 
 export default function MissionPage() {
-  return <CurrentMissionPageContent />;
+  return <MissionHubPage />;
 }
