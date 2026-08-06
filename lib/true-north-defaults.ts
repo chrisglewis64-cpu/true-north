@@ -1,6 +1,5 @@
 import { theCode, todaysOnePercent, user } from "@/lib/placeholder-data";
 import { placeholderMissions } from "@/lib/mission-data";
-import { mergeLocalSessionIntoState } from "@/lib/storage/local-session";
 import type { Standard } from "@/types/standard";
 import type { TrueNorthState } from "@/types/true-north";
 
@@ -14,8 +13,12 @@ export function createStandardsFromStatements(
   }));
 }
 
+/**
+ * Baseline state safe for SSR — no localStorage reads.
+ * Local session merge happens client-side after mount.
+ */
 export function createInitialTrueNorthState(): TrueNorthState {
-  return mergeLocalSessionIntoState({
+  return {
     myStandard: createStandardsFromStatements(theCode),
     todaysMissionIntent: null,
     todaysOnePercent: {
@@ -39,5 +42,5 @@ export function createInitialTrueNorthState(): TrueNorthState {
       onboardingCompletedAt: new Date().toISOString(),
     },
     missions: placeholderMissions,
-  });
+  };
 }

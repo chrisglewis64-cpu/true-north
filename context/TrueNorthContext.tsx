@@ -39,6 +39,7 @@ import { buildEvidenceEntriesFromDebriefs } from "@/lib/evidence/build-evidence-
 import { hasCompletedMorningCommit } from "@/lib/morning-flow/commit-state";
 import {
   createLocalSessionSnapshot,
+  mergeLocalSessionIntoState,
   saveLocalSessionSnapshot,
 } from "@/lib/storage/local-session";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -93,11 +94,33 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
   const [weeklyReviews, setWeeklyReviews] = useState(initial.weeklyReviews);
   const [session, setSession] = useState(initial.session);
   const [missions, setMissions] = useState<Mission[]>(initial.missions);
-  const [isHydrated, setIsHydrated] = useState(!supabaseEnabled);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     sessionRef.current = session;
   }, [session]);
+
+  // Local mode: merge localStorage after mount to avoid SSR hydration mismatch.
+  useEffect(() => {
+    if (supabaseEnabled) {
+      return;
+    }
+
+    const merged = mergeLocalSessionIntoState(createInitialTrueNorthState());
+    sessionRef.current = merged.session;
+    setSession(merged.session);
+    setMissions(merged.missions);
+    setMyStandardState(merged.myStandard);
+    setTodaysMissionIntentState(merged.todaysMissionIntent);
+    setTodaysOnePercentState(merged.todaysOnePercent);
+    setWeeklyBearingsState(merged.weeklyBearings);
+    setDailyDebriefSubmissionState(merged.dailyDebrief.submission);
+    setDailyDebriefDraft(merged.dailyDebrief.draft);
+    setDailyDebriefHistory(merged.dailyDebriefHistory);
+    setMissionIntentHistory(merged.missionIntentHistory);
+    setWeeklyReviews(merged.weeklyReviews);
+    setIsHydrated(true);
+  }, [supabaseEnabled]);
 
   const currentMission = useMemo(
     () => getActiveMission(missions) ?? null,

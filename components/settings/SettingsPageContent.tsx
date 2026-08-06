@@ -68,7 +68,7 @@ export function SettingsPageContent() {
 
   return (
     <>
-      <main className="mx-auto w-full max-w-lg flex-1 px-6 pb-28 pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
+      <main className="mx-auto w-full max-w-lg flex-1 px-6 pb-36 pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
         <header className="mb-12 animate-fade-in">
           <SectionLabel>Settings</SectionLabel>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
