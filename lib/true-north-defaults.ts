@@ -1,5 +1,6 @@
 import { theCode, todaysOnePercent, user } from "@/lib/placeholder-data";
 import { placeholderMissions } from "@/lib/mission-data";
+import { EMPTY_ONBOARDING_PROGRESS } from "@/lib/onboarding/stages";
 import type { Standard } from "@/types/standard";
 import type { TrueNorthState } from "@/types/true-north";
 
@@ -40,6 +41,13 @@ export function createInitialTrueNorthState(): TrueNorthState {
       email: null,
       startedAt: new Date().toISOString(),
       onboardingCompletedAt: new Date().toISOString(),
+      onboarding: {
+        ...EMPTY_ONBOARDING_PROGRESS,
+        welcomeCompletedAt: new Date().toISOString(),
+        standardsCompletedAt: new Date().toISOString(),
+        missionCompletedAt: new Date().toISOString(),
+        onboardingCompletedAt: new Date().toISOString(),
+      },
     },
     missions: placeholderMissions,
   };

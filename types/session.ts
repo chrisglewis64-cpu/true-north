@@ -1,3 +1,5 @@
+import type { OnboardingProgress } from "@/lib/onboarding/stages";
+
 /**
  * The current in-memory user session.
  */
@@ -8,4 +10,6 @@ export interface UserSession {
   startedAt: string;
   /** Null until first-time onboarding is finished. */
   onboardingCompletedAt: string | null;
+  /** Explicit onboarding stage timestamps (profile-persisted). */
+  onboarding: OnboardingProgress;
 }

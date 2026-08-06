@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTrueNorth } from "@/context/TrueNorthContext";
 import { ONBOARDING_PATH, SIGN_IN_PATH } from "@/lib/auth/paths";
-import { hasSeenWelcome, markWelcomeSeen } from "@/lib/storage/welcome";
+import {
+  logOnboardingRedirect,
+  resolveOnboardingStage,
+} from "@/lib/onboarding/stages";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 /**
- * First-launch welcome — shown once before onboarding.
+ * First-launch welcome — shown once. Continue persists welcome_completed.
  */
 export function WelcomePage() {
   const router = useRouter();
-  const { session, hasCompletedOnboarding } = useTrueNorth();
+  const { session, markWelcomeComplete } = useTrueNorth();
+  const [submitting, setSubmitting] = useState(false);
+  const stage = resolveOnboardingStage(session.onboarding);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -23,25 +28,53 @@ export function WelcomePage() {
     const supabase = createSupabaseBrowserClient();
     void supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
+        logOnboardingRedirect({
+          userId: "anonymous",
+          stage,
+          pathname: "/welcome",
+          target: SIGN_IN_PATH,
+          reason: "no auth user on welcome",
+        });
         router.replace(SIGN_IN_PATH);
         return;
       }
 
-      if (hasCompletedOnboarding) {
-        router.replace("/operations");
-        return;
-      }
-
-      if (hasSeenWelcome(data.user.id)) {
-        router.replace(ONBOARDING_PATH);
+      // Already past welcome — never re-show.
+      if (stage !== "welcome") {
+        const target = ONBOARDING_PATH;
+        logOnboardingRedirect({
+          userId: data.user.id,
+          stage,
+          pathname: "/welcome",
+          target,
+          reason: "welcome already completed; advance to onboarding",
+        });
+        router.replace(target);
       }
     });
-  }, [hasCompletedOnboarding, router]);
+  }, [router, stage]);
 
-  function handleContinue() {
-    const userId = session.id !== "session-local" ? session.id : "session-local";
-    markWelcomeSeen(userId);
-    router.replace(ONBOARDING_PATH);
+  async function handleContinue() {
+    if (submitting) {
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      await markWelcomeComplete();
+      logOnboardingRedirect({
+        userId: session.id,
+        stage: "standards",
+        pathname: "/welcome",
+        target: ONBOARDING_PATH,
+        reason: "welcome Continue — persisted welcome_completed",
+      });
+      router.replace(ONBOARDING_PATH);
+    } catch (error) {
+      console.error("[onboarding] Failed to persist welcome:", error);
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -64,10 +97,11 @@ export function WelcomePage() {
 
         <button
           type="button"
-          onClick={handleContinue}
-          className="animate-fade-in mt-14 flex h-14 w-full items-center justify-center rounded-2xl bg-accent font-mono text-sm font-medium uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90 active:opacity-80 sm:h-16 sm:text-[15px] [animation-delay:160ms]"
+          disabled={submitting}
+          onClick={() => void handleContinue()}
+          className="animate-fade-in mt-14 flex h-14 w-full items-center justify-center rounded-2xl bg-accent font-mono text-sm font-medium uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50 sm:h-16 sm:text-[15px] [animation-delay:160ms]"
         >
-          Continue
+          {submitting ? "Continuing…" : "Continue"}
         </button>
       </main>
     </div>

@@ -20,6 +20,9 @@ export interface Database {
           display_name: string;
           created_at: string;
           onboarding_completed_at: string | null;
+          welcome_completed_at: string | null;
+          standards_completed_at: string | null;
+          mission_completed_at: string | null;
           notification_preferences: Json;
           timezone: string | null;
         };
@@ -29,6 +32,9 @@ export interface Database {
           display_name: string;
           created_at?: string;
           onboarding_completed_at?: string | null;
+          welcome_completed_at?: string | null;
+          standards_completed_at?: string | null;
+          mission_completed_at?: string | null;
           notification_preferences?: Json;
           timezone?: string | null;
         };
@@ -38,6 +44,9 @@ export interface Database {
           display_name?: string;
           created_at?: string;
           onboarding_completed_at?: string | null;
+          welcome_completed_at?: string | null;
+          standards_completed_at?: string | null;
+          mission_completed_at?: string | null;
           notification_preferences?: Json;
           timezone?: string | null;
         };

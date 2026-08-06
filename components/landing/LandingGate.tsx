@@ -3,7 +3,12 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTrueNorth } from "@/context/TrueNorthContext";
-import { ONBOARDING_PATH, POST_AUTH_REDIRECT } from "@/lib/auth/paths";
+import { POST_AUTH_REDIRECT } from "@/lib/auth/paths";
+import {
+  logOnboardingRedirect,
+  pathForOnboardingStage,
+  resolveOnboardingStage,
+} from "@/lib/onboarding/stages";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 type LandingGateProps = {
@@ -12,30 +17,45 @@ type LandingGateProps = {
 
 /**
  * Daily Morning Commitment gate on `/`.
- * - Incomplete onboarding → /onboarding
- * - Today's commit already done → Compass dashboard
+ * Incomplete onboarding is sent to the next incomplete stage path.
+ * Today's commit already done → Compass.
  */
 export function LandingGate({ children }: LandingGateProps) {
   const router = useRouter();
-  const { hasCompletedMorningCommit, hasCompletedOnboarding, session } =
-    useTrueNorth();
+  const { hasCompletedMorningCommit, session } = useTrueNorth();
 
-  const needsOnboarding =
+  const stage = resolveOnboardingStage(session.onboarding);
+  const needsOnboardingStage =
     isSupabaseConfigured() &&
     session.id !== "session-local" &&
-    !hasCompletedOnboarding;
+    stage !== "complete";
 
   useEffect(() => {
-    if (needsOnboarding) {
-      router.replace(ONBOARDING_PATH);
+    if (needsOnboardingStage) {
+      const target = pathForOnboardingStage(stage);
+      logOnboardingRedirect({
+        userId: session.id,
+        stage,
+        pathname: "/",
+        target,
+        reason: "LandingGate — onboarding incomplete",
+      });
+      router.replace(target);
       return;
     }
     if (hasCompletedMorningCommit) {
+      logOnboardingRedirect({
+        userId: session.id,
+        stage,
+        pathname: "/",
+        target: POST_AUTH_REDIRECT,
+        reason: "LandingGate — morning commitment already complete",
+      });
       router.replace(POST_AUTH_REDIRECT);
     }
-  }, [hasCompletedMorningCommit, needsOnboarding, router]);
+  }, [hasCompletedMorningCommit, needsOnboardingStage, router, session.id, stage]);
 
-  if (needsOnboarding || hasCompletedMorningCommit) {
+  if (needsOnboardingStage || hasCompletedMorningCommit) {
     return null;
   }
 

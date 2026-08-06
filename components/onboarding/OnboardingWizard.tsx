@@ -14,7 +14,7 @@ import {
   fieldErrorClass,
 } from "@/components/ui/ValidationMessage";
 import { useTrueNorth } from "@/context/TrueNorthContext";
-import { POST_AUTH_REDIRECT, SIGN_IN_PATH } from "@/lib/auth/paths";
+import { POST_AUTH_REDIRECT, SIGN_IN_PATH, WELCOME_PATH } from "@/lib/auth/paths";
 import { DEFAULT_MISSION_STATUS } from "@/lib/mission-status";
 import {
   MAX_STANDARDS,
@@ -22,6 +22,11 @@ import {
   MISSION_CATEGORIES,
   ONBOARDING_EXAMPLE_STANDARDS,
 } from "@/lib/onboarding/example-standards";
+import {
+  logOnboardingRedirect,
+  resolveOnboardingStage,
+  wizardStepForStage,
+} from "@/lib/onboarding/stages";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { MissionIntent } from "@/types/mission-intent";
@@ -35,20 +40,27 @@ function createEditableStandards(
   }));
 }
 
+/**
+ * Onboarding wizard driven by profile-persisted stage.
+ * Stages advance only forward: standards → mission → morning_commitment.
+ */
 export function OnboardingWizard() {
   const router = useRouter();
   const {
     session,
     myStandard,
     currentMission,
-    hasCompletedOnboarding,
     setMyStandard,
     createMission,
     setTodaysMissionIntent,
+    markStandardsComplete,
+    markMissionStageComplete,
     markOnboardingComplete,
   } = useTrueNorth();
 
-  const [step, setStep] = useState(1);
+  const stage = resolveOnboardingStage(session.onboarding);
+  const step = wizardStepForStage(stage);
+
   const [standards, setStandards] = useState<EditableStandard[]>(() =>
     createEditableStandards(ONBOARDING_EXAMPLE_STANDARDS)
   );
@@ -65,6 +77,15 @@ export function OnboardingWizard() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    console.log("[onboarding-wizard]", {
+      user: session.id,
+      stage,
+      step,
+      onboarding: session.onboarding,
+    });
+  }, [session.id, session.onboarding, stage, step]);
+
+  useEffect(() => {
     if (!isSupabaseConfigured()) {
       return;
     }
@@ -75,11 +96,31 @@ export function OnboardingWizard() {
         router.replace(SIGN_IN_PATH);
         return;
       }
-      if (hasCompletedOnboarding) {
+
+      if (stage === "welcome") {
+        logOnboardingRedirect({
+          userId: data.user.id,
+          stage,
+          pathname: "/onboarding",
+          target: WELCOME_PATH,
+          reason: "wizard opened before welcome completed",
+        });
+        router.replace(WELCOME_PATH);
+        return;
+      }
+
+      if (stage === "complete") {
+        logOnboardingRedirect({
+          userId: data.user.id,
+          stage,
+          pathname: "/onboarding",
+          target: POST_AUTH_REDIRECT,
+          reason: "onboarding already complete",
+        });
         router.replace(POST_AUTH_REDIRECT);
       }
     });
-  }, [hasCompletedOnboarding, router]);
+  }, [router, stage]);
 
   useEffect(() => {
     if (standardsSeeded || myStandard.length === 0) {
@@ -133,7 +174,8 @@ export function OnboardingWizard() {
           statement: item.statement,
         }))
       );
-      setStep(3);
+      await markStandardsComplete();
+      console.log("[onboarding-wizard] standards_completed persisted");
     } catch {
       setStandardsError("Unable to save your standards. Try again.");
     } finally {
@@ -161,7 +203,8 @@ export function OnboardingWizard() {
         nextMilestone: "Take the first intentional action.",
         missionStatus: DEFAULT_MISSION_STATUS,
       });
-      setStep(4);
+      await markMissionStageComplete();
+      console.log("[onboarding-wizard] mission_completed persisted");
     } catch {
       setMissionError("Unable to save your mission. Try again.");
     } finally {
@@ -187,6 +230,13 @@ export function OnboardingWizard() {
     try {
       await setTodaysMissionIntent(commitment);
       await markOnboardingComplete();
+      logOnboardingRedirect({
+        userId: session.id,
+        stage: "complete",
+        pathname: "/onboarding",
+        target: POST_AUTH_REDIRECT,
+        reason: "morning commitment complete — onboarding finished",
+      });
       router.replace(POST_AUTH_REDIRECT);
       router.refresh();
     } catch {
@@ -195,34 +245,15 @@ export function OnboardingWizard() {
     }
   }
 
-  if (step === 1) {
-    return (
-      <OnboardingShell step={1} totalSteps={4} title="Define your Standard.">
-        <div className="space-y-5 text-[17px] leading-relaxed text-muted">
-          <p>
-            Standards are the principles you live by. They rarely change.
-          </p>
-          <p>
-            Everything in True North — mission, bearings, evidence — serves
-            this identity.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setStep(2)}
-          className="mt-10 flex h-14 w-full items-center justify-center rounded-2xl bg-accent font-mono text-sm font-medium uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90 active:opacity-80 sm:h-16 sm:text-[15px]"
-        >
-          Continue
-        </button>
-      </OnboardingShell>
-    );
+  if (stage === "welcome" || stage === "complete") {
+    return null;
   }
 
-  if (step === 2) {
+  if (step === 1) {
     return (
       <OnboardingShell
-        step={2}
-        totalSteps={4}
+        step={1}
+        totalSteps={3}
         title="Create Your Standards."
         subtitle="Define 5–8 personal standards. These become My Standard — unique to you."
       >
@@ -243,11 +274,11 @@ export function OnboardingWizard() {
     );
   }
 
-  if (step === 3) {
+  if (step === 2) {
     return (
       <OnboardingShell
-        step={3}
-        totalSteps={4}
+        step={2}
+        totalSteps={3}
         title="Create Your Current Mission."
         subtitle="A season of focused effort tied to who you are becoming."
       >
@@ -316,8 +347,8 @@ export function OnboardingWizard() {
 
   return (
     <OnboardingShell
-      step={4}
-      totalSteps={4}
+      step={3}
+      totalSteps={3}
       title="Who are you today?"
       subtitle="Today is another opportunity to live your standard."
     >

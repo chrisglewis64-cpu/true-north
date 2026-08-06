@@ -1,17 +1,20 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTrueNorth } from "@/context/TrueNorthContext";
 import {
   isAuthPublicPath,
   isMorningCommitPath,
   MORNING_COMMIT_PATH,
-  ONBOARDING_PATH,
   SIGN_IN_PATH,
-  WELCOME_PATH,
 } from "@/lib/auth/paths";
-import { hasSeenWelcome } from "@/lib/storage/welcome";
+import {
+  isPathAllowedForStage,
+  logOnboardingRedirect,
+  pathForOnboardingStage,
+  resolveOnboardingStage,
+} from "@/lib/onboarding/stages";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 type OnboardingRouteGuardProps = {
@@ -19,111 +22,73 @@ type OnboardingRouteGuardProps = {
 };
 
 /**
- * Client-side auth, welcome, onboarding, and daily commitment gates.
- * - Unauthenticated → Sign In
- * - First launch → /welcome (once)
- * - Incomplete onboarding → /onboarding
- * - Missing today's Morning Commitment → /
+ * Single onboarding / auth gate.
+ * Redirects only when the current path is not allowed for the resolved stage.
+ *
+ * Stages: welcome → standards → mission → morning_commitment → complete
  */
 export function OnboardingRouteGuard({ children }: OnboardingRouteGuardProps) {
   const pathname = usePathname();
   const router = useRouter();
   const {
     hasCompletedMorningCommit,
-    hasCompletedOnboarding,
     session,
   } = useTrueNorth();
 
   const supabaseEnabled = isSupabaseConfigured();
   const isAuthenticated = session.id !== "session-local";
-  const [welcomeReady, setWelcomeReady] = useState(!supabaseEnabled);
-  const [welcomeSeen, setWelcomeSeen] = useState(true);
-
-  useEffect(() => {
-    if (!supabaseEnabled || !isAuthenticated) {
-      setWelcomeSeen(true);
-      setWelcomeReady(true);
-      return;
-    }
-
-    setWelcomeSeen(hasSeenWelcome(session.id));
-    setWelcomeReady(true);
-  }, [supabaseEnabled, isAuthenticated, session.id]);
-
   const isPublic = isAuthPublicPath(pathname);
-  const onMorningCommit = isMorningCommitPath(pathname);
-  const onWelcome = pathname === WELCOME_PATH;
-  const onOnboarding =
-    pathname === ONBOARDING_PATH || pathname.startsWith(`${ONBOARDING_PATH}/`);
+  const stage = resolveOnboardingStage(session.onboarding);
 
   const mustSignIn = supabaseEnabled && !isAuthenticated && !isPublic;
 
-  const mustWelcome =
-    welcomeReady &&
-    supabaseEnabled &&
-    isAuthenticated &&
-    !hasCompletedOnboarding &&
-    !welcomeSeen &&
-    !onWelcome &&
-    !isPublic;
+  let redirectTarget: string | null = null;
+  let redirectReason = "none";
 
-  const mustOnboard =
-    welcomeReady &&
-    supabaseEnabled &&
-    isAuthenticated &&
-    !hasCompletedOnboarding &&
-    welcomeSeen &&
-    !onOnboarding &&
-    !onWelcome &&
-    !isPublic;
-
-  const mustCommit =
-    supabaseEnabled &&
-    isAuthenticated &&
-    hasCompletedOnboarding &&
-    !hasCompletedMorningCommit &&
-    !onMorningCommit &&
-    !onOnboarding &&
-    !onWelcome &&
-    !isPublic;
+  if (mustSignIn) {
+    redirectTarget = SIGN_IN_PATH;
+    redirectReason = "unauthenticated";
+  } else if (supabaseEnabled && isAuthenticated && !isPublic) {
+    if (!isPathAllowedForStage(pathname, stage)) {
+      redirectTarget = pathForOnboardingStage(stage);
+      redirectReason = `stage=${stage} disallows path=${pathname}`;
+    } else if (
+      stage === "complete" &&
+      !hasCompletedMorningCommit &&
+      !isMorningCommitPath(pathname)
+    ) {
+      redirectTarget = MORNING_COMMIT_PATH;
+      redirectReason = "onboarding complete; morning commitment missing";
+    }
+  }
 
   useEffect(() => {
-    if (mustSignIn) {
-      router.replace(SIGN_IN_PATH);
+    if (!redirectTarget || redirectTarget === pathname) {
       return;
     }
-    if (mustWelcome) {
-      router.replace(WELCOME_PATH);
-      return;
-    }
-    if (mustOnboard) {
-      router.replace(ONBOARDING_PATH);
-      return;
-    }
-    if (mustCommit) {
-      router.replace(MORNING_COMMIT_PATH);
-    }
-  }, [mustCommit, mustOnboard, mustSignIn, mustWelcome, router]);
 
-  if (
-    (supabaseEnabled && isAuthenticated && !welcomeReady) ||
-    mustSignIn ||
-    mustWelcome ||
-    mustOnboard ||
-    mustCommit
-  ) {
+    logOnboardingRedirect({
+      userId: session.id,
+      stage,
+      pathname,
+      target: redirectTarget,
+      reason: redirectReason,
+    });
+    router.replace(redirectTarget);
+  }, [
+    pathname,
+    redirectReason,
+    redirectTarget,
+    router,
+    session.id,
+    stage,
+  ]);
+
+  if (redirectTarget && redirectTarget !== pathname) {
     return (
       <div className="flex min-h-dvh items-center justify-center px-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          {mustSignIn
-            ? "Redirecting to Sign In…"
-            : mustWelcome
-              ? "Preparing True North…"
-              : mustOnboard
-                ? "Continuing setup…"
-                : mustCommit
-                  ? "Opening Morning Commitment…"
-                  : "Loading…"}
+          Continuing…
         </p>
       </div>
     );

@@ -41,6 +41,9 @@ export {
   fetchProfile,
   fetchNotificationPreferences,
   saveNotificationPreferences,
+  markWelcomeComplete,
+  markStandardsComplete,
+  markMissionStageComplete,
   markOnboardingComplete,
   isOnboardingComplete,
 } from "@/lib/database/profiles.repository";

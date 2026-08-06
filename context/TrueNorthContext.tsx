@@ -17,9 +17,13 @@ import {
   persistDailyOnePercent,
   persistMissionIntent,
   persistWeeklyBearings,
+  markWelcomeComplete as persistWelcomeComplete,
+  markStandardsComplete as persistStandardsComplete,
+  markMissionStageComplete as persistMissionStageComplete,
   markOnboardingComplete as persistOnboardingComplete,
   replaceStandards,
 } from "@/lib/database";
+import { EMPTY_ONBOARDING_PROGRESS } from "@/lib/onboarding/stages";
 import { ensureWeeklyBearings } from "@/lib/bearings/ensure-weekly";
 import {
   createInitialTrueNorthState,
@@ -262,16 +266,53 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  function patchOnboarding(
+    partial: Partial<typeof EMPTY_ONBOARDING_PROGRESS>
+  ) {
+    setSession((current) => {
+      const onboarding = { ...current.onboarding, ...partial };
+      const next = {
+        ...current,
+        onboarding,
+        onboardingCompletedAt: onboarding.onboardingCompletedAt,
+      };
+      sessionRef.current = next;
+      return next;
+    });
+  }
+
+  async function markWelcomeComplete() {
+    const completedAt = new Date().toISOString();
+    patchOnboarding({ welcomeCompletedAt: completedAt });
+    await persistAuthenticated((userId) =>
+      persistWelcomeComplete(supabaseRef.current!, userId, completedAt)
+    );
+  }
+
+  async function markStandardsComplete() {
+    const completedAt = new Date().toISOString();
+    patchOnboarding({ standardsCompletedAt: completedAt });
+    await persistAuthenticated((userId) =>
+      persistStandardsComplete(supabaseRef.current!, userId, completedAt)
+    );
+  }
+
+  async function markMissionStageComplete() {
+    const completedAt = new Date().toISOString();
+    patchOnboarding({ missionCompletedAt: completedAt });
+    await persistAuthenticated((userId) =>
+      persistMissionStageComplete(supabaseRef.current!, userId, completedAt)
+    );
+  }
+
   async function markOnboardingComplete() {
     const completedAt = new Date().toISOString();
-    setSession((current) => ({
-      ...current,
+    patchOnboarding({
+      welcomeCompletedAt: completedAt,
+      standardsCompletedAt: completedAt,
+      missionCompletedAt: completedAt,
       onboardingCompletedAt: completedAt,
-    }));
-    sessionRef.current = {
-      ...sessionRef.current,
-      onboardingCompletedAt: completedAt,
-    };
+    });
 
     await persistAuthenticated((userId) =>
       persistOnboardingComplete(supabaseRef.current!, userId, completedAt)
@@ -502,6 +543,9 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     hasCompletedMorningCommit: morningCommitComplete,
     hasCompletedOnboarding: onboardingComplete,
     setMyStandard,
+    markWelcomeComplete,
+    markStandardsComplete,
+    markMissionStageComplete,
     markOnboardingComplete,
     setTodaysMissionIntent,
     setTodaysOnePercent,
