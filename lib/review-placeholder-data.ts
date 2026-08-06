@@ -50,7 +50,7 @@ export const monthlyReviewPlaceholder: MonthlyReview = {
   missionName: "Lead My Family With Integrity",
   missionProgress: "Phase II — Consistency",
   missionProgressNarrative:
-    "Moved from intention to routine on family dinners. The mission is no longer aspirational — it is becoming habit.",
+    "Moved from intention to practice on family dinners. The mission is no longer aspirational — it is becoming character.",
   patterns: [
     "Debrief consistency dropped mid-month when work intensified.",
     "Strongest alignment: family and integrity principles.",

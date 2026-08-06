@@ -30,7 +30,7 @@ export const currentCampaign = {
 };
 
 export const todaysOnePercent = {
-  improvement: "Protect the 9:00 PM debrief. Do not rely on memory.",
+  improvement: "Protect the evening debrief. Honour today's bearing.",
 };
 
 export const courseStatus = {

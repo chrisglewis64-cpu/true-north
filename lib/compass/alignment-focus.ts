@@ -136,13 +136,13 @@ export function getAlignmentFocus(input: AlignmentFocusInput): AlignmentFocus {
     reasons.push("A small correction will restore your bearing.");
   }
 
-  let recommendation = "Take the next right action.";
+  let     recommendation = "Honour today's bearing.";
   if (!hasDebriefToday) {
     recommendation = "Complete today's debrief.";
   } else if (!hasIntentToday) {
     recommendation = "Recommit to today's intent.";
   } else if (input.evidenceCountToday === 0) {
-    recommendation = "Record one piece of evidence.";
+    recommendation = "Live one standard and record the proof.";
   }
 
   return {

@@ -18,47 +18,31 @@ export function Evidence() {
             href="/evidence"
             className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-foreground"
           >
-            View all →
+            Service record →
           </Link>
         ) : null}
       </div>
 
       {preview.length === 0 ? (
         <p className="text-[15px] leading-relaxed text-muted">
-          Complete a Daily Debrief to build evidence.
+          Proof accumulates when you live a standard and record it in Debrief.
         </p>
       ) : (
         <ul className="space-y-1">
           {preview.map((entry) => (
             <li
               key={entry.id}
-              className="flex items-start gap-3 border-b border-border py-3 last:border-0"
+              className="border-b border-border py-4 last:border-0"
             >
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-accent">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  aria-hidden
-                >
-                  <path
-                    d="M3 8.5l3.5 3.5 6.5-7"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">
-                  {formatEvidenceDate(entry.debriefDate)}
-                </p>
-                <p className="mt-1 text-[15px] text-foreground/90 sm:text-base">
-                  {entry.standardsYes[0] ?? entry.biggestWin ?? "Debrief recorded"}
-                </p>
-              </div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">
+                {formatEvidenceDate(entry.evidenceDate)}
+              </p>
+              <p className="mt-1.5 text-[15px] font-medium text-foreground/90 sm:text-base">
+                &ldquo;{entry.standardStatement}&rdquo;
+              </p>
+              <p className="mt-1 text-[14px] leading-relaxed text-muted">
+                {entry.evidenceText}
+              </p>
             </li>
           ))}
         </ul>

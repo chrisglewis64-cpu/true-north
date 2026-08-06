@@ -32,7 +32,6 @@ function formatDate(): string {
 export function DailyDebriefPage() {
   const {
     myStandard,
-    todaysMissionIntent,
     dailyDebrief,
     setDailyDebriefDraft,
     updateDailyDebriefDraft,
@@ -63,7 +62,13 @@ export function DailyDebriefPage() {
   function setStandardAnswer(index: number, answer: "yes" | "no") {
     updateDailyDebriefDraft({
       standards: draft.standards.map((entry, i) =>
-        i === index ? { ...entry, answer } : entry
+        i === index
+          ? {
+              ...entry,
+              answer,
+              evidence: answer === "no" ? "" : entry.evidence,
+            }
+          : entry
       ),
     });
     setStep1Errors({});
@@ -75,6 +80,9 @@ export function DailyDebriefPage() {
         i === index ? { ...entry, evidence } : entry
       ),
     });
+    if (step1Errors.evidence) {
+      setStep1Errors((current) => ({ ...current, evidence: undefined }));
+    }
   }
 
   function handleStep1Continue() {
@@ -159,22 +167,33 @@ export function DailyDebriefPage() {
   }
 
   const showNav = draft.step < 4;
+  const standardsHonoured = draft.standards.filter(
+    (entry) => entry.answer === "yes"
+  ).length;
+  const evidenceCount = draft.standards.filter(
+    (entry) => entry.answer === "yes" && entry.evidence.trim()
+  ).length;
 
   return (
     <div className="flex min-h-dvh flex-col">
       <main className="mx-auto w-full max-w-lg flex-1 px-6 pb-36 pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
-        <header className="mb-10">
-          <SectionLabel>Daily Debrief</SectionLabel>
-          <time
-            dateTime={new Date().toISOString().split("T")[0]}
-            className="mt-2 block text-[15px] text-muted"
-          >
-            {formatDate()}
-          </time>
-          <div className="mt-6">
-            <DebriefProgress step={debriefDraft.step} />
-          </div>
-        </header>
+        {debriefDraft.step < 4 ? (
+          <header className="mb-10">
+            <SectionLabel>Daily Debrief</SectionLabel>
+            <time
+              dateTime={new Date().toISOString().split("T")[0]}
+              className="mt-2 block text-[15px] text-muted"
+            >
+              {formatDate()}
+            </time>
+            <p className="mt-3 text-[15px] leading-relaxed text-muted">
+              Am I becoming the person I committed to be?
+            </p>
+            <div className="mt-6">
+              <DebriefProgress step={debriefDraft.step} />
+            </div>
+          </header>
+        ) : null}
 
         {debriefDraft.step === 1 && (
           <StepStandardReview
@@ -212,7 +231,10 @@ export function DailyDebriefPage() {
             summary={step3Summary}
             onChange={(field, value) => {
               updateDailyDebriefDraft({ [field]: value });
-              if (step3Errors[field]) {
+              if (
+                field !== "courseCorrection" &&
+                step3Errors[field as keyof Step3Errors]
+              ) {
                 setStep3Errors((current) => ({ ...current, [field]: undefined }));
               }
             }}
@@ -221,12 +243,8 @@ export function DailyDebriefPage() {
 
         {debriefDraft.step === 4 && (
           <StepMissionComplete
-            todaysCommitment={todaysMissionIntent?.commitment ?? ""}
-            tomorrowsOnePercent={debriefDraft.tomorrowOnePercent}
-            courseCorrection={debriefDraft.courseCorrection}
-            onCourseCorrection={(value) =>
-              updateDailyDebriefDraft({ courseCorrection: value })
-            }
+            evidenceCount={evidenceCount}
+            standardsHonoured={standardsHonoured}
             onReturnHome={handleReturnHome}
           />
         )}

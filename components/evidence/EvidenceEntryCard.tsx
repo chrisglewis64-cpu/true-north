@@ -1,69 +1,39 @@
-import { SectionLabel, SectionCard } from "@/components/ui/SectionCard";
 import { formatEvidenceDate } from "@/lib/evidence/build-evidence-entries";
-import type { DebriefEvidenceEntry } from "@/types/evidence";
+import type { EvidenceEntry } from "@/types/evidence";
 
 type EvidenceEntryCardProps = {
-  entry: DebriefEvidenceEntry;
+  entry: EvidenceEntry;
 };
 
-function EvidenceField({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <SectionLabel>{label}</SectionLabel>
-      <div className="text-[15px] leading-relaxed text-foreground/90 sm:text-base">
-        {children}
-      </div>
-    </div>
-  );
-}
-
+/**
+ * Service-record style proof entry.
+ * Read-only — Evidence is permanent history.
+ */
 export function EvidenceEntryCard({ entry }: EvidenceEntryCardProps) {
   return (
-    <SectionCard>
+    <article className="border-b border-border pb-8 last:border-0 last:pb-0">
       <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted">
-        {formatEvidenceDate(entry.debriefDate)}
+        {formatEvidenceDate(entry.evidenceDate)}
       </p>
 
-      <div className="mt-6 space-y-6">
-        <EvidenceField label="Mission Intent">
-          {entry.missionIntent ?? "—"}
-        </EvidenceField>
+      <p className="mt-4 text-[17px] font-medium leading-relaxed tracking-tight text-foreground sm:text-lg">
+        &ldquo;{entry.standardStatement}&rdquo;
+      </p>
 
-        <EvidenceField label="Standards marked Yes">
-          {entry.standardsYes.length > 0 ? (
-            <ul className="space-y-2">
-              {entry.standardsYes.map((statement) => (
-                <li key={statement} className="flex gap-3">
-                  <span className="shrink-0 text-accent" aria-hidden>
-                    ✓
-                  </span>
-                  <span>{statement}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <span className="text-muted">None recorded</span>
-          )}
-        </EvidenceField>
-
-        <EvidenceField label="Biggest Win">
-          {entry.biggestWin || "—"}
-        </EvidenceField>
-
-        <EvidenceField label="Lesson">
-          {entry.biggestLesson || "—"}
-        </EvidenceField>
-
-        <EvidenceField label="Course Correction">
-          {entry.courseCorrection || "—"}
-        </EvidenceField>
+      <div className="mt-5">
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+          Evidence
+        </p>
+        <p className="mt-2 text-[15px] leading-relaxed text-foreground/85 sm:text-base">
+          {entry.evidenceText}
+        </p>
       </div>
-    </SectionCard>
+
+      {entry.missionReference ? (
+        <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted/80">
+          Mission · {entry.missionReference}
+        </p>
+      ) : null}
+    </article>
   );
 }

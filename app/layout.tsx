@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 const APP_NAME = "True North";
 const APP_DESCRIPTION =
-  "Personal Operating System — identity, discipline, continual improvement.";
+  "Personal Operating System — identity, standards, mission, bearings, evidence.";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,

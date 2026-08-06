@@ -123,7 +123,7 @@ export const compassPlaceholderByHeading: Record<
       missionAlignment:
         "Current mission supports My Standard. Building with discipline and finishing what I start.",
       upcomingFocus:
-        "Hold the line. One percent today. Debrief tonight without skipping.",
+        "Hold the line. Honour today's bearing. Debrief tonight without skipping.",
     },
   },
   drifting: {

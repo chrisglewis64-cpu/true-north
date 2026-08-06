@@ -23,6 +23,7 @@ export function createInitialTrueNorthState(): TrueNorthState {
       setAt: new Date().toISOString(),
       source: "seed",
     },
+    weeklyBearings: null,
     dailyDebrief: {
       submission: null,
       draft: null,

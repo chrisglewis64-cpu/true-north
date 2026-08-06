@@ -26,10 +26,11 @@ export function StepStandardReview({
 }: StepStandardReviewProps) {
   const entry = draft.standards[draft.standardIndex];
   const hasAnswerError = Boolean(errors.answer);
+  const showEvidence = entry.answer === "yes";
 
   return (
     <div>
-      <SectionLabel>Review My Standard</SectionLabel>
+      <SectionLabel>Identity</SectionLabel>
       <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
         Standard {draft.standardIndex + 1} of {standardTotal}
       </p>
@@ -39,8 +40,8 @@ export function StepStandardReview({
           {statement}
         </p>
 
-        <p className="mt-8 text-[15px] text-muted">
-          Did I live this today?
+        <p className="mt-8 text-[15px] leading-relaxed text-muted">
+          Where did you provide evidence of your identity today?
         </p>
 
         <div
@@ -63,21 +64,25 @@ export function StepStandardReview({
         </div>
         <ValidationMessage message={errors.answer} />
 
-        <label className="mt-8 block">
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Evidence{" "}
-            <span className="normal-case tracking-normal text-muted/70">
-              (optional)
+        {showEvidence ? (
+          <label className="mt-8 block">
+            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
+              Evidence
             </span>
-          </span>
-          <input
-            type="text"
-            value={entry.evidence}
-            onChange={(e) => onEvidence(e.target.value)}
-            placeholder="A moment or proof from today"
-            className={`mt-3 w-full rounded-xl border bg-surface-elevated px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(false)}`}
-          />
-        </label>
+            <p className="mt-2 text-[13px] leading-relaxed text-muted">
+              This becomes permanent proof in your service record.
+            </p>
+            <textarea
+              value={entry.evidence}
+              onChange={(e) => onEvidence(e.target.value)}
+              placeholder="I completed the difficult conversation I had been avoiding."
+              rows={3}
+              aria-invalid={Boolean(errors.evidence)}
+              className={`mt-3 w-full resize-none rounded-xl border bg-surface-elevated px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(Boolean(errors.evidence))}`}
+            />
+            <ValidationMessage message={errors.evidence} />
+          </label>
+        ) : null}
       </div>
     </div>
   );

@@ -25,7 +25,7 @@ export function StepReflection({
       <div>
         <SectionLabel>Reflection</SectionLabel>
         <p className="mt-2 text-[15px] text-muted">
-          Name the truth from today. Both fields are required.
+          Reflection strengthens identity. Both fields are required.
         </p>
       </div>
 
@@ -33,13 +33,13 @@ export function StepReflection({
 
       <div>
         <label className="block" htmlFor="field-biggestWin">
-          <SectionLabel>Biggest Win</SectionLabel>
+          <SectionLabel>Growth</SectionLabel>
           <input
             id="field-biggestWin"
             type="text"
             value={draft.biggestWin}
             onChange={(e) => onChange("biggestWin", e.target.value)}
-            placeholder="Name it."
+            placeholder="Where did you become more of who you committed to be?"
             aria-invalid={Boolean(errors.biggestWin)}
             className={`w-full rounded-xl border bg-surface px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(Boolean(errors.biggestWin))}`}
           />
@@ -49,13 +49,13 @@ export function StepReflection({
 
       <div>
         <label className="block" htmlFor="field-biggestLesson">
-          <SectionLabel>Biggest Lesson</SectionLabel>
+          <SectionLabel>Lesson</SectionLabel>
           <input
             id="field-biggestLesson"
             type="text"
             value={draft.biggestLesson}
             onChange={(e) => onChange("biggestLesson", e.target.value)}
-            placeholder="Name it."
+            placeholder="What truth will you carry forward?"
             aria-invalid={Boolean(errors.biggestLesson)}
             className={`w-full rounded-xl border bg-surface px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(Boolean(errors.biggestLesson))}`}
           />

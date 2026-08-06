@@ -42,6 +42,9 @@ export function CompassDashboard() {
       <h1 className="text-[2rem] font-semibold tracking-[0.08em] text-foreground sm:text-[2.5rem]">
         TRUE NORTH
       </h1>
+      <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
+        Identity · Standards · Mission · Bearings
+      </p>
 
       <div className="mt-8">
         <Compass

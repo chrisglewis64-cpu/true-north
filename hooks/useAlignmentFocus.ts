@@ -21,7 +21,7 @@ export function useAlignmentFocus() {
 
   return useMemo(() => {
     const evidenceCountToday = evidenceEntries.filter(
-      (entry) => entry.debriefDate === today
+      (entry) => entry.evidenceDate === today
     ).length;
 
     return getAlignmentFocus({

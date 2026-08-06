@@ -280,6 +280,72 @@ export interface Database {
         };
         Relationships: [];
       };
+      evidence: {
+        Row: {
+          id: string;
+          user_id: string;
+          evidence_date: string;
+          debrief_date: string;
+          standard_statement: string;
+          evidence_text: string;
+          mission_reference: string | null;
+          recorded_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          evidence_date: string;
+          debrief_date: string;
+          standard_statement: string;
+          evidence_text: string;
+          mission_reference?: string | null;
+          recorded_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          evidence_date?: string;
+          debrief_date?: string;
+          standard_statement?: string;
+          evidence_text?: string;
+          mission_reference?: string | null;
+          recorded_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      weekly_bearings: {
+        Row: {
+          id: string;
+          user_id: string;
+          week_start: string;
+          bearing_ids: string[];
+          source: "recommended" | "manual";
+          selected_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          week_start: string;
+          bearing_ids: string[];
+          source?: "recommended" | "manual";
+          selected_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          week_start?: string;
+          bearing_ids?: string[];
+          source?: "recommended" | "manual";
+          selected_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

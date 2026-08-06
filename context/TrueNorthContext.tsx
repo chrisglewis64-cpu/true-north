@@ -16,9 +16,11 @@ import {
   persistDailyDebrief,
   persistDailyOnePercent,
   persistMissionIntent,
+  persistWeeklyBearings,
   markOnboardingComplete as persistOnboardingComplete,
   replaceStandards,
 } from "@/lib/database";
+import { ensureWeeklyBearings } from "@/lib/bearings/ensure-weekly";
 import {
   createInitialTrueNorthState,
 } from "@/lib/true-north-defaults";
@@ -32,6 +34,8 @@ import {
   upsertDatedMissionIntent,
 } from "@/lib/compass/history";
 import { getLocalDateString } from "@/lib/database/utils";
+import { evidenceEntriesFromDebrief } from "@/lib/evidence/from-debrief";
+import { buildEvidenceEntriesFromDebriefs } from "@/lib/evidence/build-evidence-entries";
 import { hasCompletedMorningCommit } from "@/lib/morning-flow/commit-state";
 import {
   createLocalSessionSnapshot,
@@ -39,6 +43,7 @@ import {
 } from "@/lib/storage/local-session";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import type { WeeklyBearings } from "@/types/bearing";
 import type { DailyDebriefDraft } from "@/types/daily-debrief";
 import type { DailyDebrief } from "@/types/daily-debrief";
 import type { DailyOnePercent } from "@/types/one-percent";
@@ -69,6 +74,9 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
   );
   const [todaysOnePercent, setTodaysOnePercentState] = useState(
     initial.todaysOnePercent
+  );
+  const [weeklyBearings, setWeeklyBearingsState] = useState(
+    initial.weeklyBearings
   );
   const [dailyDebriefSubmission, setDailyDebriefSubmissionState] = useState(
     initial.dailyDebrief.submission
@@ -112,7 +120,10 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
   function persistLocalSession(
     next: Pick<
       TrueNorthState,
-      "todaysMissionIntent" | "dailyDebriefHistory" | "missionIntentHistory"
+      | "todaysMissionIntent"
+      | "dailyDebriefHistory"
+      | "missionIntentHistory"
+      | "weeklyBearings"
     >
   ) {
     saveLocalSessionSnapshot(
@@ -141,6 +152,7 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
           setMyStandardState(persisted.myStandard);
           setTodaysMissionIntentState(persisted.todaysMissionIntent);
           setTodaysOnePercentState(persisted.todaysOnePercent);
+          setWeeklyBearingsState(persisted.weeklyBearings);
           setDailyDebriefSubmissionState(persisted.dailyDebrief.submission);
           setDailyDebriefDraft(persisted.dailyDebrief.draft);
           setDailyDebriefHistory(persisted.dailyDebriefHistory);
@@ -150,6 +162,7 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
             todaysMissionIntent: persisted.todaysMissionIntent,
             dailyDebriefHistory: persisted.dailyDebriefHistory,
             missionIntentHistory: persisted.missionIntentHistory,
+            weeklyBearings: persisted.weeklyBearings,
           });
         }
       } catch (error) {
@@ -174,6 +187,7 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
         setMissions(defaults.missions);
         setMyStandardState(defaults.myStandard);
         setTodaysMissionIntentState(null);
+        setWeeklyBearingsState(null);
         setDailyDebriefSubmissionState(null);
         setDailyDebriefDraft(null);
         setDailyDebriefHistory([]);
@@ -255,6 +269,7 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
       todaysMissionIntent: intent,
       dailyDebriefHistory,
       missionIntentHistory: nextHistory,
+      weeklyBearings,
     });
 
     await persistAuthenticated((userId) =>
@@ -269,6 +284,23 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     );
   }
 
+  function setWeeklyBearings(value: WeeklyBearings) {
+    setWeeklyBearingsState(value);
+    persistLocalSession({
+      todaysMissionIntent,
+      dailyDebriefHistory,
+      missionIntentHistory,
+      weeklyBearings: value,
+    });
+    persistIfAuthenticated((userId) =>
+      persistWeeklyBearings(supabaseRef.current!, userId, value).catch(
+        (error) => {
+          console.error("[TrueNorth] Weekly bearings persist failed:", error);
+        }
+      )
+    );
+  }
+
   function setDailyDebriefSubmission(value: DailyDebrief | null) {
     const today = getLocalDateString();
     setDailyDebriefSubmissionState(value);
@@ -279,9 +311,23 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
         todaysMissionIntent,
         dailyDebriefHistory: nextHistory,
         missionIntentHistory,
+        weeklyBearings,
       });
+
+      const missionReference =
+        currentMission?.name ?? todaysMissionIntent?.commitment ?? null;
+      const evidenceEntries = evidenceEntriesFromDebrief(value, {
+        debriefDate: today,
+        missionReference,
+      });
+
       persistIfAuthenticated((userId) =>
-        persistDailyDebrief(supabaseRef.current!, userId, value)
+        persistDailyDebrief(
+          supabaseRef.current!,
+          userId,
+          value,
+          evidenceEntries
+        )
       );
     }
   }
@@ -375,10 +421,50 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     );
   }
 
+  // Ensure weekly bearings exist (rule-based seed when missing or week rolled).
+  const weeklyBearingsWeekStart = weeklyBearings?.weekStart ?? null;
+  useEffect(() => {
+    const evidenceEntries = buildEvidenceEntriesFromDebriefs(
+      dailyDebriefHistory,
+      missionIntentHistory,
+      currentMission?.name
+    );
+    const ensured = ensureWeeklyBearings(weeklyBearings, {
+      alignment: null,
+      established: dailyDebriefHistory.length >= 3,
+      dailyDebriefHistory,
+      evidenceEntries,
+      currentMission,
+      previousWeeklyBearingIds: weeklyBearings?.bearingIds,
+    });
+
+    if (
+      weeklyBearingsWeekStart !== ensured.weekStart
+    ) {
+      setWeeklyBearingsState(ensured);
+      persistLocalSession({
+        todaysMissionIntent,
+        dailyDebriefHistory,
+        missionIntentHistory,
+        weeklyBearings: ensured,
+      });
+      persistIfAuthenticated((userId) =>
+        persistWeeklyBearings(supabaseRef.current!, userId, ensured).catch(
+          (error) => {
+            console.error("[TrueNorth] Weekly bearings persist failed:", error);
+          }
+        )
+      );
+    }
+    // Seed only when the calendar week changes or bearings are missing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weeklyBearingsWeekStart, dailyDebriefHistory.length, currentMission?.id]);
+
   const value: TrueNorthContextValue = {
     myStandard,
     todaysMissionIntent,
     todaysOnePercent,
+    weeklyBearings,
     dailyDebrief: {
       submission: dailyDebriefSubmission,
       draft: dailyDebriefDraft,
@@ -396,6 +482,7 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     markOnboardingComplete,
     setTodaysMissionIntent,
     setTodaysOnePercent,
+    setWeeklyBearings,
     setDailyDebriefSubmission,
     setDailyDebriefDraft,
     updateDailyDebriefDraft,

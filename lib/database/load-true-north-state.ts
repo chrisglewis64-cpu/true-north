@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/database/database.types";
+import { getWeekStart } from "@/lib/bearings/week";
 import { fetchDailyDebriefForDate, fetchRecentDailyDebriefs } from "@/lib/database/daily-debriefs.repository";
 import { fetchDailyOnePercentForDate } from "@/lib/database/daily-one-percent.repository";
 import {
@@ -9,6 +10,7 @@ import {
 import { fetchMissions } from "@/lib/database/missions.repository";
 import { resolveUserSession } from "@/lib/database/profiles.repository";
 import { fetchStandards } from "@/lib/database/standards.repository";
+import { fetchWeeklyBearings } from "@/lib/database/weekly-bearings.repository";
 import { getLocalDateString } from "@/lib/database/utils";
 import { createInitialTrueNorthState } from "@/lib/true-north-defaults";
 import type { TrueNorthState } from "@/types/true-north";
@@ -27,23 +29,34 @@ export async function loadTrueNorthState(
   if (!session) return null;
 
   const today = getLocalDateString();
+  const weekStart = getWeekStart();
   const defaults = createInitialTrueNorthState();
 
-  const [myStandard, missions, todaysMissionIntent, todaysOnePercent, debriefSubmission, dailyDebriefHistory, missionIntentHistory] =
-    await Promise.all([
-      fetchStandards(client, session.id),
-      fetchMissions(client, session.id),
-      fetchMissionIntentForDate(client, session.id, today),
-      fetchDailyOnePercentForDate(client, session.id, today),
-      fetchDailyDebriefForDate(client, session.id, today),
-      fetchRecentDailyDebriefs(client, session.id),
-      fetchRecentMissionIntents(client, session.id),
-    ]);
+  const [
+    myStandard,
+    missions,
+    todaysMissionIntent,
+    todaysOnePercent,
+    debriefSubmission,
+    dailyDebriefHistory,
+    missionIntentHistory,
+    weeklyBearings,
+  ] = await Promise.all([
+    fetchStandards(client, session.id),
+    fetchMissions(client, session.id),
+    fetchMissionIntentForDate(client, session.id, today),
+    fetchDailyOnePercentForDate(client, session.id, today),
+    fetchDailyDebriefForDate(client, session.id, today),
+    fetchRecentDailyDebriefs(client, session.id),
+    fetchRecentMissionIntents(client, session.id),
+    fetchWeeklyBearings(client, session.id, weekStart).catch(() => null),
+  ]);
 
   return {
     myStandard,
     todaysMissionIntent,
     todaysOnePercent: todaysOnePercent ?? defaults.todaysOnePercent,
+    weeklyBearings,
     dailyDebrief: {
       submission: debriefSubmission,
       draft: null,

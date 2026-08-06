@@ -5,14 +5,14 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "True North",
     short_name: "True North",
     description:
-      "Personal Operating System — identity, discipline, continual improvement.",
+      "Personal Operating System — identity, standards, mission, bearings, evidence.",
     start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
     background_color: "#0a0a0a",
     theme_color: "#0a0a0a",
-    categories: ["productivity", "lifestyle"],
+    categories: ["lifestyle"],
     icons: [
       {
         src: "/icons/icon.svg",
