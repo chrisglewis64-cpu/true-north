@@ -18,3 +18,8 @@ export {
   GUIDANCE_MESSAGE_COUNT,
   type GuidanceOptions,
 } from "@/lib/compass/guidance";
+
+export {
+  getAlignmentFocus,
+  type AlignmentFocus,
+} from "@/lib/compass/alignment-focus";

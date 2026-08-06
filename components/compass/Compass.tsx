@@ -35,7 +35,6 @@ export function Compass({
     established && alignment !== null
       ? getGuidanceFromAlignment(alignment)
       : message;
-  const headingMargin = size === "large" ? "mt-6" : "mt-5";
 
   return (
     <div className={className}>
@@ -44,12 +43,23 @@ export function Compass({
         established={established}
         size={size}
       />
-      {heading ? (
-        <CompassHeadingLabel heading={heading} className={headingMargin} />
-      ) : null}
+
+      <div className={size === "large" ? "mt-8" : "mt-6"}>
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted">
+          Current Heading
+        </p>
+        {heading ? (
+          <CompassHeadingLabel heading={heading} className="mt-3" />
+        ) : (
+          <p className="mt-3 font-mono text-sm uppercase tracking-[0.18em] text-muted">
+            Establishing…
+          </p>
+        )}
+      </div>
+
       {showGuidance && guidance ? (
         <p
-          className={`mt-3 text-[15px] leading-relaxed text-muted sm:text-base ${guidanceClassName}`}
+          className={`mt-4 text-[15px] leading-relaxed text-muted sm:text-base ${guidanceClassName}`}
         >
           {guidance}
         </p>

@@ -14,27 +14,27 @@ export type CompassHeadingOption = {
 export const COMPASS_HEADING_OPTIONS: CompassHeadingOption[] = [
   {
     value: "true_north",
-    label: "True North",
-    emoji: "🟢",
+    label: "On Course",
+    emoji: "",
     description: "Living consistently according to My Standard.",
   },
   {
     value: "drifting",
-    label: "Drifting",
-    emoji: "🟡",
+    label: "Slightly Off Course",
+    emoji: "",
     description: "Small inconsistencies have appeared.",
   },
   {
     value: "off_course",
     label: "Off Course",
-    emoji: "🟠",
+    emoji: "",
     description:
       "My actions are no longer consistently matching My Standard.",
   },
   {
     value: "lost",
-    label: "Lost",
-    emoji: "🔴",
+    label: "Off Course",
+    emoji: "",
     description: "I have drifted significantly from My Standard.",
   },
 ];

@@ -8,6 +8,7 @@ type ReviewHubCardProps = {
   subtitle: string;
   href: string;
   external?: boolean;
+  actionLabel?: string;
   delayClass?: string;
 };
 
@@ -18,8 +19,11 @@ export function ReviewHubCard({
   subtitle,
   href,
   external = false,
+  actionLabel,
   delayClass = "",
 }: ReviewHubCardProps) {
+  const label = actionLabel ?? (external ? "→ Debrief" : "→ Review");
+
   return (
     <Link href={href} className={`block animate-fade-in ${delayClass}`}>
       <SectionCard className="transition-colors hover:border-border-subtle">
@@ -32,7 +36,7 @@ export function ReviewHubCard({
         </p>
         <p className="mt-3 text-sm leading-relaxed text-muted">{subtitle}</p>
         <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          {external ? "→ Debrief" : "→ Review"}
+          {label}
         </p>
       </SectionCard>
     </Link>

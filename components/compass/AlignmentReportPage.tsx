@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { BottomNav } from "@/components/navigation/BottomNav";
 import { Compass } from "@/components/compass/Compass";
-import { AlignmentReportContent } from "@/components/compass/AlignmentReportContent";
-import { SectionLabel } from "@/components/ui/SectionCard";
+import { AlignmentFocusContent } from "@/components/compass/AlignmentFocusContent";
+import { useAlignmentFocus } from "@/hooks/useAlignmentFocus";
 import { useCompassAlignment } from "@/hooks/useCompassAlignment";
 
 export function AlignmentReportPage() {
   const { established, alignment, message } = useCompassAlignment();
+  const focus = useAlignmentFocus();
 
   return (
     <>
@@ -20,20 +21,24 @@ export function AlignmentReportPage() {
           ← Back
         </Link>
 
-        <div className="animate-fade-in mb-10 mt-6 text-center [animation-delay:60ms]">
-          <div className="mb-4">
-            <SectionLabel>Current Heading</SectionLabel>
+        <div className="animate-fade-in mb-10 mt-8 text-center [animation-delay:60ms]">
+          <h1 className="text-[2rem] font-semibold tracking-[0.08em] text-foreground sm:text-[2.5rem]">
+            TRUE NORTH
+          </h1>
+          <div className="mt-8">
+            <Compass
+              established={established}
+              alignment={alignment}
+              message={message}
+              size="medium"
+              showGuidance
+            />
           </div>
-          <Compass
-            established={established}
-            alignment={alignment}
-            message={message}
-            size="medium"
-            showGuidance={!established}
-          />
         </div>
 
-        <AlignmentReportContent />
+        <div className="animate-fade-in rounded-2xl border border-border bg-surface px-6 py-8 [animation-delay:120ms] sm:px-8">
+          <AlignmentFocusContent focus={focus} />
+        </div>
       </main>
       <BottomNav />
     </>

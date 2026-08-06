@@ -52,14 +52,14 @@ body {
   animation: fade-in 0.4s ease-out both;
 }
 
-.compass-needle {
+.compass-bearing {
   transform-box: fill-box;
   transform-origin: center;
   transition: transform 0.8s ease-in-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .compass-needle {
+  .compass-bearing {
     transition: none;
   }
 }

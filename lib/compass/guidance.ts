@@ -5,36 +5,28 @@ type GuidanceCategory = CompassHeading;
 
 const GUIDANCE_MESSAGES: Record<GuidanceCategory, readonly string[]> = {
   true_north: [
+    "Keep moving.",
     "Stay the course.",
     "Hold the line you have set.",
     "Continue with quiet consistency.",
-    "Your rhythm is sound. Protect it.",
-    "Steady hands. Clear direction.",
-    "Maintain what is working.",
   ],
   drifting: [
-    "Small correction required.",
+    "Reconnect with today's intent.",
     "A gentle adjustment will suffice.",
     "Notice the drift early. Correct now.",
     "Tend to the small things today.",
-    "Recenter before the day gains momentum.",
-    "A minor realignment is enough.",
   ],
   off_course: [
-    "Refocus on your Standard today.",
+    "One small decision puts you back on course.",
     "Return your attention to what matters most.",
-    "Pause. Remember who you are becoming.",
     "One Standard. One clear action.",
-    "Step back to identity before action.",
     "Reconnect with your Standard this evening.",
   ],
   lost: [
-    "Return to your Standard.",
+    "One small decision puts you back on course.",
     "Begin again with one principle.",
-    "Identity first. Everything else can wait.",
     "One step toward alignment is enough today.",
     "Ground yourself before you move forward.",
-    "Start with the man you chose to become.",
   ],
 };
 

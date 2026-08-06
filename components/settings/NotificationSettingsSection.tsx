@@ -2,7 +2,9 @@
 
 import {
   NOTIFICATION_REMINDER_LABELS,
+  WEEKDAY_LABELS,
   type NotificationReminderId,
+  type WeekdayIndex,
 } from "@/types/notifications";
 import { SectionCard, SectionLabel } from "@/components/ui/SectionCard";
 import { useNotificationSettings } from "@/hooks/useNotificationSettings";
@@ -19,13 +21,23 @@ export function NotificationSettingsSection() {
   const { settings, updateReminder, permissionState, requestPermission } =
     useNotificationSettings();
 
+  function toggleDay(id: NotificationReminderId, day: WeekdayIndex) {
+    const current = settings[id].days ?? [];
+    const next = current.includes(day)
+      ? current.filter((value) => value !== day)
+      : [...current, day].sort((a, b) => a - b);
+
+    updateReminder(id, {
+      days: next.length > 0 ? (next as WeekdayIndex[]) : [day],
+    });
+  }
+
   return (
     <section>
       <SectionLabel>Notifications</SectionLabel>
       <SectionCard className="space-y-6">
         <p className="text-[15px] leading-relaxed text-muted">
-          Reminders are saved locally for now. Browser notifications will be
-          wired to this section in a future version.
+          Intentional reminders. Quiet by default — enable only what serves you.
         </p>
 
         {permissionState === "unsupported" ? (
@@ -38,7 +50,7 @@ export function NotificationSettingsSection() {
             onClick={() => void requestPermission()}
             className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-foreground"
           >
-            Enable browser notifications (placeholder)
+            Enable browser notifications
           </button>
         ) : null}
 
@@ -62,6 +74,7 @@ export function NotificationSettingsSection() {
                     </p>
                   </div>
                   <label className="relative inline-flex shrink-0 cursor-pointer items-center">
+                    <span className="sr-only">Enabled</span>
                     <input
                       type="checkbox"
                       checked={preference.enabled}
@@ -80,7 +93,7 @@ export function NotificationSettingsSection() {
                     htmlFor={`${id}-time`}
                     className="mb-2 block font-mono text-[10px] uppercase tracking-[0.14em] text-muted"
                   >
-                    Reminder time
+                    Time
                   </label>
                   <input
                     id={`${id}-time`}
@@ -93,6 +106,37 @@ export function NotificationSettingsSection() {
                     className="rounded-xl border border-border bg-background px-3 py-2 font-mono text-sm text-foreground disabled:opacity-40"
                   />
                 </div>
+
+                {meta.supportsDays ? (
+                  <div className="mt-4">
+                    <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+                      Days
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {WEEKDAY_LABELS.map((day) => {
+                        const active = (preference.days ?? []).includes(
+                          day.value
+                        );
+                        return (
+                          <button
+                            key={`${id}-${day.value}`}
+                            type="button"
+                            disabled={!preference.enabled}
+                            onClick={() => toggleDay(id, day.value)}
+                            className={`flex h-9 w-9 items-center justify-center rounded-full font-mono text-[11px] transition-colors disabled:opacity-40 ${
+                              active
+                                ? "bg-accent text-white"
+                                : "border border-border text-muted hover:border-border-subtle hover:text-foreground"
+                            }`}
+                            aria-pressed={active}
+                          >
+                            {day.short}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
               </li>
             );
           })}

@@ -17,11 +17,8 @@ export function CompassHeadingLabel({
 
   return (
     <p
-      className={`font-mono text-sm font-medium uppercase tracking-[0.2em] sm:text-base ${getCompassHeadingTextClass(heading)} ${className}`}
+      className={`font-mono text-sm font-medium uppercase tracking-[0.22em] sm:text-[15px] ${getCompassHeadingTextClass(heading)} ${className}`}
     >
-      <span aria-hidden className="mr-2">
-        {option.emoji}
-      </span>
       {option.label}
     </p>
   );

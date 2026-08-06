@@ -1,10 +1,39 @@
 import { DEFAULT_NOTIFICATION_SETTINGS } from "@/lib/notifications/defaults";
-import type { NotificationSettings } from "@/types/notifications";
+import type {
+  NotificationReminderId,
+  NotificationSettings,
+} from "@/types/notifications";
 
 const STORAGE_PREFIX = "true-north:notifications";
 
 function storageKey(userId: string): string {
   return `${STORAGE_PREFIX}:${userId}`;
+}
+
+function mergeSettings(raw: unknown): NotificationSettings {
+  const parsed =
+    raw && typeof raw === "object"
+      ? (raw as Partial<NotificationSettings>)
+      : {};
+
+  const merged = { ...DEFAULT_NOTIFICATION_SETTINGS } as NotificationSettings;
+
+  (Object.keys(DEFAULT_NOTIFICATION_SETTINGS) as NotificationReminderId[]).forEach(
+    (id) => {
+      const incoming = parsed[id];
+      if (!incoming || typeof incoming !== "object") {
+        return;
+      }
+
+      merged[id] = {
+        ...DEFAULT_NOTIFICATION_SETTINGS[id],
+        ...incoming,
+        days: incoming.days ?? DEFAULT_NOTIFICATION_SETTINGS[id].days,
+      };
+    }
+  );
+
+  return merged;
 }
 
 export function loadNotificationSettings(userId: string): NotificationSettings {
@@ -18,10 +47,7 @@ export function loadNotificationSettings(userId: string): NotificationSettings {
       return DEFAULT_NOTIFICATION_SETTINGS;
     }
 
-    return {
-      ...DEFAULT_NOTIFICATION_SETTINGS,
-      ...JSON.parse(raw),
-    } as NotificationSettings;
+    return mergeSettings(JSON.parse(raw));
   } catch {
     return DEFAULT_NOTIFICATION_SETTINGS;
   }
