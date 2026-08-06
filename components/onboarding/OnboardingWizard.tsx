@@ -14,6 +14,7 @@ import {
   fieldErrorClass,
 } from "@/components/ui/ValidationMessage";
 import { useTrueNorth } from "@/context/TrueNorthContext";
+import { resolvePostAuthPath } from "@/lib/auth/post-auth";
 import { POST_AUTH_REDIRECT, SIGN_IN_PATH } from "@/lib/auth/paths";
 import { DEFAULT_MISSION_STATUS } from "@/lib/mission-status";
 import {
@@ -70,16 +71,32 @@ export function OnboardingWizard() {
     }
 
     const supabase = createSupabaseBrowserClient();
-    void supabase.auth.getUser().then(({ data }) => {
+    void supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace(SIGN_IN_PATH);
         return;
       }
       if (hasCompletedOnboarding) {
-        router.replace(POST_AUTH_REDIRECT);
+        const path = await resolvePostAuthPath(supabase, data.user.id);
+        router.replace(path);
       }
     });
   }, [hasCompletedOnboarding, router]);
+
+  useEffect(() => {
+    if (hasCompletedOnboarding) {
+      return;
+    }
+
+    if (currentMission) {
+      setStep(4);
+      return;
+    }
+
+    if (myStandard.length >= MIN_STANDARDS) {
+      setStep(3);
+    }
+  }, [currentMission, hasCompletedOnboarding, myStandard.length]);
 
   useEffect(() => {
     if (standardsSeeded || myStandard.length === 0) {
@@ -142,6 +159,11 @@ export function OnboardingWizard() {
   }
 
   async function saveMissionAndContinue() {
+    if (currentMission) {
+      setStep(4);
+      return;
+    }
+
     if (!missionTitle.trim() || !missionDescription.trim() || !missionCategory) {
       setMissionError("Title, description, and category are required.");
       return;

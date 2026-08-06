@@ -346,8 +346,8 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
       })
     );
 
-    persistIfAuthenticated(() =>
-      missionsService.update(supabaseRef.current!, id, input)
+    persistIfAuthenticated((userId) =>
+      missionsService.update(supabaseRef.current!, userId, id, input)
     );
   }
 
@@ -370,8 +370,8 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
       })
     );
 
-    persistIfAuthenticated(() =>
-      missionsService.complete(supabaseRef.current!, id, lessonsLearned)
+    persistIfAuthenticated((userId) =>
+      missionsService.complete(supabaseRef.current!, userId, id, lessonsLearned)
     );
   }
 
