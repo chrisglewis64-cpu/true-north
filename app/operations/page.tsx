@@ -1,6 +1,6 @@
 import { CompassDashboard } from "@/components/dashboard/CourseStatus";
 import { CurrentMission } from "@/components/dashboard/CurrentMission";
-import { TodaysOnePercent } from "@/components/dashboard/TodaysOnePercent";
+import { WeeklyBearings } from "@/components/dashboard/WeeklyBearings";
 import { TodaysCommitment } from "@/components/dashboard/TodaysCommitment";
 import { Evidence } from "@/components/dashboard/Evidence";
 import { BottomNav } from "@/components/navigation/BottomNav";
@@ -19,6 +19,7 @@ export default function OperationsPage() {
       <main className="mx-auto w-full max-w-lg flex-1 px-6 pb-28 pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
         <div className="space-y-10 sm:space-y-12">
           <TodaysCommitment />
+          <WeeklyBearings />
 
           <time
             dateTime={new Date().toISOString().split("T")[0]}
@@ -29,7 +30,6 @@ export default function OperationsPage() {
 
           <CompassDashboard />
           <CurrentMission />
-          <TodaysOnePercent />
           <Evidence />
         </div>
       </main>

@@ -2,14 +2,18 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/database/database.types";
 import { upsertDailyDebrief } from "@/lib/database/daily-debriefs.repository";
 import { upsertDailyOnePercent } from "@/lib/database/daily-one-percent.repository";
+import { syncEvidenceForDebrief } from "@/lib/database/evidence.repository";
 import { upsertMissionIntent } from "@/lib/database/mission-intents.repository";
 import {
   completeMissionById,
   insertMission,
   updateMissionById,
 } from "@/lib/database/missions.repository";
+import { upsertWeeklyBearings } from "@/lib/database/weekly-bearings.repository";
 import { getLocalDateString } from "@/lib/database/utils";
+import type { WeeklyBearings } from "@/types/bearing";
 import type { DailyDebrief } from "@/types/daily-debrief";
+import type { EvidenceEntry } from "@/types/evidence";
 import type { DailyOnePercent } from "@/types/one-percent";
 import type { Mission, MissionInput } from "@/types/mission";
 import type { MissionIntent } from "@/types/mission-intent";
@@ -32,12 +36,29 @@ export async function persistDailyOnePercent(
   await upsertDailyOnePercent(client, userId, getLocalDateString(), onePercent);
 }
 
+export async function persistWeeklyBearings(
+  client: Client,
+  userId: string,
+  weekly: WeeklyBearings
+): Promise<void> {
+  await upsertWeeklyBearings(client, userId, weekly);
+}
+
 export async function persistDailyDebrief(
   client: Client,
   userId: string,
-  debrief: DailyDebrief
+  debrief: DailyDebrief,
+  evidenceEntries: Omit<EvidenceEntry, "id">[] = []
 ): Promise<void> {
-  await upsertDailyDebrief(client, userId, getLocalDateString(), debrief);
+  const debriefDate = getLocalDateString();
+  await upsertDailyDebrief(client, userId, debriefDate, debrief);
+
+  try {
+    await syncEvidenceForDebrief(client, userId, debriefDate, evidenceEntries);
+  } catch (error) {
+    // Evidence table may not be migrated yet — debrief still persists.
+    console.error("[TrueNorth] Evidence sync failed:", error);
+  }
 }
 
 export async function persistCreateMission(

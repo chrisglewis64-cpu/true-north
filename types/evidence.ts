@@ -1,6 +1,21 @@
 /**
- * Proof that a standard or mission was lived — evidence over motivation.
- * @deprecated Prefer DebriefEvidenceEntry for debrief-derived evidence.
+ * Permanent proof that a standard was lived.
+ * Created automatically from Daily Debrief — never manually.
+ * No editing. No deleting. Evidence is history.
+ */
+export interface EvidenceEntry {
+  id: string;
+  evidenceDate: string;
+  standardStatement: string;
+  evidenceText: string;
+  /** Optional mission name or intent reference. */
+  missionReference: string | null;
+  debriefDate: string;
+  recordedAt: string;
+}
+
+/**
+ * @deprecated Prefer EvidenceEntry — proof timeline entries.
  */
 export interface Evidence {
   id: string;
@@ -10,7 +25,9 @@ export interface Evidence {
   recordedAt: string;
 }
 
-/** One Evidence entry derived from a completed Daily Debrief. */
+/**
+ * @deprecated Prefer EvidenceEntry built from per-standard proof.
+ */
 export interface DebriefEvidenceEntry {
   id: string;
   debriefDate: string;

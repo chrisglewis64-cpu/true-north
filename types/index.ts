@@ -10,7 +10,17 @@ export type {
 
 export type { AlignmentReport, CompassHeading, CompassState } from "@/types/compass";
 
-export type { Evidence, DebriefEvidenceEntry } from "@/types/evidence";
+export type {
+  Bearing,
+  TodaysBearing,
+  WeeklyBearings,
+} from "@/types/bearing";
+
+export type {
+  Evidence,
+  EvidenceEntry,
+  DebriefEvidenceEntry,
+} from "@/types/evidence";
 
 export type {
   NotificationReminderId,

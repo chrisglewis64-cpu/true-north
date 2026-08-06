@@ -1,5 +1,6 @@
 import type { DatedDailyDebrief, DatedMissionIntent } from "@/lib/compass/types";
 import { getLocalDateString } from "@/lib/database/utils";
+import type { WeeklyBearings } from "@/types/bearing";
 import type { MissionIntent } from "@/types/mission-intent";
 import type { TrueNorthState } from "@/types/true-north";
 
@@ -9,6 +10,7 @@ export interface LocalSessionSnapshot {
   todaysMissionIntent: MissionIntent | null;
   dailyDebriefHistory: DatedDailyDebrief[];
   missionIntentHistory: DatedMissionIntent[];
+  weeklyBearings: WeeklyBearings | null;
 }
 
 function storageKey(sessionId: string): string {
@@ -28,7 +30,13 @@ export function loadLocalSessionSnapshot(
       return null;
     }
 
-    return JSON.parse(raw) as LocalSessionSnapshot;
+    const parsed = JSON.parse(raw) as Partial<LocalSessionSnapshot>;
+    return {
+      todaysMissionIntent: parsed.todaysMissionIntent ?? null,
+      dailyDebriefHistory: parsed.dailyDebriefHistory ?? [],
+      missionIntentHistory: parsed.missionIntentHistory ?? [],
+      weeklyBearings: parsed.weeklyBearings ?? null,
+    };
   } catch {
     return null;
   }
@@ -80,6 +88,7 @@ export function mergeLocalSessionIntoState(state: TrueNorthState): TrueNorthStat
   return {
     ...state,
     todaysMissionIntent,
+    weeklyBearings: snapshot.weeklyBearings ?? state.weeklyBearings,
     dailyDebriefHistory: snapshot.dailyDebriefHistory,
     missionIntentHistory: snapshot.missionIntentHistory,
     dailyDebrief: {
@@ -95,12 +104,16 @@ export function mergeLocalSessionIntoState(state: TrueNorthState): TrueNorthStat
 export function createLocalSessionSnapshot(
   state: Pick<
     TrueNorthState,
-    "todaysMissionIntent" | "dailyDebriefHistory" | "missionIntentHistory"
+    | "todaysMissionIntent"
+    | "dailyDebriefHistory"
+    | "missionIntentHistory"
+    | "weeklyBearings"
   >
 ): LocalSessionSnapshot {
   return {
     todaysMissionIntent: state.todaysMissionIntent,
     dailyDebriefHistory: state.dailyDebriefHistory,
     missionIntentHistory: state.missionIntentHistory,
+    weeklyBearings: state.weeklyBearings,
   };
 }

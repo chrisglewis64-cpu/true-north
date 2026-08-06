@@ -57,11 +57,19 @@ export function ReviewHubPage() {
             />
             <ReviewHubCard
               cadence="Evidence"
-              title="Evidence Captured"
-              period="Today"
-              subtitle="Proof that the standard was lived."
+              title="Evidence"
+              period="Service record"
+              subtitle="Permanent proof of identity lived."
               href="/evidence"
               actionLabel="→ Evidence"
+            />
+            <ReviewHubCard
+              cadence="Bearings"
+              title="Weekly Bearings"
+              period="This week"
+              subtitle="Three identity corrections. Never more."
+              href="/bearings"
+              actionLabel="→ Bearings"
             />
           </ReviewSection>
 

@@ -1,6 +1,6 @@
 /**
- * The daily 1% improvement — a small, deliberate system upgrade.
- * Set during Debrief Step 3; displayed on Operations the following day.
+ * Tomorrow's alignment note — stored for continuity with Daily Debrief.
+ * Today's operational action is Today's Bearing (see types/bearing).
  */
 export interface DailyOnePercent {
   improvement: string;

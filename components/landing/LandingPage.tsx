@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SectionLabel } from "@/components/ui/SectionCard";
 import {
@@ -9,15 +10,17 @@ import {
 } from "@/components/ui/ValidationMessage";
 import { MyStandardCard } from "@/components/landing/MyStandardCard";
 import { useTrueNorth } from "@/context/TrueNorthContext";
+import { useTodaysBearing } from "@/hooks/useTodaysBearing";
 import { POST_AUTH_REDIRECT } from "@/lib/auth/paths";
 
 /**
- * Daily Morning Commitment — Personal Standards, Current Mission,
+ * Daily Morning Commitment — Standards, Mission, Bearings,
  * Today's Intent, and COMMIT. Required once per local calendar day.
  */
 export function LandingPage() {
   const router = useRouter();
   const { currentMission, session, setTodaysMissionIntent } = useTrueNorth();
+  const { todaysBearing, weeklyBearingsList } = useTodaysBearing();
   const [intent, setIntent] = useState("");
   const [intentError, setIntentError] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
@@ -80,6 +83,27 @@ export function LandingPage() {
               </p>
             )}
           </div>
+
+          {todaysBearing ? (
+            <div className="animate-fade-in [animation-delay:180ms]">
+              <SectionLabel>Today&apos;s Bearing</SectionLabel>
+              <p className="mt-2 text-[17px] font-medium leading-relaxed tracking-tight text-foreground/90 sm:text-lg">
+                {todaysBearing.bearing.statement}
+              </p>
+              {weeklyBearingsList.length > 0 ? (
+                <p className="mt-3 text-[13px] leading-relaxed text-muted">
+                  Week&apos;s three:{" "}
+                  {weeklyBearingsList.map((b) => b.statement).join(" · ")}
+                </p>
+              ) : null}
+              <Link
+                href="/bearings"
+                className="mt-3 inline-block font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-foreground"
+              >
+                Adjust bearings →
+              </Link>
+            </div>
+          ) : null}
 
           <label
             className="block animate-fade-in [animation-delay:200ms]"

@@ -41,7 +41,8 @@ export interface DailyDebriefStandardEntry {
 
 /**
  * A completed Daily Debrief — the centre of the application.
- * Captures standard review, reflection, tomorrow's plan, and course correction.
+ * Captures identity evidence, reflection, tomorrow's direction, and course correction.
+ * YES + evidence text automatically creates permanent Evidence records.
  */
 export interface DailyDebrief {
   standards: DailyDebriefStandardEntry[];

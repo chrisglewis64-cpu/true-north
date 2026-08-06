@@ -1,3 +1,4 @@
+import type { WeeklyBearings } from "@/types/bearing";
 import type { DailyDebrief, DailyDebriefDraft, DailyDebriefState } from "@/types/daily-debrief";
 import type { DailyOnePercent } from "@/types/one-percent";
 import type { Mission, MissionInput, MissionStatus } from "@/types/mission";
@@ -14,6 +15,7 @@ export interface TrueNorthState {
   myStandard: Standard[];
   todaysMissionIntent: MissionIntent | null;
   todaysOnePercent: DailyOnePercent;
+  weeklyBearings: WeeklyBearings | null;
   dailyDebrief: DailyDebriefState;
   dailyDebriefHistory: DatedDailyDebrief[];
   missionIntentHistory: DatedMissionIntent[];
@@ -34,6 +36,7 @@ export interface TrueNorthContextValue extends TrueNorthState {
   markOnboardingComplete: () => Promise<void>;
   setTodaysMissionIntent: (intent: MissionIntent) => Promise<void>;
   setTodaysOnePercent: (value: DailyOnePercent) => void;
+  setWeeklyBearings: (value: WeeklyBearings) => void;
   setDailyDebriefSubmission: (value: DailyDebrief | null) => void;
   setDailyDebriefDraft: (value: DailyDebriefDraft | null) => void;
   updateDailyDebriefDraft: (partial: Partial<DailyDebriefDraft>) => void;

@@ -32,6 +32,7 @@ export {
   persistDailyOnePercent,
   persistMissionIntent,
   persistUpdateMission,
+  persistWeeklyBearings,
 } from "@/lib/database/persist-true-north-state";
 
 export {
@@ -52,5 +53,13 @@ export { fetchMissions, insertMission, updateMissionById, completeMissionById } 
 export { fetchMissionIntentForDate, upsertMissionIntent } from "@/lib/database/mission-intents.repository";
 export { fetchDailyDebriefForDate, upsertDailyDebrief } from "@/lib/database/daily-debriefs.repository";
 export { fetchDailyOnePercentForDate, upsertDailyOnePercent } from "@/lib/database/daily-one-percent.repository";
+export {
+  fetchRecentEvidence,
+  syncEvidenceForDebrief,
+} from "@/lib/database/evidence.repository";
+export {
+  fetchWeeklyBearings,
+  upsertWeeklyBearings,
+} from "@/lib/database/weekly-bearings.repository";
 
 export { createMissionUuid, getLocalDateString } from "@/lib/database/utils";

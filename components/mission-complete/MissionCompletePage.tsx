@@ -10,9 +10,7 @@ export function MissionCompletePage() {
   const router = useRouter();
   const {
     myStandard,
-    todaysMissionIntent,
     dailyDebrief,
-    updateDailyDebriefDraft,
     setDailyDebriefSubmission,
     setTodaysOnePercent,
     setDailyDebriefDraft,
@@ -27,16 +25,19 @@ export function MissionCompletePage() {
   }, [todaysDebrief, debriefDraft, router]);
 
   if (debriefDraft?.step === 4) {
+    const standardsHonoured = debriefDraft.standards.filter(
+      (entry) => entry.answer === "yes"
+    ).length;
+    const evidenceCount = debriefDraft.standards.filter(
+      (entry) => entry.answer === "yes" && entry.evidence.trim()
+    ).length;
+
     return (
       <div className="flex min-h-dvh flex-col">
         <main className="mx-auto w-full max-w-lg flex-1 px-6 py-16 sm:max-w-xl sm:px-8 lg:max-w-2xl">
           <StepMissionComplete
-            todaysCommitment={todaysMissionIntent?.commitment ?? ""}
-            tomorrowsOnePercent={debriefDraft.tomorrowOnePercent}
-            courseCorrection={debriefDraft.courseCorrection}
-            onCourseCorrection={(value) =>
-              updateDailyDebriefDraft({ courseCorrection: value })
-            }
+            evidenceCount={evidenceCount}
+            standardsHonoured={standardsHonoured}
             onReturnHome={() => {
               setDailyDebriefSubmission(
                 serializeDebrief(debriefDraft, myStandard)
@@ -58,14 +59,19 @@ export function MissionCompletePage() {
     return null;
   }
 
+  const standardsHonoured = todaysDebrief.standards.filter(
+    (entry) => entry.answer === "yes"
+  ).length;
+  const evidenceCount = todaysDebrief.standards.filter(
+    (entry) => entry.answer === "yes" && entry.evidence.trim()
+  ).length;
+
   return (
     <div className="flex min-h-dvh flex-col">
       <main className="mx-auto w-full max-w-lg flex-1 px-6 py-16 sm:max-w-xl sm:px-8 lg:max-w-2xl">
         <StepMissionComplete
-          todaysCommitment={todaysMissionIntent?.commitment ?? ""}
-          tomorrowsOnePercent={todaysDebrief.tomorrowOnePercent}
-          courseCorrection={todaysDebrief.courseCorrection}
-          onCourseCorrection={() => {}}
+          evidenceCount={evidenceCount}
+          standardsHonoured={standardsHonoured}
           onReturnHome={() => router.push("/operations")}
         />
       </main>

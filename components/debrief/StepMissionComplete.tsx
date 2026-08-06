@@ -1,93 +1,87 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { SectionLabel } from "@/components/ui/SectionCard";
-import { fieldErrorClass } from "@/components/ui/ValidationMessage";
-
-const courseCorrectionExamples = [
-  "Prepare my clothes tonight.",
-  "Put my phone away earlier.",
-  "Review spending before buying.",
-  "Read Scripture before checking messages.",
-] as const;
+import { motion, useReducedMotion } from "framer-motion";
+import { contentRevealTransition } from "@/lib/motion/transitions";
 
 type StepMissionCompleteProps = {
-  todaysCommitment: string;
-  tomorrowsOnePercent: string;
-  courseCorrection: string;
-  onCourseCorrection: (value: string) => void;
+  evidenceCount: number;
+  standardsHonoured: number;
   onReturnHome: () => void;
 };
 
+/**
+ * End-of-day completion — calm confidence. Military instrument quiet.
+ * No confetti. No celebration. Close today's mission.
+ */
 export function StepMissionComplete({
-  todaysCommitment,
-  tomorrowsOnePercent,
-  courseCorrection,
-  onCourseCorrection,
+  evidenceCount,
+  standardsHonoured,
   onReturnHome,
 }: StepMissionCompleteProps) {
   const router = useRouter();
+  const prefersReducedMotion = useReducedMotion();
 
-  function handleReturnHome() {
+  function handleReturn() {
     onReturnHome();
     router.push("/operations");
   }
 
+  const lines = [
+    standardsHonoured > 0
+      ? "You honoured your standards."
+      : "You faced your standards honestly.",
+    evidenceCount > 0 ? "Evidence recorded." : "Reflection complete.",
+    "Identity strengthened.",
+    "Rest well.",
+    "Tomorrow we continue North.",
+  ];
+
   return (
-    <div>
-      <header className="text-center">
-        <SectionLabel>Mission Complete</SectionLabel>
-      </header>
+    <motion.div
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={
+        prefersReducedMotion ? { duration: 0 } : contentRevealTransition
+      }
+      className="flex min-h-[60vh] flex-col items-center justify-center text-center"
+    >
+      <p className="font-mono text-[11px] font-medium uppercase tracking-[0.28em] text-accent">
+        Today Complete
+      </p>
 
-      <div className="mt-10 space-y-8">
-        <section>
-          <SectionLabel>Today&apos;s Commitment</SectionLabel>
-          <p className="text-[17px] leading-relaxed text-foreground/90 sm:text-lg">
-            {todaysCommitment.trim() || "—"}
-          </p>
-        </section>
-
-        <section>
-          <SectionLabel>Tomorrow&apos;s 1%</SectionLabel>
-          <p className="text-[17px] leading-relaxed text-foreground/90 sm:text-lg">
-            {tomorrowsOnePercent.trim() || "—"}
-          </p>
-        </section>
-
-        <section>
-          <label className="block" htmlFor="field-courseCorrection">
-            <p className="text-[15px] leading-relaxed text-foreground/90 sm:text-base">
-              What one course correction will make tomorrow better?
-            </p>
-            <input
-              id="field-courseCorrection"
-              type="text"
-              value={courseCorrection}
-              onChange={(e) => onCourseCorrection(e.target.value)}
-              placeholder="One small adjustment."
-              className={`mt-4 w-full rounded-xl border bg-surface px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(false)}`}
-            />
-          </label>
-          <ul className="mt-4 space-y-2">
-            {courseCorrectionExamples.map((example) => (
-              <li
-                key={example}
-                className="font-mono text-[11px] leading-relaxed text-muted"
-              >
-                • {example}
-              </li>
-            ))}
-          </ul>
-        </section>
+      <div className="mt-12 max-w-sm space-y-4">
+        {lines.map((line, index) => (
+          <motion.p
+            key={line}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { ...contentRevealTransition, delay: 0.12 + index * 0.1 }
+            }
+            className="text-[17px] leading-relaxed text-foreground/90 sm:text-lg"
+          >
+            {line}
+          </motion.p>
+        ))}
       </div>
 
-      <button
+      <motion.button
         type="button"
-        onClick={handleReturnHome}
-        className="mt-12 flex h-14 w-full items-center justify-center rounded-2xl border border-border bg-surface font-mono text-sm font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:border-border-subtle sm:h-16 sm:text-[15px]"
+        onClick={handleReturn}
+        initial={prefersReducedMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={
+          prefersReducedMotion
+            ? { duration: 0 }
+            : { ...contentRevealTransition, delay: 0.75 }
+        }
+        className="mt-16 flex h-14 w-full max-w-sm items-center justify-center rounded-2xl border border-border bg-surface font-mono text-sm font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:border-border-subtle sm:h-16 sm:text-[15px]"
       >
-        Return Home
-      </button>
-    </div>
+        Return to Compass
+      </motion.button>
+    </motion.div>
   );
 }

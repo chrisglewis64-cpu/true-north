@@ -2,6 +2,7 @@ import type { DailyDebriefDraft } from "@/types/daily-debrief";
 
 export type Step1Errors = {
   answer?: string;
+  evidence?: string;
 };
 
 export type Step2Errors = {
@@ -26,6 +27,15 @@ export function validateStep1Standard(
     };
   }
 
+  if (entry.answer === "yes" && !entry.evidence.trim()) {
+    return {
+      isValid: false,
+      errors: {
+        evidence: "Record the proof. This becomes permanent Evidence.",
+      },
+    };
+  }
+
   return { isValid: true, errors: {} };
 }
 
@@ -36,12 +46,12 @@ export function validateStep2(
   let issueCount = 0;
 
   if (!draft.biggestWin.trim()) {
-    errors.biggestWin = "Name your biggest win today.";
+    errors.biggestWin = "Name where you grew today.";
     issueCount += 1;
   }
 
   if (!draft.biggestLesson.trim()) {
-    errors.biggestLesson = "Name your biggest lesson today.";
+    errors.biggestLesson = "Name what reflection taught you.";
     issueCount += 1;
   }
 
@@ -63,12 +73,12 @@ export function validateStep3(
   let issueCount = 0;
 
   if (!draft.tomorrowOnePercent.trim()) {
-    errors.tomorrowOnePercent = "Set one improvement for tomorrow.";
+    errors.tomorrowOnePercent = "Set tomorrow's alignment.";
     issueCount += 1;
   }
 
   if (!draft.tomorrowPriority.trim()) {
-    errors.tomorrowPriority = "Set one priority for tomorrow.";
+    errors.tomorrowPriority = "Set tomorrow's priority.";
     issueCount += 1;
   }
 
@@ -79,6 +89,6 @@ export function validateStep3(
   return {
     isValid: false,
     errors,
-    summary: "Both tomorrow fields are required.",
+    summary: "Both direction fields are required.",
   };
 }
