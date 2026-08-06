@@ -1,71 +1,106 @@
-import type { DebriefSubmission } from "@/lib/debrief-form";
+import type { DatedDailyDebrief, DatedMissionIntent } from "@/lib/compass/types";
+import { getLocalDateString } from "@/lib/database/utils";
+import type { MissionIntent } from "@/types/mission-intent";
+import type { TrueNorthState } from "@/types/true-north";
 
-const DAILY_SESSION_KEY = "true-north:daily-session";
-const DEBRIEF_HISTORY_KEY = "true-north:debrief-history";
+const STORAGE_PREFIX = "true-north:session";
 
-export type DebriefRecord = DebriefSubmission & {
-  date: string;
-  completedAt: string;
-};
-
-export type DailySession = {
-  date: string;
-  morningCommitCompleted: boolean;
-  todaysCommitment: string;
-  todaysOnePercent: string;
-  todaysDebrief: DebriefSubmission | null;
-};
-
-export function getCalendarDateKey(date = new Date()): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+export interface LocalSessionSnapshot {
+  todaysMissionIntent: MissionIntent | null;
+  dailyDebriefHistory: DatedDailyDebrief[];
+  missionIntentHistory: DatedMissionIntent[];
 }
 
-function readJson<T>(key: string): T | null {
+function storageKey(sessionId: string): string {
+  return `${STORAGE_PREFIX}:${sessionId}`;
+}
+
+export function loadLocalSessionSnapshot(
+  sessionId: string
+): LocalSessionSnapshot | null {
   if (typeof window === "undefined") {
     return null;
   }
 
   try {
-    const raw = window.localStorage.getItem(key);
+    const raw = window.localStorage.getItem(storageKey(sessionId));
     if (!raw) {
       return null;
     }
 
-    return JSON.parse(raw) as T;
+    return JSON.parse(raw) as LocalSessionSnapshot;
   } catch {
     return null;
   }
 }
 
-function writeJson<T>(key: string, value: T): void {
-  window.localStorage.setItem(key, JSON.stringify(value));
+export function saveLocalSessionSnapshot(
+  sessionId: string,
+  snapshot: LocalSessionSnapshot
+): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(storageKey(sessionId), JSON.stringify(snapshot));
 }
 
-export function readDailySession(): DailySession | null {
-  return readJson<DailySession>(DAILY_SESSION_KEY);
+function resolveTodaysMissionIntent(
+  snapshot: LocalSessionSnapshot
+): MissionIntent | null {
+  const today = getLocalDateString();
+  const todayFromHistory = snapshot.missionIntentHistory.find(
+    (entry) => entry.intentDate === today
+  );
+
+  if (todayFromHistory) {
+    return todayFromHistory.intent;
+  }
+
+  const intent = snapshot.todaysMissionIntent;
+  if (
+    intent &&
+    getLocalDateString(new Date(intent.createdAt)) === today
+  ) {
+    return intent;
+  }
+
+  return null;
 }
 
-export function writeDailySession(session: DailySession): void {
-  writeJson(DAILY_SESSION_KEY, session);
-}
+export function mergeLocalSessionIntoState(state: TrueNorthState): TrueNorthState {
+  const snapshot = loadLocalSessionSnapshot(state.session.id);
 
-export function readDebriefHistory(): DebriefRecord[] {
-  return readJson<DebriefRecord[]>(DEBRIEF_HISTORY_KEY) ?? [];
-}
+  if (!snapshot) {
+    return state;
+  }
 
-export function writeDebriefHistory(history: DebriefRecord[]): void {
-  writeJson(DEBRIEF_HISTORY_KEY, history);
-}
+  const todaysMissionIntent = resolveTodaysMissionIntent(snapshot);
 
-export function createEmptyDailySession(): DailySession {
   return {
-    date: getCalendarDateKey(),
-    morningCommitCompleted: false,
-    todaysCommitment: "",
-    todaysOnePercent: "",
-    todaysDebrief: null,
+    ...state,
+    todaysMissionIntent,
+    dailyDebriefHistory: snapshot.dailyDebriefHistory,
+    missionIntentHistory: snapshot.missionIntentHistory,
+    dailyDebrief: {
+      ...state.dailyDebrief,
+      submission:
+        snapshot.dailyDebriefHistory.find(
+          (entry) => entry.debriefDate === getLocalDateString()
+        )?.debrief ?? state.dailyDebrief.submission,
+    },
+  };
+}
+
+export function createLocalSessionSnapshot(
+  state: Pick<
+    TrueNorthState,
+    "todaysMissionIntent" | "dailyDebriefHistory" | "missionIntentHistory"
+  >
+): LocalSessionSnapshot {
+  return {
+    todaysMissionIntent: state.todaysMissionIntent,
+    dailyDebriefHistory: state.dailyDebriefHistory,
+    missionIntentHistory: state.missionIntentHistory,
   };
 }

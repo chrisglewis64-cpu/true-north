@@ -1,0 +1,31 @@
+# True North Non-Negotiables
+
+The Landing Page must always display My Standard.
+
+The app always begins with identity before action.
+
+The Daily Debrief must remain the centre of the application.
+
+The app must feel calm.
+
+No feature should increase friction.
+
+Every screen must reinforce the philosophy.
+
+The application should never become a traditional habit tracker.
+
+---
+
+## Landing Page — Required Content
+
+The route `/` must render `components/landing/LandingPage.tsx`.
+Do not replace it with a generic placeholder or FlowPage.
+
+Required sections:
+
+1. TRUE NORTH (brand label)
+2. "Who are you today?" (heading)
+3. "Today is another opportunity to live your standard." (supporting text)
+4. MY STANDARD card — all eight principles from The Code
+5. Current Campaign (placeholder)
+6. COMMIT button → `/mission-intent`

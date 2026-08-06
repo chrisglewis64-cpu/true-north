@@ -1,60 +1,39 @@
-import type { DebriefRecord } from "@/lib/storage/local-session";
+import type { DatedDailyDebrief, DatedMissionIntent } from "@/lib/compass/types";
+import type { DebriefEvidenceEntry } from "@/types/evidence";
 
-export type EvidenceEntry = {
-  id: string;
-  label: string;
-  date: string;
-};
+function findMissionIntentForDate(
+  intentHistory: DatedMissionIntent[],
+  debriefDate: string
+): string | null {
+  const match = intentHistory.find((entry) => entry.intentDate === debriefDate);
+  return match?.intent.commitment ?? null;
+}
 
-function formatEvidenceDate(dateKey: string): string {
-  const [year, month, day] = dateKey.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
+export function buildEvidenceEntriesFromDebriefs(
+  debriefHistory: DatedDailyDebrief[],
+  missionIntentHistory: DatedMissionIntent[]
+): DebriefEvidenceEntry[] {
+  return debriefHistory.map(({ debriefDate, debrief }) => ({
+    id: debriefDate,
+    debriefDate,
+    missionIntent: findMissionIntentForDate(missionIntentHistory, debriefDate),
+    standardsYes: debrief.standards
+      .filter((entry) => entry.answer === "yes")
+      .map((entry) => entry.statement),
+    biggestWin: debrief.biggestWin,
+    biggestLesson: debrief.biggestLesson,
+    courseCorrection: debrief.courseCorrection,
+    recordedAt: debrief.completedAt,
+  }));
+}
+
+export function formatEvidenceDate(debriefDate: string): string {
+  const [year, month, day] = debriefDate.split("-").map(Number);
 
   return new Intl.DateTimeFormat("en-NZ", {
-    weekday: "short",
+    weekday: "long",
     day: "numeric",
-    month: "short",
-  }).format(date);
-}
-
-export function buildEvidenceEntries(
-  history: readonly DebriefRecord[]
-): EvidenceEntry[] {
-  const entries: EvidenceEntry[] = [];
-
-  for (const debrief of history) {
-    debrief.standards.forEach((standard, index) => {
-      const evidence = standard.evidence.trim();
-      if (!evidence) {
-        return;
-      }
-
-      entries.push({
-        id: `${debrief.date}-standard-${index}`,
-        label: evidence,
-        date: debrief.date,
-      });
-    });
-
-    const win = debrief.biggestWin.trim();
-    if (win) {
-      entries.push({
-        id: `${debrief.date}-win`,
-        label: win,
-        date: debrief.date,
-      });
-    }
-  }
-
-  return entries.sort((left, right) => {
-    if (left.date === right.date) {
-      return left.id.localeCompare(right.id);
-    }
-
-    return right.date.localeCompare(left.date);
-  });
-}
-
-export function formatEvidenceEntryDate(dateKey: string): string {
-  return formatEvidenceDate(dateKey);
+    month: "long",
+    year: "numeric",
+  }).format(new Date(year, month - 1, day));
 }

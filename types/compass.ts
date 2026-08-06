@@ -1,49 +1,32 @@
+/**
+ * Compass heading — identity alignment with My Standard.
+ * Not mission progress. Not a score.
+ */
 export type CompassHeading =
-  | "true-north"
+  | "true_north"
   | "drifting"
-  | "off-course"
+  | "off_course"
   | "lost";
 
-export type CompassSignals = {
-  hasMissionIntent: boolean;
-  hasDailyDebrief: boolean;
-  hasActiveMission: boolean;
-  hasWeeklyReview: boolean;
-};
+/**
+ * Current compass state displayed on Operations.
+ * `alignment` is internal (0–100) — never render as a number.
+ */
+export interface CompassState {
+  alignment: number;
+  guidance: string;
+}
 
-export type CompassAlignment = {
-  heading: CompassHeading;
-  score: number;
-  signals: CompassSignals;
-};
-
-export const HEADING_LABELS: Record<CompassHeading, string> = {
-  "true-north": "TRUE NORTH",
-  drifting: "DRIFTING",
-  "off-course": "OFF COURSE",
-  lost: "LOST",
-};
-
-export const HEADING_DOT_CLASS: Record<CompassHeading, string> = {
-  "true-north": "bg-accent",
-  drifting: "bg-yellow-400/90",
-  "off-course": "bg-orange-400/90",
-  lost: "bg-red-400/90",
-};
-
-/** Needle rotation in degrees — 0° points to north. */
-export const HEADING_NEEDLE_ROTATION: Record<CompassHeading, number> = {
-  "true-north": 0,
-  drifting: 20,
-  "off-course": 45,
-  lost: 90,
-};
-
-export const HEADING_ACCENT_CLASS: Record<CompassHeading, string> = {
-  "true-north": "text-accent",
-  drifting: "text-yellow-400/90",
-  "off-course": "text-orange-400/90",
-  lost: "text-red-400/90",
-};
-
-export const COMPASS_LAYOUT_ID = "compass-dial";
+/**
+ * Alignment Report — opened from the Compass on the dashboard.
+ * `alignment` is internal (0–100) — never render as a number.
+ */
+export interface AlignmentReport {
+  alignment: number;
+  strongestStandard: string;
+  greatestOpportunity: string;
+  currentDrift: string;
+  suggestedCourseCorrection: string;
+  missionAlignment: string;
+  upcomingFocus: string;
+}

@@ -1,0 +1,11 @@
+# A string used to distinguish different Supabase projects on the same host.
+project_id = "true-north"
+
+[api]
+enabled = true
+
+[db]
+major_version = 15
+
+[functions.send-notifications]
+verify_jwt = false

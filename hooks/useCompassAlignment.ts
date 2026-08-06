@@ -1,34 +1,37 @@
-import { calculateCompassAlignment } from "@/lib/compass/calculate-heading";
-import { getCompassGuidance } from "@/lib/compass/guidance";
-import { getAlignmentPlaceholders } from "@/lib/compass/placeholders";
-import { hasCompletedWeeklyReviewThisWeek } from "@/lib/storage/review-state";
-import { useApp } from "@/context/AppContext";
-import { useMissions } from "@/hooks/useMissions";
+"use client";
+
 import { useMemo } from "react";
+import { useTrueNorth } from "@/context/TrueNorthContext";
+import {
+  calculateAlignment,
+  type CalculateAlignmentResult,
+} from "@/lib/compass/calculate-alignment";
 
-export function useCompassAlignment() {
-  const { todaysCommitment, todaysDebrief } = useApp();
-  const { activeMission } = useMissions();
+/**
+ * Resolves compass alignment from app state.
+ * Recalculates automatically when debrief, intent, mission, or review data changes.
+ */
+export function useCompassAlignment(): CalculateAlignmentResult {
+  const {
+    dailyDebriefHistory,
+    missionIntentHistory,
+    currentMission,
+    weeklyReviews,
+  } = useTrueNorth();
 
-  return useMemo(() => {
-    const signals = {
-      hasMissionIntent: Boolean(todaysCommitment.trim()),
-      hasDailyDebrief: todaysDebrief !== null,
-      hasActiveMission: Boolean(activeMission),
-      hasWeeklyReview: hasCompletedWeeklyReviewThisWeek(),
-    };
-
-    const alignment = calculateCompassAlignment(signals);
-    const guidance = getCompassGuidance(alignment.heading);
-    const placeholders = getAlignmentPlaceholders(alignment.heading);
-
-    return {
-      alignment,
-      guidance,
-      placeholders,
-      activeMission,
-    };
-  }, [todaysCommitment, todaysDebrief, activeMission]);
+  return useMemo(
+    () =>
+      calculateAlignment({
+        dailyDebriefs: dailyDebriefHistory,
+        missionIntents: missionIntentHistory,
+        currentMission,
+        weeklyReviews,
+      }),
+    [
+      dailyDebriefHistory,
+      missionIntentHistory,
+      currentMission,
+      weeklyReviews,
+    ]
+  );
 }
-
-export type CompassAlignmentView = ReturnType<typeof useCompassAlignment>;

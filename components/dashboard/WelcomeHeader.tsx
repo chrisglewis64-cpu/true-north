@@ -1,4 +1,6 @@
-import { user } from "@/lib/placeholder-data";
+"use client";
+
+import { useTrueNorth } from "@/context/TrueNorthContext";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -16,6 +18,8 @@ function formatDate(): string {
 }
 
 export function WelcomeHeader() {
+  const { session } = useTrueNorth();
+
   return (
     <header className="animate-fade-in">
       <div className="flex items-start justify-between gap-4">
@@ -24,7 +28,7 @@ export function WelcomeHeader() {
             True North
           </p>
           <h1 className="mt-2 text-[2rem] font-semibold leading-tight tracking-tight sm:text-[2.25rem]">
-            {getGreeting()}, {user.name}.
+            {getGreeting()}, {session.displayName}.
           </h1>
         </div>
         <time

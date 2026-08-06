@@ -1,7 +1,16 @@
 "use client";
 
-import { AppProvider } from "@/context/AppContext";
+import { TrueNorthProvider } from "@/context/TrueNorthContext";
+import { OnboardingRouteGuard } from "@/components/onboarding/OnboardingRouteGuard";
+import { PwaInstallPrompt } from "@/components/pwa/PwaInstallPrompt";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <AppProvider>{children}</AppProvider>;
+  return (
+    <TrueNorthProvider>
+      <OnboardingRouteGuard>
+        {children}
+        <PwaInstallPrompt />
+      </OnboardingRouteGuard>
+    </TrueNorthProvider>
+  );
 }

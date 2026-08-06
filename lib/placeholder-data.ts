@@ -24,6 +24,11 @@ export const mission = {
   roles: ["Man of faith", "Husband", "Father", "Provider", "Leader"],
 };
 
+export const currentCampaign = {
+  statement:
+    "Lead My Family With Integrity — building a home rooted in faith, discipline, and unconditional presence.",
+};
+
 export const todaysOnePercent = {
   improvement: "Protect the 9:00 PM debrief. Do not rely on memory.",
 };

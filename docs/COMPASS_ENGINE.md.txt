@@ -1,0 +1,129 @@
+# TRUE NORTH - COMPASS ENGINE
+
+## Purpose
+
+The Compass is the centrepiece of True North.
+
+It is not a score.
+
+It is not a statistic.
+
+It answers one question:
+
+"Am I becoming the man I said I would become?"
+
+---
+
+## Philosophy
+
+The Compass measures alignment.
+
+Not achievement.
+
+Not productivity.
+
+Alignment with My Standard.
+
+The user should never chase numbers.
+
+The user should chase direction.
+
+---
+
+## Compass States
+
+🟢 TRUE NORTH
+
+Living consistently according to My Standard.
+
+---
+
+🟡 DRIFTING
+
+Small inconsistencies are appearing.
+
+A course correction is recommended.
+
+---
+
+🟠 OFF COURSE
+
+Recent actions no longer consistently align with My Standard.
+
+Immediate attention is recommended.
+
+---
+
+🔴 LOST
+
+Significant drift has occurred.
+
+Return to My Standard.
+
+One step at a time.
+
+---
+
+## Dashboard
+
+The Compass is the largest element on the dashboard.
+
+It displays:
+
+Compass
+
+Heading
+
+One sentence of guidance
+
+Example
+
+Stay the course.
+
+---
+
+## Alignment Report
+
+When the Compass is tapped it opens a full report.
+
+The report contains:
+
+Current Heading
+
+Strongest Standard
+
+Greatest Opportunity
+
+Current Drift
+
+Suggested Course Correction
+
+Mission Alignment
+
+Recent Progress
+
+Upcoming Focus
+
+---
+
+## Future Version
+
+The Compass will calculate alignment using:
+
+Mission Intent
+
+Daily Debriefs
+
+Mission Progress
+
+Course Corrections
+
+Weekly Reviews
+
+The calculation will remain hidden.
+
+Only the Compass moves.
+
+Never display percentages.
+
+Never display scores.

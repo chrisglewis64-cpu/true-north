@@ -1,0 +1,56 @@
+# TRUE NORTH APP FLOW
+
+## Morning
+
+Launch
+
+↓
+
+Landing Page
+
+- True North
+- My Standard
+- Current Campaign
+- Commit → Mission Intent
+
+↓
+
+Mission Intent
+
+- Suggested Commitment
+- Write My Own
+- Begin Mission
+
+↓
+
+Operations
+
+- Course Status
+- Campaign
+- Today's 1%
+- Evidence
+
+## Evening
+
+Operations
+
+↓
+
+Daily Debrief (4 steps)
+
+1. Review My Standard — one principle at a time
+2. Reflection — Biggest Win, Biggest Lesson
+3. Tomorrow — Tomorrow's 1%, Tomorrow's Priority
+4. Mission Complete — summary + course correction
+
+↓
+
+Return Home
+
+---
+
+## Flow Page Rules
+
+- `/` (Landing) is always the full LandingPage component — never a stub.
+- FlowPage placeholders are for temporary scaffold routes only.
+- Mission Intent, Operations, Debrief, and Mission Complete are fully built pages.

@@ -1,96 +1,190 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTrueNorth } from "@/context/TrueNorthContext";
 import {
-  applyFrequencyChange,
-  createDefaultNotificationSettings,
-} from "@/lib/notifications/default-settings";
+  fetchNotificationPreferences,
+  saveNotificationPreferences,
+} from "@/lib/database/profiles.repository";
+import { DEFAULT_NOTIFICATION_SETTINGS } from "@/lib/notifications/defaults";
+import { NOTIFICATIONS_FEATURE_ENABLED } from "@/lib/notifications/feature";
+import {
+  getNotificationPermissionMessage,
+  getNotificationPermissionState,
+  requestNotificationPermissionOnce,
+  type NotificationPermissionState,
+} from "@/lib/notifications/permission";
+import { registerBrowserPushSubscription } from "@/lib/notifications/register-push";
+import {
+  loadNotificationSettings,
+  saveNotificationSettings,
+} from "@/lib/notifications/storage";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type {
-  NotificationFrequency,
-  NotificationReminder,
   NotificationReminderId,
+  NotificationReminderPreference,
   NotificationSettings,
 } from "@/types/notifications";
 
-const STORAGE_KEY = "true-north:notification-settings";
-
-function readStoredSettings(): NotificationSettings | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return null;
-    }
-
-    return JSON.parse(raw) as NotificationSettings;
-  } catch {
-    return null;
-  }
+function isAuthenticatedSession(sessionId: string): boolean {
+  return sessionId !== "session-local";
 }
 
-function writeStoredSettings(settings: NotificationSettings): void {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-}
-
-function loadInitialSettings(): NotificationSettings {
-  return readStoredSettings() ?? createDefaultNotificationSettings();
+function hasAnyReminderEnabled(settings: NotificationSettings): boolean {
+  return Object.values(settings).some((reminder) => reminder.enabled);
 }
 
 export function useNotificationSettings() {
-  const [settings, setSettings] = useState<NotificationSettings>(loadInitialSettings);
+  const { session } = useTrueNorth();
+  const [settings, setSettings] = useState<NotificationSettings>(() =>
+    loadNotificationSettings(session.id)
+  );
+  const [isLoading, setIsLoading] = useState(
+    () =>
+      NOTIFICATIONS_FEATURE_ENABLED &&
+      isSupabaseConfigured() &&
+      isAuthenticatedSession(session.id)
+  );
+  const [saveError, setSaveError] = useState<string>();
+  const [permissionState, setPermissionState] =
+    useState<NotificationPermissionState>(() =>
+      getNotificationPermissionState()
+    );
 
   useEffect(() => {
-    writeStoredSettings(settings);
-  }, [settings]);
+    setPermissionState(getNotificationPermissionState());
+  }, []);
+
+  useEffect(() => {
+    if (!NOTIFICATIONS_FEATURE_ENABLED) {
+      setIsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function restoreSettings() {
+      const cached = loadNotificationSettings(session.id);
+      setSettings(cached);
+
+      if (!isSupabaseConfigured() || !isAuthenticatedSession(session.id)) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setSaveError(undefined);
+
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const remote = await fetchNotificationPreferences(
+          supabase,
+          session.id
+        );
+        if (cancelled) return;
+
+        setSettings(remote);
+        saveNotificationSettings(session.id, remote);
+
+        if (
+          hasAnyReminderEnabled(remote) &&
+          getNotificationPermissionState() === "granted"
+        ) {
+          void registerBrowserPushSubscription(session.id);
+        }
+      } catch (error) {
+        console.error("[Notifications] Failed to restore preferences:", error);
+        if (!cancelled) {
+          setSettings(cached);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void restoreSettings();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session.id]);
+
+  const persistSettings = useCallback(
+    async (next: NotificationSettings) => {
+      if (!NOTIFICATIONS_FEATURE_ENABLED) {
+        return;
+      }
+
+      saveNotificationSettings(session.id, next);
+
+      if (!isSupabaseConfigured() || !isAuthenticatedSession(session.id)) {
+        return;
+      }
+
+      try {
+        const supabase = createSupabaseBrowserClient();
+        await saveNotificationPreferences(supabase, session.id, next);
+        setSaveError(undefined);
+      } catch (error) {
+        console.error("[Notifications] Failed to save preferences:", error);
+        setSaveError("Unable to save notification preferences.");
+      }
+    },
+    [session.id]
+  );
 
   const updateReminder = useCallback(
-    (
+    async (
       id: NotificationReminderId,
-      updater: (current: NotificationReminder) => NotificationReminder
+      patch: Partial<NotificationReminderPreference>
     ) => {
-      setSettings((current) => ({
-        reminders: current.reminders.map((reminder) =>
-          reminder.id === id ? updater(reminder) : reminder
-        ),
-      }));
-    },
-    []
-  );
+      if (!NOTIFICATIONS_FEATURE_ENABLED) {
+        return;
+      }
 
-  const setEnabled = useCallback(
-    (id: NotificationReminderId, enabled: boolean) => {
-      updateReminder(id, (reminder) => ({ ...reminder, enabled }));
-    },
-    [updateReminder]
-  );
+      const enabling =
+        patch.enabled === true && !hasAnyReminderEnabled(settings);
 
-  const setFrequency = useCallback(
-    (id: NotificationReminderId, frequency: NotificationFrequency) => {
-      updateReminder(id, (reminder) => applyFrequencyChange(reminder, frequency));
-    },
-    [updateReminder]
-  );
+      let nextPermission = permissionState;
 
-  const updateSchedule = useCallback(
-    (id: NotificationReminderId, schedule: NotificationReminder["schedule"]) => {
-      updateReminder(id, (reminder) => {
-        if (reminder.frequency === "custom") {
-          return { ...reminder, schedule: {} };
-        }
+      if (enabling) {
+        nextPermission = await requestNotificationPermissionOnce();
+        setPermissionState(nextPermission);
+      }
 
-        return { ...reminder, schedule } as NotificationReminder;
+      if (
+        patch.enabled === true &&
+        (nextPermission === "granted" ||
+          getNotificationPermissionState() === "granted")
+      ) {
+        void registerBrowserPushSubscription(session.id);
+      }
+
+      setSettings((current) => {
+        const next: NotificationSettings = {
+          ...current,
+          [id]: {
+            ...current[id],
+            ...patch,
+          },
+        };
+
+        void persistSettings(next);
+        return next;
       });
     },
-    [updateReminder]
+    [persistSettings, permissionState, session.id, settings]
   );
 
   return {
-    settings,
-    setEnabled,
-    setFrequency,
-    updateSchedule,
+    settings: settings ?? DEFAULT_NOTIFICATION_SETTINGS,
+    updateReminder,
+    isLoading,
+    saveError,
+    permissionState,
+    permissionMessage: getNotificationPermissionMessage(permissionState),
   };
 }

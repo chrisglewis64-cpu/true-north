@@ -1,64 +1,29 @@
 "use client";
 
+import { useTrueNorth } from "@/context/TrueNorthContext";
+import { CurrentMissionCard } from "@/components/mission/CurrentMissionCard";
 import { SectionCard, SectionLabel } from "@/components/ui/SectionCard";
-import type { Mission } from "@/types/mission";
+import Link from "next/link";
 
-type CurrentMissionProps = {
-  mission?: Mission;
-};
+export function CurrentMission() {
+  const { currentMission } = useTrueNorth();
 
-export function CurrentMission({ mission }: CurrentMissionProps) {
-  if (!mission) {
+  if (!currentMission) {
     return (
-      <SectionCard className="animate-fade-in border-border-subtle p-6 sm:p-8 [animation-delay:80ms]">
+      <SectionCard className="border-border-subtle p-6 sm:p-8">
         <SectionLabel>Current Mission</SectionLabel>
-        <p className="text-[15px] leading-relaxed text-muted">
-          No active mission. Start one from the Mission tab.
+        <p className="mt-3 text-[15px] text-muted">
+          No active mission.
         </p>
+        <Link
+          href="/mission/new"
+          className="mt-4 inline-block font-mono text-[11px] uppercase tracking-[0.14em] text-accent"
+        >
+          Create Mission →
+        </Link>
       </SectionCard>
     );
   }
 
-  return (
-    <SectionCard className="animate-fade-in border-border-subtle p-6 sm:p-8 [animation-delay:80ms]">
-      <SectionLabel>Current Mission</SectionLabel>
-
-      <h2 className="text-2xl font-semibold leading-tight tracking-tight sm:text-[1.75rem]">
-        {mission.name}
-      </h2>
-
-      <p className="mt-4 text-[15px] leading-relaxed text-muted sm:text-base">
-        {mission.purpose}
-      </p>
-
-      <div className="mt-8 space-y-5 border-t border-border pt-6">
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Success Criteria
-          </p>
-          <p className="mt-1.5 text-[15px] text-foreground/90">
-            {mission.successCriteria}
-          </p>
-        </div>
-
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Mission Status
-          </p>
-          <p className="mt-1.5 text-[15px] text-foreground/90">
-            {mission.missionStatus}
-          </p>
-        </div>
-
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Next Milestone
-          </p>
-          <p className="mt-1.5 text-[15px] font-medium text-foreground">
-            {mission.nextMilestone}
-          </p>
-        </div>
-      </div>
-    </SectionCard>
-  );
+  return <CurrentMissionCard mission={currentMission} />;
 }

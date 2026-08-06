@@ -1,0 +1,110 @@
+# TRUE NORTH - MISSION SYSTEM
+
+## Philosophy
+
+A Mission is not a goal.
+
+A Mission is a period of focused effort that moves me toward the man I want to become.
+
+I only ever have ONE Current Mission.
+
+Every Mission exists to strengthen one area of my life.
+
+---
+
+## Mission Structure
+
+Mission Name
+
+Mission Purpose
+
+Why this matters
+
+Success Criteria
+
+Current Progress
+
+Next Milestone
+
+Mission Status
+
+Lessons Learned
+
+Evidence Produced
+
+---
+
+## Dashboard
+
+The Current Mission should always be visible.
+
+It should answer:
+
+What am I building right now?
+
+Why does it matter?
+
+What is my next step?
+
+---
+
+## Completed Missions
+
+Completed Missions become a permanent record of growth.
+
+They are never deleted.
+
+They become proof.
+
+---
+
+## Mission Status
+
+Every Mission has one status.
+
+The user does not enter free text.
+
+Instead they select one predefined status.
+
+Statuses:
+
+🟢 ON TRACK
+
+Progress is being made consistently.
+
+No intervention required.
+
+---
+
+🟡 AT RISK
+
+Progress has slowed.
+
+The mission requires attention.
+
+---
+
+🔴 OFF COURSE
+
+The mission has stalled.
+
+Immediate course correction is required.
+
+---
+
+⚪ COMPLETE
+
+The mission has been successfully completed.
+
+It will move into Completed Missions.
+
+---
+
+Future Version
+
+Mission Status will eventually be calculated automatically using:
+
+- Daily Debriefs
+- Mission activity
+- Time since last progress
+- Weekly Reviews

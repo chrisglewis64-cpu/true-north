@@ -1,27 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { DebriefCompleteStep } from "@/components/debrief/DebriefCompleteStep";
-import { theCode } from "@/lib/placeholder-data";
+import { useEffect, useState } from "react";
 import {
-  createInitialDebriefState,
+  createInitialDebriefDraft,
   serializeDebrief,
-  type DebriefStep,
-  type StandardAnswer,
 } from "@/lib/debrief-form";
 import {
-  validateDebriefStep,
-  type DebriefFieldErrors,
+  validateStep1Standard,
+  validateStep2,
+  validateStep3,
+  type Step1Errors,
+  type Step2Errors,
+  type Step3Errors,
 } from "@/lib/validate-debrief";
-import { useApp } from "@/context/AppContext";
+import { useTrueNorth } from "@/context/TrueNorthContext";
 import { SectionLabel } from "@/components/ui/SectionCard";
-import {
-  ValidationMessage,
-  ValidationSummary,
-  cardErrorClass,
-  fieldErrorClass,
-} from "@/components/ui/ValidationMessage";
+import { DebriefProgress } from "@/components/debrief/DebriefProgress";
+import { StepStandardReview } from "@/components/debrief/StepStandardReview";
+import { StepReflection } from "@/components/debrief/StepReflection";
+import { StepTomorrow } from "@/components/debrief/StepTomorrow";
+import { StepMissionComplete } from "@/components/debrief/StepMissionComplete";
 
 function formatDate(): string {
   return new Intl.DateTimeFormat("en-NZ", {
@@ -31,425 +29,250 @@ function formatDate(): string {
   }).format(new Date());
 }
 
-const STEP_LABELS: Record<DebriefStep, string> = {
-  1: "Review My Standard",
-  2: "Reflection",
-  3: "Tomorrow",
-  4: "Mission Complete",
-};
-
-function AnswerButton({
-  label,
-  selected,
-  hasError,
-  onClick,
-}: {
-  label: "Yes" | "No";
-  selected: boolean;
-  hasError: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={selected}
-      className={`flex h-11 flex-1 items-center justify-center rounded-xl border text-sm font-medium transition-colors ${
-        selected
-          ? "border-accent/50 bg-accent-glow text-accent"
-          : hasError
-            ? "border-amber-500/40 bg-surface-elevated text-foreground/80 ring-1 ring-amber-500/10"
-            : "border-border bg-surface-elevated text-foreground/80 hover:border-border-subtle"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
-const EMPTY_ERRORS: DebriefFieldErrors = { standards: {} };
-
 export function DailyDebriefPage() {
-  const router = useRouter();
-  const { completeDebrief, todaysCommitment } = useApp();
-  const [step, setStep] = useState<DebriefStep>(1);
-  const [standardIndex, setStandardIndex] = useState(0);
-  const [form, setForm] = useState(() =>
-    createInitialDebriefState(theCode.length)
-  );
-  const [errors, setErrors] = useState<DebriefFieldErrors>(EMPTY_ERRORS);
-  const [summary, setSummary] = useState<string>();
-  const [completedOnePercent, setCompletedOnePercent] = useState("");
+  const {
+    myStandard,
+    todaysMissionIntent,
+    dailyDebrief,
+    setDailyDebriefDraft,
+    updateDailyDebriefDraft,
+    setDailyDebriefSubmission,
+    setTodaysOnePercent,
+  } = useTrueNorth();
 
-  const currentStandard = theCode[standardIndex];
-  const currentEntry = form.standards[standardIndex];
-  const currentStandardErrors = errors.standards[standardIndex];
-  const hasAnswerError = Boolean(currentStandardErrors?.answer);
+  const debriefDraft = dailyDebrief.draft;
 
-  function clearErrors() {
-    setErrors(EMPTY_ERRORS);
-    setSummary(undefined);
-  }
+  const [step1Errors, setStep1Errors] = useState<Step1Errors>({});
+  const [step2Errors, setStep2Errors] = useState<Step2Errors>({});
+  const [step2Summary, setStep2Summary] = useState<string>();
+  const [step3Errors, setStep3Errors] = useState<Step3Errors>({});
+  const [step3Summary, setStep3Summary] = useState<string>();
 
-  function setAnswer(index: number, answer: StandardAnswer) {
-    setForm((current) => ({
-      ...current,
-      standards: current.standards.map((entry, i) => {
-        if (i !== index) return entry;
-        return { ...entry, answer: entry.answer === answer ? null : answer };
-      }),
-    }));
-
-    if (errors.standards[index]?.answer) {
-      setErrors((current) => {
-        const next = { ...current, standards: { ...current.standards } };
-        const standardErrors = { ...next.standards[index] };
-        delete standardErrors.answer;
-        if (Object.keys(standardErrors).length === 0) {
-          delete next.standards[index];
-        } else {
-          next.standards[index] = standardErrors;
-        }
-        return next;
-      });
+  useEffect(() => {
+    if (!debriefDraft) {
+      setDailyDebriefDraft(createInitialDebriefDraft(myStandard.length));
     }
+  }, [debriefDraft, myStandard.length, setDailyDebriefDraft]);
+
+  if (!debriefDraft) {
+    return null;
   }
 
-  function setProof(index: number, evidence: string) {
-    setForm((current) => ({
-      ...current,
-      standards: current.standards.map((entry, i) =>
+  const draft = debriefDraft;
+
+  function setStandardAnswer(index: number, answer: "yes" | "no") {
+    updateDailyDebriefDraft({
+      standards: draft.standards.map((entry, i) =>
+        i === index ? { ...entry, answer } : entry
+      ),
+    });
+    setStep1Errors({});
+  }
+
+  function setStandardEvidence(index: number, evidence: string) {
+    updateDailyDebriefDraft({
+      standards: draft.standards.map((entry, i) =>
         i === index ? { ...entry, evidence } : entry
       ),
-    }));
+    });
   }
 
-  function handleBack() {
-    clearErrors();
-
-    if (step === 1) {
-      if (standardIndex > 0) {
-        setStandardIndex((current) => current - 1);
-        return;
-      }
-
-      router.push("/operations");
+  function handleStep1Continue() {
+    const result = validateStep1Standard(draft);
+    if (!result.isValid) {
+      setStep1Errors(result.errors);
       return;
     }
 
-    if (step === 2) {
-      setStep(1);
-      setStandardIndex(theCode.length - 1);
+    setStep1Errors({});
+
+    if (draft.standardIndex < myStandard.length - 1) {
+      updateDailyDebriefDraft({ standardIndex: draft.standardIndex + 1 });
       return;
     }
 
-    if (step === 3) {
-      setStep(2);
-      return;
-    }
+    updateDailyDebriefDraft({ step: 2 });
   }
 
-  function handleNext() {
-    if (step === 1) {
-      const result = validateDebriefStep(step, form, standardIndex);
-      if (!result.isValid) {
-        setErrors(result.errors);
-        setSummary(result.summary);
-        return;
-      }
-
-      clearErrors();
-
-      if (standardIndex < theCode.length - 1) {
-        setStandardIndex((current) => current + 1);
-        return;
-      }
-
-      setStep(2);
-      return;
-    }
-
-    if (step === 2) {
-      const result = validateDebriefStep(step, form);
-      if (!result.isValid) {
-        setErrors(result.errors);
-        setSummary(result.summary);
-        return;
-      }
-
-      clearErrors();
-      setStep(3);
-      return;
-    }
-
-    if (step === 3) {
-      const result = validateDebriefStep(step, form);
-      if (!result.isValid) {
-        setErrors(result.errors);
-        setSummary(result.summary);
-        return;
-      }
-
-      clearErrors();
-
-      const completed = serializeDebrief(form, theCode);
-      completeDebrief(completed);
-      setCompletedOnePercent(completed.tomorrowOnePercent);
-      setStep(4);
+  function handleStep1Back() {
+    if (draft.standardIndex > 0) {
+      updateDailyDebriefDraft({ standardIndex: draft.standardIndex - 1 });
+      setStep1Errors({});
     }
   }
 
-  const showFooter = step < 4;
+  function handleStep2Continue() {
+    const result = validateStep2(draft);
+    if (!result.isValid) {
+      setStep2Errors(result.errors);
+      setStep2Summary(result.summary);
+      return;
+    }
+
+    setStep2Errors({});
+    setStep2Summary(undefined);
+    updateDailyDebriefDraft({ step: 3 });
+  }
+
+  function handleStep2Back() {
+    setStep2Errors({});
+    setStep2Summary(undefined);
+    updateDailyDebriefDraft({ step: 1, standardIndex: myStandard.length - 1 });
+  }
+
+  function handleStep3Continue() {
+    const result = validateStep3(draft);
+    if (!result.isValid) {
+      setStep3Errors(result.errors);
+      setStep3Summary(result.summary);
+      return;
+    }
+
+    setStep3Errors({});
+    setStep3Summary(undefined);
+
+    const submission = serializeDebrief(draft, myStandard);
+    setDailyDebriefSubmission(submission);
+    setTodaysOnePercent({
+      improvement: draft.tomorrowOnePercent.trim(),
+      setAt: new Date().toISOString(),
+      source: "debrief",
+    });
+    updateDailyDebriefDraft({ step: 4 });
+  }
+
+  function handleStep3Back() {
+    setStep3Errors({});
+    setStep3Summary(undefined);
+    updateDailyDebriefDraft({ step: 2 });
+  }
+
+  function handleReturnHome() {
+    const submission = serializeDebrief(draft, myStandard);
+    setDailyDebriefSubmission(submission);
+    setTodaysOnePercent({
+      improvement: draft.tomorrowOnePercent.trim(),
+      setAt: new Date().toISOString(),
+      source: "debrief",
+    });
+    setDailyDebriefDraft(null);
+  }
+
+  const showNav = draft.step < 4;
 
   return (
     <div className="flex min-h-dvh flex-col">
       <main className="mx-auto w-full max-w-lg flex-1 px-6 pb-36 pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
-        <header className="mb-10 animate-fade-in">
+        <header className="mb-10">
           <SectionLabel>Daily Debrief</SectionLabel>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Step {step} of 4 · {STEP_LABELS[step]}
-          </p>
-          {step < 4 ? (
-            <time
-              dateTime={new Date().toISOString().split("T")[0]}
-              className="mt-2 block text-[15px] text-muted"
-            >
-              {formatDate()}
-            </time>
-          ) : null}
+          <time
+            dateTime={new Date().toISOString().split("T")[0]}
+            className="mt-2 block text-[15px] text-muted"
+          >
+            {formatDate()}
+          </time>
+          <div className="mt-6">
+            <DebriefProgress step={debriefDraft.step} />
+          </div>
         </header>
 
-        {step === 1 ? (
-          <section className="animate-fade-in [animation-delay:60ms]">
-            <SectionLabel>My Standard</SectionLabel>
-            <p className="mb-6 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-              Standard {standardIndex + 1} of {theCode.length}
-            </p>
-
-            <article
-              id={`standard-${standardIndex}`}
-              className={`rounded-2xl border bg-surface p-5 sm:p-6 ${cardErrorClass(hasAnswerError)}`}
-            >
-              <p className="text-[15px] leading-relaxed text-foreground/90 sm:text-base">
-                {currentStandard}
-              </p>
-
-              <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                Did I live this today?
-              </p>
-
-              <div
-                id={`standard-${standardIndex}-answer`}
-                className="mt-3 flex gap-2"
-              >
-                <AnswerButton
-                  label="Yes"
-                  selected={currentEntry.answer === "yes"}
-                  hasError={hasAnswerError}
-                  onClick={() => setAnswer(standardIndex, "yes")}
-                />
-                <AnswerButton
-                  label="No"
-                  selected={currentEntry.answer === "no"}
-                  hasError={hasAnswerError}
-                  onClick={() => setAnswer(standardIndex, "no")}
-                />
-              </div>
-              <ValidationMessage message={currentStandardErrors?.answer} />
-
-              <label className="mt-4 block">
-                <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                  Proof (optional)
-                </span>
-                <input
-                  id={`standard-${standardIndex}-evidence`}
-                  type="text"
-                  value={currentEntry.evidence}
-                  onChange={(event) =>
-                    setProof(standardIndex, event.target.value)
-                  }
-                  placeholder="Proof"
-                  className={`w-full rounded-xl border bg-surface-elevated px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(false)}`}
-                />
-              </label>
-            </article>
-          </section>
-        ) : null}
-
-        {step === 2 ? (
-          <section className="space-y-6 animate-fade-in [animation-delay:60ms]">
-            <div>
-              <label className="block" htmlFor="field-biggestWin">
-                <SectionLabel>Biggest Win</SectionLabel>
-                <input
-                  id="field-biggestWin"
-                  type="text"
-                  value={form.biggestWin}
-                  onChange={(event) => {
-                    setForm((current) => ({
-                      ...current,
-                      biggestWin: event.target.value,
-                    }));
-                    if (errors.biggestWin && event.target.value.trim()) {
-                      setErrors((current) => ({
-                        ...current,
-                        biggestWin: undefined,
-                      }));
-                    }
-                  }}
-                  placeholder="Name it."
-                  aria-invalid={Boolean(errors.biggestWin)}
-                  className={`w-full rounded-xl border bg-surface px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(Boolean(errors.biggestWin))}`}
-                />
-              </label>
-              <ValidationMessage message={errors.biggestWin} />
-            </div>
-
-            <div>
-              <label className="block" htmlFor="field-biggestLesson">
-                <SectionLabel>Biggest Lesson</SectionLabel>
-                <input
-                  id="field-biggestLesson"
-                  type="text"
-                  value={form.biggestLesson}
-                  onChange={(event) => {
-                    setForm((current) => ({
-                      ...current,
-                      biggestLesson: event.target.value,
-                    }));
-                    if (errors.biggestLesson && event.target.value.trim()) {
-                      setErrors((current) => ({
-                        ...current,
-                        biggestLesson: undefined,
-                      }));
-                    }
-                  }}
-                  placeholder="Name it."
-                  aria-invalid={Boolean(errors.biggestLesson)}
-                  className={`w-full rounded-xl border bg-surface px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(Boolean(errors.biggestLesson))}`}
-                />
-              </label>
-              <ValidationMessage message={errors.biggestLesson} />
-            </div>
-          </section>
-        ) : null}
-
-        {step === 3 ? (
-          <section className="space-y-6 animate-fade-in [animation-delay:60ms]">
-            <div>
-              <label className="block" htmlFor="field-tomorrowOnePercent">
-                <SectionLabel>Tomorrow&apos;s 1%</SectionLabel>
-                <input
-                  id="field-tomorrowOnePercent"
-                  type="text"
-                  value={form.tomorrowOnePercent}
-                  onChange={(event) => {
-                    setForm((current) => ({
-                      ...current,
-                      tomorrowOnePercent: event.target.value,
-                    }));
-                    if (errors.tomorrowOnePercent && event.target.value.trim()) {
-                      setErrors((current) => ({
-                        ...current,
-                        tomorrowOnePercent: undefined,
-                      }));
-                    }
-                  }}
-                  placeholder="One small improvement."
-                  aria-invalid={Boolean(errors.tomorrowOnePercent)}
-                  className={`w-full rounded-xl border bg-surface px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(Boolean(errors.tomorrowOnePercent))}`}
-                />
-              </label>
-              <ValidationMessage message={errors.tomorrowOnePercent} />
-            </div>
-
-            <div>
-              <label className="block" htmlFor="field-tomorrowPriority">
-                <SectionLabel>Tomorrow&apos;s Priority</SectionLabel>
-                <input
-                  id="field-tomorrowPriority"
-                  type="text"
-                  value={form.tomorrowPriority}
-                  onChange={(event) => {
-                    setForm((current) => ({
-                      ...current,
-                      tomorrowPriority: event.target.value,
-                    }));
-                    if (errors.tomorrowPriority && event.target.value.trim()) {
-                      setErrors((current) => ({
-                        ...current,
-                        tomorrowPriority: undefined,
-                      }));
-                    }
-                  }}
-                  placeholder="The one thing that matters most."
-                  aria-invalid={Boolean(errors.tomorrowPriority)}
-                  className={`w-full rounded-xl border bg-surface px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(Boolean(errors.tomorrowPriority))}`}
-                />
-              </label>
-              <ValidationMessage message={errors.tomorrowPriority} />
-            </div>
-
-            <div>
-              <label className="block" htmlFor="field-courseCorrection">
-                <SectionLabel>Course Correction</SectionLabel>
-                <input
-                  id="field-courseCorrection"
-                  type="text"
-                  value={form.courseCorrection}
-                  onChange={(event) => {
-                    setForm((current) => ({
-                      ...current,
-                      courseCorrection: event.target.value,
-                    }));
-                    if (errors.courseCorrection && event.target.value.trim()) {
-                      setErrors((current) => ({
-                        ...current,
-                        courseCorrection: undefined,
-                      }));
-                    }
-                  }}
-                  placeholder="What needs to change tomorrow?"
-                  aria-invalid={Boolean(errors.courseCorrection)}
-                  className={`w-full rounded-xl border bg-surface px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none ${fieldErrorClass(Boolean(errors.courseCorrection))}`}
-                />
-              </label>
-              <ValidationMessage message={errors.courseCorrection} />
-            </div>
-          </section>
-        ) : null}
-
-        {step === 4 ? (
-          <DebriefCompleteStep
-            todaysCommitment={todaysCommitment}
-            tomorrowsOnePercent={completedOnePercent}
+        {debriefDraft.step === 1 && (
+          <StepStandardReview
+            draft={debriefDraft}
+            statement={myStandard[debriefDraft.standardIndex]?.statement ?? ""}
+            standardTotal={myStandard.length}
+            errors={step1Errors}
+            onAnswer={(answer) =>
+              setStandardAnswer(debriefDraft.standardIndex, answer)
+            }
+            onEvidence={(evidence) =>
+              setStandardEvidence(debriefDraft.standardIndex, evidence)
+            }
           />
-        ) : null}
+        )}
+
+        {debriefDraft.step === 2 && (
+          <StepReflection
+            draft={debriefDraft}
+            errors={step2Errors}
+            summary={step2Summary}
+            onChange={(field, value) => {
+              updateDailyDebriefDraft({ [field]: value });
+              if (step2Errors[field]) {
+                setStep2Errors((current) => ({ ...current, [field]: undefined }));
+              }
+            }}
+          />
+        )}
+
+        {debriefDraft.step === 3 && (
+          <StepTomorrow
+            draft={debriefDraft}
+            errors={step3Errors}
+            summary={step3Summary}
+            onChange={(field, value) => {
+              updateDailyDebriefDraft({ [field]: value });
+              if (step3Errors[field]) {
+                setStep3Errors((current) => ({ ...current, [field]: undefined }));
+              }
+            }}
+          />
+        )}
+
+        {debriefDraft.step === 4 && (
+          <StepMissionComplete
+            todaysCommitment={todaysMissionIntent?.commitment ?? ""}
+            tomorrowsOnePercent={debriefDraft.tomorrowOnePercent}
+            courseCorrection={debriefDraft.courseCorrection}
+            onCourseCorrection={(value) =>
+              updateDailyDebriefDraft({ courseCorrection: value })
+            }
+            onReturnHome={handleReturnHome}
+          />
+        )}
       </main>
 
-      {showFooter ? (
+      {showNav && (
         <footer className="fixed inset-x-0 bottom-0 border-t border-border bg-background/90 px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-xl sm:px-8">
-          <div className="mx-auto w-full max-w-lg sm:max-w-xl lg:max-w-2xl">
-            <ValidationSummary message={summary} />
-            <div className="flex gap-3">
+          <div className="mx-auto flex w-full max-w-lg gap-3 sm:max-w-xl lg:max-w-2xl">
+            {debriefDraft.step === 1 && debriefDraft.standardIndex > 0 && (
               <button
                 type="button"
-                onClick={handleBack}
-                className="flex h-14 flex-1 items-center justify-center rounded-2xl border border-border bg-surface font-mono text-sm font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:border-border-subtle sm:h-16"
+                onClick={handleStep1Back}
+                className="flex h-14 flex-1 items-center justify-center rounded-2xl border border-border bg-surface font-mono text-sm font-medium uppercase tracking-[0.14em] text-foreground transition-colors hover:border-border-subtle sm:h-16"
               >
-                {step === 1 && standardIndex === 0 ? "Cancel" : "Back"}
+                Back
               </button>
+            )}
+
+            {(debriefDraft.step === 2 || debriefDraft.step === 3) && (
               <button
                 type="button"
-                onClick={handleNext}
-                className="flex h-14 flex-[1.4] items-center justify-center rounded-2xl bg-accent font-mono text-sm font-medium uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90 active:opacity-80 sm:h-16 sm:text-[15px]"
+                onClick={
+                  debriefDraft.step === 2 ? handleStep2Back : handleStep3Back
+                }
+                className="flex h-14 flex-1 items-center justify-center rounded-2xl border border-border bg-surface font-mono text-sm font-medium uppercase tracking-[0.14em] text-foreground transition-colors hover:border-border-subtle sm:h-16"
               >
-                Next
+                Back
               </button>
-            </div>
+            )}
+
+            <button
+              type="button"
+              onClick={
+                debriefDraft.step === 1
+                  ? handleStep1Continue
+                  : debriefDraft.step === 2
+                    ? handleStep2Continue
+                    : handleStep3Continue
+              }
+              className="flex h-14 flex-[2] items-center justify-center rounded-2xl bg-accent font-mono text-sm font-medium uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90 sm:h-16"
+            >
+              Continue
+            </button>
           </div>
         </footer>
-      ) : null}
+      )}
     </div>
   );
 }

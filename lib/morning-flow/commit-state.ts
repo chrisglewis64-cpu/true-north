@@ -1,52 +1,45 @@
-import {
-  createEmptyDailySession,
-  getCalendarDateKey,
-  readDailySession,
-  writeDailySession,
-  type DailySession,
-} from "@/lib/storage/local-session";
+import { getLocalDateString } from "@/lib/database/utils";
+import type { DatedMissionIntent } from "@/lib/compass/types";
+import type { MissionIntent } from "@/types/mission-intent";
 
-export function getDailySession(): DailySession {
-  const stored = readDailySession();
-  const today = getCalendarDateKey();
+function isIntentForToday(intent: MissionIntent): boolean {
+  return getLocalDateString(new Date(intent.createdAt)) === getLocalDateString();
+}
 
-  if (!stored || stored.date !== today) {
-    return createEmptyDailySession();
+/**
+ * Returns true when today's Morning Commitment is complete.
+ * Resets automatically on the next local calendar day.
+ */
+export function hasCompletedMorningCommit(
+  todaysMissionIntent: MissionIntent | null,
+  missionIntentHistory: DatedMissionIntent[]
+): boolean {
+  const today = getLocalDateString();
+
+  if (missionIntentHistory.some((entry) => entry.intentDate === today)) {
+    return true;
   }
 
-  return stored;
+  if (todaysMissionIntent && isIntentForToday(todaysMissionIntent)) {
+    return true;
+  }
+
+  return false;
 }
 
-export function hasCompletedMorningCommit(): boolean {
-  return getDailySession().morningCommitCompleted;
-}
+export function getMorningCommitDate(
+  todaysMissionIntent: MissionIntent | null,
+  missionIntentHistory: DatedMissionIntent[]
+): string | null {
+  const today = getLocalDateString();
 
-export function markMorningCommitComplete(commitment: string): DailySession {
-  const session: DailySession = {
-    ...getDailySession(),
-    date: getCalendarDateKey(),
-    morningCommitCompleted: true,
-    todaysCommitment: commitment,
-  };
+  if (missionIntentHistory.some((entry) => entry.intentDate === today)) {
+    return today;
+  }
 
-  writeDailySession(session);
-  return session;
-}
+  if (todaysMissionIntent && isIntentForToday(todaysMissionIntent)) {
+    return today;
+  }
 
-export function updateDailySession(
-  patch: Partial<
-    Pick<
-      DailySession,
-      "todaysCommitment" | "todaysOnePercent" | "todaysDebrief"
-    >
-  >
-): DailySession {
-  const session = {
-    ...getDailySession(),
-    ...patch,
-    date: getCalendarDateKey(),
-  };
-
-  writeDailySession(session);
-  return session;
+  return null;
 }

@@ -1,20 +1,18 @@
 "use client";
 
 import { useMemo } from "react";
-import { buildEvidenceEntries } from "@/lib/evidence/build-evidence-entries";
-import { useApp } from "@/context/AppContext";
+import { useTrueNorth } from "@/context/TrueNorthContext";
+import { buildEvidenceEntriesFromDebriefs } from "@/lib/evidence/build-evidence-entries";
 
-export function useEvidenceEntries(limit?: number) {
-  const { debriefHistory } = useApp();
+export function useEvidenceEntries() {
+  const { dailyDebriefHistory, missionIntentHistory } = useTrueNorth();
 
-  const entries = useMemo(
-    () => buildEvidenceEntries(debriefHistory),
-    [debriefHistory]
+  return useMemo(
+    () =>
+      buildEvidenceEntriesFromDebriefs(
+        dailyDebriefHistory,
+        missionIntentHistory
+      ),
+    [dailyDebriefHistory, missionIntentHistory]
   );
-
-  if (limit === undefined) {
-    return entries;
-  }
-
-  return entries.slice(0, limit);
 }
