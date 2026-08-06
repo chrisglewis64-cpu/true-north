@@ -16,18 +16,21 @@ export interface Database {
       profiles: {
         Row: {
           id: string;
+          email: string | null;
           display_name: string;
           created_at: string;
           onboarding_completed_at: string | null;
         };
         Insert: {
           id: string;
+          email?: string | null;
           display_name: string;
           created_at?: string;
           onboarding_completed_at?: string | null;
         };
         Update: {
           id?: string;
+          email?: string | null;
           display_name?: string;
           created_at?: string;
           onboarding_completed_at?: string | null;

@@ -26,11 +26,13 @@ export async function fetchProfile(
 export async function upsertProfile(
   client: Client,
   userId: string,
-  displayName: string
+  displayName: string,
+  email?: string | null
 ): Promise<void> {
   const { error } = await client.from("profiles").upsert({
     id: userId,
     display_name: displayName,
+    ...(email ? { email } : {}),
   });
 
   if (error) throw error;
@@ -73,7 +75,7 @@ export async function resolveUserSession(client: Client): Promise<UserSession | 
     "Operator";
 
   if (!profile) {
-    await upsertProfile(client, user.id, displayName);
+    await upsertProfile(client, user.id, displayName, user.email);
   }
 
   return mapAuthUserToSession(

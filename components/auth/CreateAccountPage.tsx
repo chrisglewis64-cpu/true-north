@@ -93,7 +93,7 @@ export function CreateAccountPage() {
       // Profile is also created by the auth trigger; upsert covers both paths.
       if (data.session) {
         try {
-          await upsertProfile(supabase, user.id, trimmedName);
+          await upsertProfile(supabase, user.id, trimmedName, trimmedEmail);
         } catch {
           // Trigger may already have created the row; continue into the app.
         }
