@@ -45,25 +45,25 @@ export const NOTIFICATION_REMINDER_LABELS: Record<
   }
 > = {
   morningReminder: {
-    title: "Morning Intent reminder",
+    title: "Morning Intent",
     description: "Return to identity before action.",
   },
   dailyDebriefReminder: {
-    title: "Daily Debrief reminder",
+    title: "Daily Debrief",
     description: "Close the day with your Standard review.",
   },
   weeklyReviewReminder: {
-    title: "Weekly Review reminder",
+    title: "Weekly Review",
     description: "Course-correct for the week ahead.",
     supportsDays: true,
   },
   monthlyReviewReminder: {
-    title: "Monthly Reflection reminder",
+    title: "Monthly Reflection",
     description: "Step back and read the patterns.",
     supportsDayOfMonth: true,
   },
   annualReviewReminder: {
-    title: "Annual Review reminder",
+    title: "Annual Review",
     description: "Confirm who you are becoming.",
     supportsDate: true,
   },

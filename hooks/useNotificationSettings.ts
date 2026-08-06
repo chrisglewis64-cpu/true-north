@@ -7,6 +7,7 @@ import {
   saveNotificationPreferences,
 } from "@/lib/database/profiles.repository";
 import { DEFAULT_NOTIFICATION_SETTINGS } from "@/lib/notifications/defaults";
+import { NOTIFICATIONS_FEATURE_ENABLED } from "@/lib/notifications/feature";
 import {
   getNotificationPermissionMessage,
   getNotificationPermissionState,
@@ -40,7 +41,10 @@ export function useNotificationSettings() {
     loadNotificationSettings(session.id)
   );
   const [isLoading, setIsLoading] = useState(
-    () => isSupabaseConfigured() && isAuthenticatedSession(session.id)
+    () =>
+      NOTIFICATIONS_FEATURE_ENABLED &&
+      isSupabaseConfigured() &&
+      isAuthenticatedSession(session.id)
   );
   const [saveError, setSaveError] = useState<string>();
   const [permissionState, setPermissionState] =
@@ -53,6 +57,11 @@ export function useNotificationSettings() {
   }, []);
 
   useEffect(() => {
+    if (!NOTIFICATIONS_FEATURE_ENABLED) {
+      setIsLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     async function restoreSettings() {
@@ -105,6 +114,10 @@ export function useNotificationSettings() {
 
   const persistSettings = useCallback(
     async (next: NotificationSettings) => {
+      if (!NOTIFICATIONS_FEATURE_ENABLED) {
+        return;
+      }
+
       saveNotificationSettings(session.id, next);
 
       if (!isSupabaseConfigured() || !isAuthenticatedSession(session.id)) {
@@ -128,6 +141,10 @@ export function useNotificationSettings() {
       id: NotificationReminderId,
       patch: Partial<NotificationReminderPreference>
     ) => {
+      if (!NOTIFICATIONS_FEATURE_ENABLED) {
+        return;
+      }
+
       const enabling =
         patch.enabled === true && !hasAnyReminderEnabled(settings);
 
