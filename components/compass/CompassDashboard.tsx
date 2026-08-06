@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Compass } from "@/components/compass/Compass";
 import { AlignmentFocusContent } from "@/components/compass/AlignmentFocusContent";
 import { useAlignmentFocus } from "@/hooks/useAlignmentFocus";
 import { useCompassAlignment } from "@/hooks/useCompassAlignment";
+import { useTodaysBearing } from "@/hooks/useTodaysBearing";
 import {
   backdropTransition,
   contentRevealTransition,
@@ -14,6 +16,7 @@ import {
 export function CompassDashboard() {
   const { established, alignment, message } = useCompassAlignment();
   const focus = useAlignmentFocus();
+  const { todaysBearing } = useTodaysBearing();
   const [open, setOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
@@ -55,6 +58,23 @@ export function CompassDashboard() {
           showGuidance
         />
       </div>
+
+      {todaysBearing ? (
+        <div className="mt-10 border-y border-accent/30 bg-accent-glow/40 px-4 py-6">
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted">
+            Today&apos;s Bearing
+          </p>
+          <p className="mt-3 text-[18px] font-medium leading-snug tracking-tight text-foreground sm:text-[1.25rem]">
+            {todaysBearing.bearing.statement}
+          </p>
+          <Link
+            href="/bearings"
+            className="mt-4 inline-block font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-foreground"
+          >
+            This week →
+          </Link>
+        </div>
+      ) : null}
 
       <button
         type="button"

@@ -1,6 +1,5 @@
 import { CompassDashboard } from "@/components/dashboard/CourseStatus";
 import { CurrentMission } from "@/components/dashboard/CurrentMission";
-import { TodaysBearing } from "@/components/dashboard/TodaysBearing";
 import { WeeklyBearings } from "@/components/dashboard/WeeklyBearings";
 import { TodaysCommitment } from "@/components/dashboard/TodaysCommitment";
 import { Evidence } from "@/components/dashboard/Evidence";
@@ -29,7 +28,6 @@ export default function DashboardPage() {
           <TodaysCommitment />
           <WeeklyBearings />
           <CompassDashboard />
-          <TodaysBearing />
           <CurrentMission />
           <Evidence />
         </div>

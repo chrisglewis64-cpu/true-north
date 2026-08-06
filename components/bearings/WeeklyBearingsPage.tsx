@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { BottomNav } from "@/components/navigation/BottomNav";
 import { SectionLabel } from "@/components/ui/SectionCard";
 import { useTrueNorth } from "@/context/TrueNorthContext";
 import { listBearingLibrary } from "@/lib/bearings/library";
@@ -28,10 +27,14 @@ export function WeeklyBearingsPage() {
   const { established, alignment } = useCompassAlignment();
   const library = useMemo(() => listBearingLibrary(), []);
 
-  const [selected, setSelected] = useState<string[]>(
-    () => weeklyBearings?.bearingIds ?? []
-  );
+  const [selected, setSelected] = useState<string[]>([]);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (weeklyBearings?.bearingIds?.length) {
+      setSelected([...weeklyBearings.bearingIds]);
+    }
+  }, [weeklyBearings?.bearingIds]);
 
   function toggle(id: string) {
     setSaved(false);
@@ -147,7 +150,7 @@ export function WeeklyBearingsPage() {
         </p>
       </main>
 
-      <footer className="fixed inset-x-0 bottom-0 border-t border-border bg-background/90 px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-xl sm:px-8">
+      <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/90 px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-xl sm:px-8">
         <div className="mx-auto flex w-full max-w-lg gap-3 sm:max-w-xl lg:max-w-2xl">
           <button
             type="button"
@@ -166,7 +169,6 @@ export function WeeklyBearingsPage() {
           </button>
         </div>
       </footer>
-      <BottomNav />
     </>
   );
 }
