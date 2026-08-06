@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 import { LandingGate } from "@/components/landing/LandingGate";
 import { LandingPage } from "@/components/landing/LandingPage";
-import { POST_AUTH_REDIRECT, SIGN_IN_PATH } from "@/lib/auth/paths";
+import { SIGN_IN_PATH } from "@/lib/auth/paths";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 /**
- * Application root.
- * Authenticated → dashboard. Unauthenticated → Sign In.
- * Local/demo mode (Supabase unset) keeps the identity landing.
+ * Application root — Morning Commitment gate.
+ * Unauthenticated → Sign In.
+ * Authenticated → daily commitment (or dashboard via LandingGate if already done).
  */
 export default async function Home() {
   if (!isSupabaseConfigured()) {
@@ -24,5 +24,13 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  redirect(user ? POST_AUTH_REDIRECT : SIGN_IN_PATH);
+  if (!user) {
+    redirect(SIGN_IN_PATH);
+  }
+
+  return (
+    <LandingGate>
+      <LandingPage />
+    </LandingGate>
+  );
 }

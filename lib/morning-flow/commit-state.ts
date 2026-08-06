@@ -2,9 +2,13 @@ import { getLocalDateString } from "@/lib/database/utils";
 import type { DatedMissionIntent } from "@/lib/compass/types";
 import type { MissionIntent } from "@/types/mission-intent";
 
+function isIntentForToday(intent: MissionIntent): boolean {
+  return getLocalDateString(new Date(intent.createdAt)) === getLocalDateString();
+}
+
 /**
- * Returns true when today's Commit flow (Mission Intent) is complete.
- * Resets automatically on the next calendar day.
+ * Returns true when today's Morning Commitment is complete.
+ * Resets automatically on the next local calendar day.
  */
 export function hasCompletedMorningCommit(
   todaysMissionIntent: MissionIntent | null,
@@ -12,11 +16,15 @@ export function hasCompletedMorningCommit(
 ): boolean {
   const today = getLocalDateString();
 
-  if (todaysMissionIntent) {
+  if (missionIntentHistory.some((entry) => entry.intentDate === today)) {
     return true;
   }
 
-  return missionIntentHistory.some((entry) => entry.intentDate === today);
+  if (todaysMissionIntent && isIntentForToday(todaysMissionIntent)) {
+    return true;
+  }
+
+  return false;
 }
 
 export function getMorningCommitDate(
@@ -25,13 +33,13 @@ export function getMorningCommitDate(
 ): string | null {
   const today = getLocalDateString();
 
-  if (todaysMissionIntent) {
+  if (missionIntentHistory.some((entry) => entry.intentDate === today)) {
     return today;
   }
 
-  const todayEntry = missionIntentHistory.find(
-    (entry) => entry.intentDate === today
-  );
+  if (todaysMissionIntent && isIntentForToday(todaysMissionIntent)) {
+    return today;
+  }
 
-  return todayEntry?.intentDate ?? null;
+  return null;
 }

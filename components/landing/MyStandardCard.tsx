@@ -8,7 +8,7 @@ export function MyStandardCard() {
 
   return (
     <SectionCard className="animate-fade-in [animation-delay:80ms]">
-      <SectionLabel>My Standard</SectionLabel>
+      <SectionLabel>Personal Standards</SectionLabel>
       <ul className="space-y-4">
         {myStandard.map((principle) => (
           <li

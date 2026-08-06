@@ -1,11 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/lib/database/database.types";
-import {
-  isAuthPublicPath,
-  POST_AUTH_REDIRECT,
-  SIGN_IN_PATH,
-} from "@/lib/auth/paths";
+import { isAuthPublicPath, SIGN_IN_PATH } from "@/lib/auth/paths";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/config";
 
 function withSupabaseCookies(
@@ -20,8 +16,8 @@ function withSupabaseCookies(
 
 /**
  * Refreshes the Supabase auth session and enforces auth entry routing.
- * Unauthenticated visitors are sent to Sign In. Authenticated visitors
- * hitting "/" go to the dashboard.
+ * Unauthenticated visitors are sent to Sign In.
+ * Authenticated "/" remains available for the daily Morning Commitment gate.
  */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -59,13 +55,6 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = SIGN_IN_PATH;
-    url.search = "";
-    return withSupabaseCookies(supabaseResponse, NextResponse.redirect(url));
-  }
-
-  if (user && pathname === "/") {
-    const url = request.nextUrl.clone();
-    url.pathname = POST_AUTH_REDIRECT;
     url.search = "";
     return withSupabaseCookies(supabaseResponse, NextResponse.redirect(url));
   }

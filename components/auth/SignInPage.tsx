@@ -10,7 +10,7 @@ import {
   ValidationSummary,
   fieldErrorClass,
 } from "@/components/ui/ValidationMessage";
-import { CREATE_ACCOUNT_PATH } from "@/lib/auth/paths";
+import { CREATE_ACCOUNT_PATH, MORNING_COMMIT_PATH } from "@/lib/auth/paths";
 import { resolvePostAuthPath } from "@/lib/auth/post-auth";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -70,7 +70,7 @@ export function SignInPage() {
       const userId = data.user?.id;
       const path = userId
         ? await resolvePostAuthPath(supabase, userId)
-        : "/operations";
+        : MORNING_COMMIT_PATH;
 
       router.replace(path);
       router.refresh();

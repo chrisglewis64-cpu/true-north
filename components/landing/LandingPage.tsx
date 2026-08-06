@@ -1,16 +1,49 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { SectionLabel } from "@/components/ui/SectionCard";
+import {
+  ValidationMessage,
+  fieldErrorClass,
+} from "@/components/ui/ValidationMessage";
 import { MyStandardCard } from "@/components/landing/MyStandardCard";
 import { useTrueNorth } from "@/context/TrueNorthContext";
+import { POST_AUTH_REDIRECT } from "@/lib/auth/paths";
 
 /**
- * Daily identity screen — not account creation.
- * First-time setup lives under /onboarding.
+ * Daily Morning Commitment — Personal Standards, Current Mission,
+ * Today's Intent, and COMMIT. Required once per local calendar day.
  */
 export function LandingPage() {
-  const { currentMission, session } = useTrueNorth();
+  const router = useRouter();
+  const { currentMission, session, setTodaysMissionIntent } = useTrueNorth();
+  const [intent, setIntent] = useState("");
+  const [intentError, setIntentError] = useState<string>();
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleCommit() {
+    if (!intent.trim()) {
+      setIntentError("Set today's intent before you commit.");
+      return;
+    }
+
+    setIntentError(undefined);
+    setSubmitting(true);
+
+    try {
+      await setTodaysMissionIntent({
+        commitment: intent.trim(),
+        source: "custom",
+        createdAt: new Date().toISOString(),
+      });
+      router.replace(POST_AUTH_REDIRECT);
+      router.refresh();
+    } catch {
+      setIntentError("Unable to save today's commitment. Try again.");
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -47,39 +80,41 @@ export function LandingPage() {
               </p>
             )}
           </div>
+
+          <label
+            className="block animate-fade-in [animation-delay:200ms]"
+            htmlFor="morning-intent"
+          >
+            <SectionLabel>Today&apos;s Intent</SectionLabel>
+            <input
+              id="morning-intent"
+              value={intent}
+              onChange={(event) => setIntent(event.target.value)}
+              placeholder="One clear commitment for today."
+              disabled={submitting}
+              className={`mt-1 w-full rounded-xl border bg-surface px-4 py-3 text-[15px] text-foreground placeholder:text-muted/60 focus:outline-none disabled:opacity-50 ${fieldErrorClass(Boolean(intentError))}`}
+            />
+            <ValidationMessage message={intentError} />
+          </label>
         </div>
       </main>
 
       <footer className="animate-fade-in px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-4 [animation-delay:240ms] sm:px-8">
         <div className="mx-auto w-full max-w-lg sm:max-w-xl lg:max-w-2xl">
-          <Link
-            href="/mission-intent"
-            className="flex h-14 w-full items-center justify-center rounded-2xl bg-accent font-mono text-sm font-medium uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90 active:opacity-80 sm:h-16 sm:text-[15px]"
+          <button
+            type="button"
+            disabled={submitting}
+            onClick={() => void handleCommit()}
+            className="flex h-14 w-full items-center justify-center rounded-2xl bg-accent font-mono text-sm font-medium uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50 sm:h-16 sm:text-[15px]"
           >
-            Commit
-          </Link>
+            {submitting ? "Committing…" : "Commit"}
+          </button>
 
-          {session.id === "session-local" ? (
-            <p className="mt-5 text-center text-[14px] text-muted">
-              <Link
-                href="/sign-in"
-                className="text-foreground/90 underline decoration-border-subtle underline-offset-4 transition-colors hover:decoration-muted"
-              >
-                Sign in
-              </Link>
-              <span className="mx-2 text-border-subtle">·</span>
-              <Link
-                href="/create-account"
-                className="text-foreground/90 underline decoration-border-subtle underline-offset-4 transition-colors hover:decoration-muted"
-              >
-                Create account
-              </Link>
-            </p>
-          ) : (
+          {session.id !== "session-local" ? (
             <p className="mt-5 text-center text-[14px] text-muted">
               {session.displayName}
             </p>
-          )}
+          ) : null}
         </div>
       </footer>
     </div>

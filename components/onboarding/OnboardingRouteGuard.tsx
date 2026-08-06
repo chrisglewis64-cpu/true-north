@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTrueNorth } from "@/context/TrueNorthContext";
 import {
   isAuthPublicPath,
+  isMorningCommitPath,
+  MORNING_COMMIT_PATH,
   ONBOARDING_PATH,
   SIGN_IN_PATH,
 } from "@/lib/auth/paths";
@@ -15,26 +17,43 @@ type OnboardingRouteGuardProps = {
 };
 
 /**
- * Client-side auth + onboarding gate.
+ * Client-side auth, onboarding, and daily commitment gates.
  * - Unauthenticated → Sign In
- * - Authenticated but incomplete onboarding → /onboarding
+ * - Incomplete onboarding → /onboarding
+ * - Missing today's Morning Commitment → /
  */
 export function OnboardingRouteGuard({ children }: OnboardingRouteGuardProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { hasCompletedOnboarding, session } = useTrueNorth();
+  const {
+    hasCompletedMorningCommit,
+    hasCompletedOnboarding,
+    session,
+  } = useTrueNorth();
 
   const supabaseEnabled = isSupabaseConfigured();
   const isAuthenticated = session.id !== "session-local";
   const isPublic = isAuthPublicPath(pathname);
+  const onMorningCommit = isMorningCommitPath(pathname);
+  const onOnboarding =
+    pathname === ONBOARDING_PATH || pathname.startsWith(`${ONBOARDING_PATH}/`);
 
   const mustSignIn = supabaseEnabled && !isAuthenticated && !isPublic;
+
   const mustOnboard =
     supabaseEnabled &&
     isAuthenticated &&
     !hasCompletedOnboarding &&
-    pathname !== ONBOARDING_PATH &&
-    !pathname.startsWith(`${ONBOARDING_PATH}/`) &&
+    !onOnboarding &&
+    !isPublic;
+
+  const mustCommit =
+    supabaseEnabled &&
+    isAuthenticated &&
+    hasCompletedOnboarding &&
+    !hasCompletedMorningCommit &&
+    !onMorningCommit &&
+    !onOnboarding &&
     !isPublic;
 
   useEffect(() => {
@@ -44,14 +63,22 @@ export function OnboardingRouteGuard({ children }: OnboardingRouteGuardProps) {
     }
     if (mustOnboard) {
       router.replace(ONBOARDING_PATH);
+      return;
     }
-  }, [mustOnboard, mustSignIn, router]);
+    if (mustCommit) {
+      router.replace(MORNING_COMMIT_PATH);
+    }
+  }, [mustCommit, mustOnboard, mustSignIn, router]);
 
-  if (mustSignIn || mustOnboard) {
+  if (mustSignIn || mustOnboard || mustCommit) {
     return (
       <div className="flex min-h-dvh items-center justify-center px-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          {mustSignIn ? "Redirecting to Sign In…" : "Continuing setup…"}
+          {mustSignIn
+            ? "Redirecting to Sign In…"
+            : mustOnboard
+              ? "Continuing setup…"
+              : "Opening Morning Commitment…"}
         </p>
       </div>
     );

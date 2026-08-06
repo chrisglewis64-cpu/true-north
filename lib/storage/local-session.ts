@@ -57,7 +57,15 @@ function resolveTodaysMissionIntent(
     return todayFromHistory.intent;
   }
 
-  return snapshot.todaysMissionIntent;
+  const intent = snapshot.todaysMissionIntent;
+  if (
+    intent &&
+    getLocalDateString(new Date(intent.createdAt)) === today
+  ) {
+    return intent;
+  }
+
+  return null;
 }
 
 export function mergeLocalSessionIntoState(state: TrueNorthState): TrueNorthState {

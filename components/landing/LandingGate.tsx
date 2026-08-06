@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTrueNorth } from "@/context/TrueNorthContext";
-import { ONBOARDING_PATH } from "@/lib/auth/paths";
+import { ONBOARDING_PATH, POST_AUTH_REDIRECT } from "@/lib/auth/paths";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 type LandingGateProps = {
@@ -11,9 +11,9 @@ type LandingGateProps = {
 };
 
 /**
- * Daily identity landing.
+ * Daily Morning Commitment gate on `/`.
  * - Incomplete onboarding → /onboarding
- * - Morning Commit already done → /operations
+ * - Today's commit already done → Compass dashboard
  */
 export function LandingGate({ children }: LandingGateProps) {
   const router = useRouter();
@@ -31,7 +31,7 @@ export function LandingGate({ children }: LandingGateProps) {
       return;
     }
     if (hasCompletedMorningCommit) {
-      router.replace("/operations");
+      router.replace(POST_AUTH_REDIRECT);
     }
   }, [hasCompletedMorningCommit, needsOnboarding, router]);
 
