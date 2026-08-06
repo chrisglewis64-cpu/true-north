@@ -7,9 +7,14 @@ import {
   isAuthPublicPath,
   isMorningCommitPath,
   MORNING_COMMIT_PATH,
-  ONBOARDING_PATH,
   SIGN_IN_PATH,
 } from "@/lib/auth/paths";
+import {
+  isPathAllowedForStage,
+  logOnboardingRedirect,
+  pathForOnboardingStage,
+  resolveOnboardingStage,
+} from "@/lib/onboarding/stages";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 type OnboardingRouteGuardProps = {
@@ -17,68 +22,73 @@ type OnboardingRouteGuardProps = {
 };
 
 /**
- * Client-side auth, onboarding, and daily commitment gates.
- * - Unauthenticated → Sign In
- * - Incomplete onboarding → /onboarding
- * - Missing today's Morning Commitment → /
+ * Single onboarding / auth gate.
+ * Redirects only when the current path is not allowed for the resolved stage.
+ *
+ * Stages: welcome → standards → mission → morning_commitment → complete
  */
 export function OnboardingRouteGuard({ children }: OnboardingRouteGuardProps) {
   const pathname = usePathname();
   const router = useRouter();
   const {
     hasCompletedMorningCommit,
-    hasCompletedOnboarding,
     session,
   } = useTrueNorth();
 
   const supabaseEnabled = isSupabaseConfigured();
   const isAuthenticated = session.id !== "session-local";
   const isPublic = isAuthPublicPath(pathname);
-  const onMorningCommit = isMorningCommitPath(pathname);
-  const onOnboarding =
-    pathname === ONBOARDING_PATH || pathname.startsWith(`${ONBOARDING_PATH}/`);
+  const stage = resolveOnboardingStage(session.onboarding);
 
   const mustSignIn = supabaseEnabled && !isAuthenticated && !isPublic;
 
-  const mustOnboard =
-    supabaseEnabled &&
-    isAuthenticated &&
-    !hasCompletedOnboarding &&
-    !onOnboarding &&
-    !isPublic;
+  let redirectTarget: string | null = null;
+  let redirectReason = "none";
 
-  const mustCommit =
-    supabaseEnabled &&
-    isAuthenticated &&
-    hasCompletedOnboarding &&
-    !hasCompletedMorningCommit &&
-    !onMorningCommit &&
-    !onOnboarding &&
-    !isPublic;
+  if (mustSignIn) {
+    redirectTarget = SIGN_IN_PATH;
+    redirectReason = "unauthenticated";
+  } else if (supabaseEnabled && isAuthenticated && !isPublic) {
+    if (!isPathAllowedForStage(pathname, stage)) {
+      redirectTarget = pathForOnboardingStage(stage);
+      redirectReason = `stage=${stage} disallows path=${pathname}`;
+    } else if (
+      stage === "complete" &&
+      !hasCompletedMorningCommit &&
+      !isMorningCommitPath(pathname)
+    ) {
+      redirectTarget = MORNING_COMMIT_PATH;
+      redirectReason = "onboarding complete; morning commitment missing";
+    }
+  }
 
   useEffect(() => {
-    if (mustSignIn) {
-      router.replace(SIGN_IN_PATH);
+    if (!redirectTarget || redirectTarget === pathname) {
       return;
     }
-    if (mustOnboard) {
-      router.replace(ONBOARDING_PATH);
-      return;
-    }
-    if (mustCommit) {
-      router.replace(MORNING_COMMIT_PATH);
-    }
-  }, [mustCommit, mustOnboard, mustSignIn, router]);
 
-  if (mustSignIn || mustOnboard || mustCommit) {
+    logOnboardingRedirect({
+      userId: session.id,
+      stage,
+      pathname,
+      target: redirectTarget,
+      reason: redirectReason,
+    });
+    router.replace(redirectTarget);
+  }, [
+    pathname,
+    redirectReason,
+    redirectTarget,
+    router,
+    session.id,
+    stage,
+  ]);
+
+  if (redirectTarget && redirectTarget !== pathname) {
     return (
       <div className="flex min-h-dvh items-center justify-center px-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          {mustSignIn
-            ? "Redirecting to Sign In…"
-            : mustOnboard
-              ? "Continuing setup…"
-              : "Opening Morning Commitment…"}
+          Continuing…
         </p>
       </div>
     );

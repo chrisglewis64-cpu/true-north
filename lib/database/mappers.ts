@@ -1,4 +1,5 @@
 import type { Tables, TablesInsert, TablesUpdate } from "@/lib/database/database.types";
+import type { OnboardingProgress } from "@/lib/onboarding/stages";
 import type { DailyDebrief, DailyDebriefStandardEntry } from "@/types/daily-debrief";
 import type { DailyOnePercent } from "@/types/one-percent";
 import type { Mission, MissionInput } from "@/types/mission";
@@ -161,16 +162,33 @@ export function mapDailyOnePercentToInsert(
   };
 }
 
+export function mapOnboardingProgress(row: {
+  welcome_completed_at?: string | null;
+  standards_completed_at?: string | null;
+  mission_completed_at?: string | null;
+  onboarding_completed_at?: string | null;
+}): OnboardingProgress {
+  return {
+    welcomeCompletedAt: row.welcome_completed_at ?? null,
+    standardsCompletedAt: row.standards_completed_at ?? null,
+    missionCompletedAt: row.mission_completed_at ?? null,
+    onboardingCompletedAt: row.onboarding_completed_at ?? null,
+  };
+}
+
 export function mapAuthUserToSession(
   userId: string,
   displayName: string,
   startedAt: string,
-  onboardingCompletedAt: string | null = null
+  onboarding: OnboardingProgress,
+  email: string | null = null
 ): UserSession {
   return {
     id: userId,
     displayName,
+    email,
     startedAt,
-    onboardingCompletedAt,
+    onboardingCompletedAt: onboarding.onboardingCompletedAt,
+    onboarding,
   };
 }

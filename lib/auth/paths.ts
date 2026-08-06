@@ -1,6 +1,9 @@
 /** Post-auth destination when onboarding and today's commitment are complete. */
 export const POST_AUTH_REDIRECT = "/operations";
 
+/** First-launch welcome — shown once before onboarding. */
+export const WELCOME_PATH = "/welcome";
+
 /** First-time setup wizard. */
 export const ONBOARDING_PATH = "/onboarding";
 

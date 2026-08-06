@@ -1,8 +1,9 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { BottomNav } from "@/components/navigation/BottomNav";
 import { ReviewHubCard } from "@/components/review/ReviewHubCard";
 import { SectionLabel } from "@/components/ui/SectionCard";
+import { getWeekStart } from "@/lib/bearings/week";
+import { buildWeeklySummary } from "@/lib/review/build-weekly-summary";
 import { reviewHubMeta } from "@/lib/review-placeholder-data";
 
 function ReviewSection({
@@ -23,6 +24,8 @@ function ReviewSection({
 }
 
 export function ReviewHubPage() {
+  const weekLabel = buildWeeklySummary([], [], getWeekStart()).weekLabel;
+
   return (
     <>
       <main className="mx-auto w-full max-w-lg flex-1 px-6 pb-28 pt-10 sm:max-w-xl sm:px-8 sm:pt-14 lg:max-w-2xl">
@@ -32,8 +35,8 @@ export function ReviewHubPage() {
             Reflection.
           </h1>
           <p className="mt-3 max-w-md text-[15px] leading-relaxed text-muted">
-            A calm place to close the day, course-correct the week, and remember
-            who you are becoming.
+            Close the day. Course-correct the week. Remember who you are
+            becoming.
           </p>
         </header>
 
@@ -43,7 +46,7 @@ export function ReviewHubPage() {
               cadence="Daily"
               title="Daily Debrief"
               period="Today"
-              subtitle="Review My Standard. Close the day."
+              subtitle="Evidence of identity. Close the day."
               href="/debrief"
               external
             />
@@ -77,8 +80,8 @@ export function ReviewHubPage() {
             <ReviewHubCard
               cadence="Weekly"
               title="Weekly Review"
-              period={reviewHubMeta.weekly.period}
-              subtitle={reviewHubMeta.weekly.subtitle}
+              period={weekLabel}
+              subtitle="Alignment · Standards · Direction"
               href="/review/weekly"
             />
           </ReviewSection>
@@ -105,20 +108,6 @@ export function ReviewHubPage() {
               href="/review/annual"
             />
           </ReviewSection>
-        </div>
-
-        <div className="animate-fade-in mt-14 border-t border-border pt-10 text-center [animation-delay:280ms]">
-          <Link
-            href="/settings"
-            className="inline-flex flex-col items-center gap-2"
-          >
-            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-              Settings
-            </span>
-            <span className="text-[15px] text-foreground transition-colors hover:text-accent">
-              Notifications, account, and preferences
-            </span>
-          </Link>
         </div>
       </main>
       <BottomNav />

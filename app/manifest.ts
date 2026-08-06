@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "True North",
     short_name: "True North",
     description:
-      "Personal Operating System — identity, standards, mission, bearings, evidence.",
+      "Become the person you committed to be. A personal operating system for identity.",
     start_url: "/",
     scope: "/",
     display: "standalone",

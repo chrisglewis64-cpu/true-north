@@ -33,6 +33,9 @@ export interface TrueNorthContextValue extends TrueNorthState {
   hasCompletedMorningCommit: boolean;
   hasCompletedOnboarding: boolean;
   setMyStandard: (standards: Standard[]) => Promise<void>;
+  markWelcomeComplete: () => Promise<void>;
+  markStandardsComplete: () => Promise<void>;
+  markMissionStageComplete: () => Promise<void>;
   markOnboardingComplete: () => Promise<void>;
   setTodaysMissionIntent: (intent: MissionIntent) => Promise<void>;
   setTodaysOnePercent: (value: DailyOnePercent) => void;

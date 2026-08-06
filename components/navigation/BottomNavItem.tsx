@@ -21,7 +21,7 @@ export function BottomNavItem({ item, active }: BottomNavItemProps) {
       />
       <NavIcon id={item.id} active={active} />
       <span
-        className={`truncate text-[10px] font-medium tracking-wide ${
+        className={`truncate text-[9px] font-medium tracking-wide sm:text-[10px] ${
           active ? "text-accent" : "text-muted"
         }`}
       >

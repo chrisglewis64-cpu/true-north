@@ -17,9 +17,13 @@ import {
   persistDailyOnePercent,
   persistMissionIntent,
   persistWeeklyBearings,
+  markWelcomeComplete as persistWelcomeComplete,
+  markStandardsComplete as persistStandardsComplete,
+  markMissionStageComplete as persistMissionStageComplete,
   markOnboardingComplete as persistOnboardingComplete,
   replaceStandards,
 } from "@/lib/database";
+import { EMPTY_ONBOARDING_PROGRESS } from "@/lib/onboarding/stages";
 import { ensureWeeklyBearings } from "@/lib/bearings/ensure-weekly";
 import {
   createInitialTrueNorthState,
@@ -39,6 +43,7 @@ import { buildEvidenceEntriesFromDebriefs } from "@/lib/evidence/build-evidence-
 import { hasCompletedMorningCommit } from "@/lib/morning-flow/commit-state";
 import {
   createLocalSessionSnapshot,
+  mergeLocalSessionIntoState,
   saveLocalSessionSnapshot,
 } from "@/lib/storage/local-session";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -93,11 +98,33 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
   const [weeklyReviews, setWeeklyReviews] = useState(initial.weeklyReviews);
   const [session, setSession] = useState(initial.session);
   const [missions, setMissions] = useState<Mission[]>(initial.missions);
-  const [isHydrated, setIsHydrated] = useState(!supabaseEnabled);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     sessionRef.current = session;
   }, [session]);
+
+  // Local mode: merge localStorage after mount to avoid SSR hydration mismatch.
+  useEffect(() => {
+    if (supabaseEnabled) {
+      return;
+    }
+
+    const merged = mergeLocalSessionIntoState(createInitialTrueNorthState());
+    sessionRef.current = merged.session;
+    setSession(merged.session);
+    setMissions(merged.missions);
+    setMyStandardState(merged.myStandard);
+    setTodaysMissionIntentState(merged.todaysMissionIntent);
+    setTodaysOnePercentState(merged.todaysOnePercent);
+    setWeeklyBearingsState(merged.weeklyBearings);
+    setDailyDebriefSubmissionState(merged.dailyDebrief.submission);
+    setDailyDebriefDraft(merged.dailyDebrief.draft);
+    setDailyDebriefHistory(merged.dailyDebriefHistory);
+    setMissionIntentHistory(merged.missionIntentHistory);
+    setWeeklyReviews(merged.weeklyReviews);
+    setIsHydrated(true);
+  }, [supabaseEnabled]);
 
   const currentMission = useMemo(
     () => getActiveMission(missions) ?? null,
@@ -239,16 +266,53 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  function patchOnboarding(
+    partial: Partial<typeof EMPTY_ONBOARDING_PROGRESS>
+  ) {
+    setSession((current) => {
+      const onboarding = { ...current.onboarding, ...partial };
+      const next = {
+        ...current,
+        onboarding,
+        onboardingCompletedAt: onboarding.onboardingCompletedAt,
+      };
+      sessionRef.current = next;
+      return next;
+    });
+  }
+
+  async function markWelcomeComplete() {
+    const completedAt = new Date().toISOString();
+    patchOnboarding({ welcomeCompletedAt: completedAt });
+    await persistAuthenticated((userId) =>
+      persistWelcomeComplete(supabaseRef.current!, userId, completedAt)
+    );
+  }
+
+  async function markStandardsComplete() {
+    const completedAt = new Date().toISOString();
+    patchOnboarding({ standardsCompletedAt: completedAt });
+    await persistAuthenticated((userId) =>
+      persistStandardsComplete(supabaseRef.current!, userId, completedAt)
+    );
+  }
+
+  async function markMissionStageComplete() {
+    const completedAt = new Date().toISOString();
+    patchOnboarding({ missionCompletedAt: completedAt });
+    await persistAuthenticated((userId) =>
+      persistMissionStageComplete(supabaseRef.current!, userId, completedAt)
+    );
+  }
+
   async function markOnboardingComplete() {
     const completedAt = new Date().toISOString();
-    setSession((current) => ({
-      ...current,
+    patchOnboarding({
+      welcomeCompletedAt: completedAt,
+      standardsCompletedAt: completedAt,
+      missionCompletedAt: completedAt,
       onboardingCompletedAt: completedAt,
-    }));
-    sessionRef.current = {
-      ...sessionRef.current,
-      onboardingCompletedAt: completedAt,
-    };
+    });
 
     await persistAuthenticated((userId) =>
       persistOnboardingComplete(supabaseRef.current!, userId, completedAt)
@@ -479,6 +543,9 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     hasCompletedMorningCommit: morningCommitComplete,
     hasCompletedOnboarding: onboardingComplete,
     setMyStandard,
+    markWelcomeComplete,
+    markStandardsComplete,
+    markMissionStageComplete,
     markOnboardingComplete,
     setTodaysMissionIntent,
     setTodaysOnePercent,
