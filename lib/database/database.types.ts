@@ -20,6 +20,7 @@ export interface Database {
           display_name: string;
           created_at: string;
           onboarding_completed_at: string | null;
+          notification_preferences: Json;
         };
         Insert: {
           id: string;
@@ -27,6 +28,7 @@ export interface Database {
           display_name: string;
           created_at?: string;
           onboarding_completed_at?: string | null;
+          notification_preferences?: Json;
         };
         Update: {
           id?: string;
@@ -34,6 +36,7 @@ export interface Database {
           display_name?: string;
           created_at?: string;
           onboarding_completed_at?: string | null;
+          notification_preferences?: Json;
         };
         Relationships: [];
       };

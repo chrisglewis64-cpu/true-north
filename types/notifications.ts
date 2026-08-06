@@ -11,8 +11,12 @@ export interface NotificationReminderPreference {
   enabled: boolean;
   /** Local time HH:mm */
   time: string;
-  /** Days of week (0 = Sunday). Used where cadence is weekly. */
+  /** Days of week (0 = Sunday). Weekly reminders only. */
   days?: WeekdayIndex[];
+  /** Day of month (1–31). Monthly reminders only. */
+  dayOfMonth?: number;
+  /** Annual date as MM-DD. Annual reminders only. */
+  date?: string;
 }
 
 export type NotificationSettings = Record<
@@ -36,27 +40,31 @@ export const NOTIFICATION_REMINDER_LABELS: Record<
     title: string;
     description: string;
     supportsDays?: boolean;
+    supportsDayOfMonth?: boolean;
+    supportsDate?: boolean;
   }
 > = {
   morningReminder: {
-    title: "Morning Intent",
+    title: "Morning Intent reminder",
     description: "Return to identity before action.",
   },
   dailyDebriefReminder: {
-    title: "Daily Debrief",
+    title: "Daily Debrief reminder",
     description: "Close the day with your Standard review.",
   },
   weeklyReviewReminder: {
-    title: "Weekly Review",
+    title: "Weekly Review reminder",
     description: "Course-correct for the week ahead.",
     supportsDays: true,
   },
   monthlyReviewReminder: {
-    title: "Monthly Reflection",
+    title: "Monthly Reflection reminder",
     description: "Step back and read the patterns.",
+    supportsDayOfMonth: true,
   },
   annualReviewReminder: {
-    title: "Annual Reflection",
+    title: "Annual Review reminder",
     description: "Confirm who you are becoming.",
+    supportsDate: true,
   },
 };

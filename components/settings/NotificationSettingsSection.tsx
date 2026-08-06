@@ -8,6 +8,10 @@ import {
 } from "@/types/notifications";
 import { SectionCard, SectionLabel } from "@/components/ui/SectionCard";
 import { useNotificationSettings } from "@/hooks/useNotificationSettings";
+import {
+  annualDateFromInputValue,
+  annualDateToInputValue,
+} from "@/lib/notifications/storage";
 
 const REMINDER_ORDER: NotificationReminderId[] = [
   "morningReminder",
@@ -17,8 +21,10 @@ const REMINDER_ORDER: NotificationReminderId[] = [
   "annualReviewReminder",
 ];
 
+const DAY_OF_MONTH_OPTIONS = Array.from({ length: 31 }, (_, index) => index + 1);
+
 export function NotificationSettingsSection() {
-  const { settings, updateReminder, permissionState, requestPermission } =
+  const { settings, updateReminder, isLoading, saveError } =
     useNotificationSettings();
 
   function toggleDay(id: NotificationReminderId, day: WeekdayIndex) {
@@ -40,18 +46,14 @@ export function NotificationSettingsSection() {
           Intentional reminders. Quiet by default — enable only what serves you.
         </p>
 
-        {permissionState === "unsupported" ? (
+        {isLoading ? (
           <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-            Browser notifications not supported on this device.
+            Restoring preferences…
           </p>
-        ) : permissionState !== "granted" ? (
-          <button
-            type="button"
-            onClick={() => void requestPermission()}
-            className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-foreground"
-          >
-            Enable browser notifications
-          </button>
+        ) : null}
+
+        {saveError ? (
+          <p className="text-[14px] leading-relaxed text-red-400">{saveError}</p>
         ) : null}
 
         <ul className="space-y-5">
@@ -78,6 +80,7 @@ export function NotificationSettingsSection() {
                     <input
                       type="checkbox"
                       checked={preference.enabled}
+                      disabled={isLoading}
                       onChange={(event) =>
                         updateReminder(id, { enabled: event.target.checked })
                       }
@@ -99,7 +102,7 @@ export function NotificationSettingsSection() {
                     id={`${id}-time`}
                     type="time"
                     value={preference.time}
-                    disabled={!preference.enabled}
+                    disabled={!preference.enabled || isLoading}
                     onChange={(event) =>
                       updateReminder(id, { time: event.target.value })
                     }
@@ -110,7 +113,7 @@ export function NotificationSettingsSection() {
                 {meta.supportsDays ? (
                   <div className="mt-4">
                     <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                      Days
+                      Weekday
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {WEEKDAY_LABELS.map((day) => {
@@ -121,7 +124,7 @@ export function NotificationSettingsSection() {
                           <button
                             key={`${id}-${day.value}`}
                             type="button"
-                            disabled={!preference.enabled}
+                            disabled={!preference.enabled || isLoading}
                             onClick={() => toggleDay(id, day.value)}
                             className={`flex h-9 w-9 items-center justify-center rounded-full font-mono text-[11px] transition-colors disabled:opacity-40 ${
                               active
@@ -135,6 +138,57 @@ export function NotificationSettingsSection() {
                         );
                       })}
                     </div>
+                  </div>
+                ) : null}
+
+                {meta.supportsDayOfMonth ? (
+                  <div className="mt-4">
+                    <label
+                      htmlFor={`${id}-day-of-month`}
+                      className="mb-2 block font-mono text-[10px] uppercase tracking-[0.14em] text-muted"
+                    >
+                      Day of month
+                    </label>
+                    <select
+                      id={`${id}-day-of-month`}
+                      value={preference.dayOfMonth ?? 1}
+                      disabled={!preference.enabled || isLoading}
+                      onChange={(event) =>
+                        updateReminder(id, {
+                          dayOfMonth: Number(event.target.value),
+                        })
+                      }
+                      className="rounded-xl border border-border bg-background px-3 py-2 font-mono text-sm text-foreground disabled:opacity-40"
+                    >
+                      {DAY_OF_MONTH_OPTIONS.map((day) => (
+                        <option key={day} value={day}>
+                          {day}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
+
+                {meta.supportsDate ? (
+                  <div className="mt-4">
+                    <label
+                      htmlFor={`${id}-date`}
+                      className="mb-2 block font-mono text-[10px] uppercase tracking-[0.14em] text-muted"
+                    >
+                      Date
+                    </label>
+                    <input
+                      id={`${id}-date`}
+                      type="date"
+                      value={annualDateToInputValue(preference.date)}
+                      disabled={!preference.enabled || isLoading}
+                      onChange={(event) =>
+                        updateReminder(id, {
+                          date: annualDateFromInputValue(event.target.value),
+                        })
+                      }
+                      className="rounded-xl border border-border bg-background px-3 py-2 font-mono text-sm text-foreground disabled:opacity-40"
+                    />
                   </div>
                 ) : null}
               </li>

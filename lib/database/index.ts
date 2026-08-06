@@ -38,6 +38,8 @@ export {
   resolveUserSession,
   upsertProfile,
   fetchProfile,
+  fetchNotificationPreferences,
+  saveNotificationPreferences,
   markOnboardingComplete,
   isOnboardingComplete,
 } from "@/lib/database/profiles.repository";

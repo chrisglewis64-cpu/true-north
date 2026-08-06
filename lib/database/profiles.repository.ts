@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/database/database.types";
+import type { Database, Json } from "@/lib/database/database.types";
 import { mapAuthUserToSession } from "@/lib/database/mappers";
+import { mergeNotificationSettings } from "@/lib/notifications/storage";
+import type { NotificationSettings } from "@/types/notifications";
 import type { UserSession } from "@/types/session";
 
 type Client = SupabaseClient<Database>;
@@ -21,6 +23,35 @@ export async function fetchProfile(
 
   if (error) throw error;
   return data;
+}
+
+export async function fetchNotificationPreferences(
+  client: Client,
+  userId: string
+): Promise<NotificationSettings> {
+  const { data, error } = await client
+    .from("profiles")
+    .select("notification_preferences")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return mergeNotificationSettings(data?.notification_preferences ?? {});
+}
+
+export async function saveNotificationPreferences(
+  client: Client,
+  userId: string,
+  settings: NotificationSettings
+): Promise<void> {
+  const { error } = await client
+    .from("profiles")
+    .update({
+      notification_preferences: settings as unknown as Json,
+    })
+    .eq("id", userId);
+
+  if (error) throw error;
 }
 
 export async function upsertProfile(
