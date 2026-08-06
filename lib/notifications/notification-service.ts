@@ -3,6 +3,7 @@ import {
   requestNotificationPermissionOnce,
   type NotificationPermissionState,
 } from "@/lib/notifications/permission";
+import { registerBrowserPushSubscription } from "@/lib/notifications/register-push";
 import type { NotificationSettings } from "@/types/notifications";
 
 export type { NotificationPermissionState };
@@ -29,10 +30,12 @@ export const placeholderNotificationService: NotificationService = {
 
   async syncSchedules(settings) {
     void settings;
-    // Placeholder — future: sync with service worker push scheduling via lib/pwa/push-notifications.ts
+    // Preference sync only — push delivery scheduling lands later.
   },
 
   async clearSchedules() {
-    // Placeholder — future: cancel push schedules registered in app/sw.ts
+    // Placeholder — future: cancel scheduled reminder pushes
   },
 };
+
+export { registerBrowserPushSubscription };

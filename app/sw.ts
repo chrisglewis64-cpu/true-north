@@ -30,9 +30,63 @@ const serwist = new Serwist({
 
 serwist.addEventListeners();
 
-/**
- * Future browser notifications (Mission Hotel):
- * - Register push handler here once VAPID keys and subscription flow exist.
- * - Example: self.addEventListener("push", (event) => { ... showNotification ... })
- * - NotificationService.syncSchedules() will target this registration.
- */
+self.addEventListener("push", (event) => {
+  const fallbackTitle = "True North";
+  const fallbackBody = "You have a reminder.";
+
+  let title = fallbackTitle;
+  let body = fallbackBody;
+  let data: Record<string, unknown> = {};
+
+  try {
+    if (event.data) {
+      const payload = event.data.json() as {
+        title?: string;
+        body?: string;
+        data?: Record<string, unknown>;
+      };
+      title = payload.title?.trim() || fallbackTitle;
+      body = payload.body?.trim() || fallbackBody;
+      data = payload.data ?? {};
+    }
+  } catch {
+    const text = event.data?.text();
+    if (text) {
+      body = text;
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      data,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl =
+    typeof event.notification.data?.url === "string"
+      ? event.notification.data.url
+      : "/operations";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(
+      (clients) => {
+        for (const client of clients) {
+          if ("focus" in client) {
+            void client.focus();
+            if ("navigate" in client) {
+              void client.navigate(targetUrl);
+            }
+            return;
+          }
+        }
+        return self.clients.openWindow(targetUrl);
+      }
+    )
+  );
+});

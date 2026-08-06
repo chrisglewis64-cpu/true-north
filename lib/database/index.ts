@@ -43,6 +43,7 @@ export {
   markOnboardingComplete,
   isOnboardingComplete,
 } from "@/lib/database/profiles.repository";
+export { upsertPushSubscription } from "@/lib/database/push-subscriptions.repository";
 export {
   fetchStandards,
   replaceStandards,

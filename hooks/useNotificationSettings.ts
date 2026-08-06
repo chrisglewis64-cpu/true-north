@@ -13,6 +13,7 @@ import {
   requestNotificationPermissionOnce,
   type NotificationPermissionState,
 } from "@/lib/notifications/permission";
+import { registerBrowserPushSubscription } from "@/lib/notifications/register-push";
 import {
   loadNotificationSettings,
   saveNotificationSettings,
@@ -76,6 +77,13 @@ export function useNotificationSettings() {
 
         setSettings(remote);
         saveNotificationSettings(session.id, remote);
+
+        if (
+          hasAnyReminderEnabled(remote) &&
+          getNotificationPermissionState() === "granted"
+        ) {
+          void registerBrowserPushSubscription(session.id);
+        }
       } catch (error) {
         console.error("[Notifications] Failed to restore preferences:", error);
         if (!cancelled) {
@@ -123,9 +131,19 @@ export function useNotificationSettings() {
       const enabling =
         patch.enabled === true && !hasAnyReminderEnabled(settings);
 
+      let nextPermission = permissionState;
+
       if (enabling) {
-        const nextPermission = await requestNotificationPermissionOnce();
+        nextPermission = await requestNotificationPermissionOnce();
         setPermissionState(nextPermission);
+      }
+
+      if (
+        patch.enabled === true &&
+        (nextPermission === "granted" ||
+          getNotificationPermissionState() === "granted")
+      ) {
+        void registerBrowserPushSubscription(session.id);
       }
 
       setSettings((current) => {
@@ -141,7 +159,7 @@ export function useNotificationSettings() {
         return next;
       });
     },
-    [persistSettings, settings]
+    [persistSettings, permissionState, session.id, settings]
   );
 
   return {
