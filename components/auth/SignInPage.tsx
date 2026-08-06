@@ -133,12 +133,12 @@ export function SignInPage() {
         </form>
 
         <p className="mt-8 text-center text-[15px] text-muted">
-          New here?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href={CREATE_ACCOUNT_PATH}
             className="text-foreground underline decoration-border-subtle underline-offset-4 transition-colors hover:decoration-muted"
           >
-            Create an account
+            Create account
           </Link>
         </p>
       </AuthShell>

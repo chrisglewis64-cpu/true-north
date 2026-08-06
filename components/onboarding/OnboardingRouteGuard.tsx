@@ -4,52 +4,54 @@ import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTrueNorth } from "@/context/TrueNorthContext";
 import {
-  CREATE_ACCOUNT_PATH,
+  isAuthPublicPath,
   ONBOARDING_PATH,
   SIGN_IN_PATH,
 } from "@/lib/auth/paths";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-
-const OPEN_PATHS = [
-  SIGN_IN_PATH,
-  CREATE_ACCOUNT_PATH,
-  ONBOARDING_PATH,
-  "/~offline",
-] as const;
 
 type OnboardingRouteGuardProps = {
   children: ReactNode;
 };
 
 /**
- * Authenticated users must finish onboarding before using the rest of the app.
+ * Client-side auth + onboarding gate.
+ * - Unauthenticated → Sign In
+ * - Authenticated but incomplete onboarding → /onboarding
  */
 export function OnboardingRouteGuard({ children }: OnboardingRouteGuardProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { hasCompletedOnboarding, session } = useTrueNorth();
 
+  const supabaseEnabled = isSupabaseConfigured();
   const isAuthenticated = session.id !== "session-local";
-  const isOpenPath = OPEN_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
-  );
+  const isPublic = isAuthPublicPath(pathname);
+
+  const mustSignIn = supabaseEnabled && !isAuthenticated && !isPublic;
   const mustOnboard =
-    isSupabaseConfigured() &&
+    supabaseEnabled &&
     isAuthenticated &&
     !hasCompletedOnboarding &&
-    !isOpenPath;
+    pathname !== ONBOARDING_PATH &&
+    !pathname.startsWith(`${ONBOARDING_PATH}/`) &&
+    !isPublic;
 
   useEffect(() => {
+    if (mustSignIn) {
+      router.replace(SIGN_IN_PATH);
+      return;
+    }
     if (mustOnboard) {
       router.replace(ONBOARDING_PATH);
     }
-  }, [mustOnboard, router]);
+  }, [mustOnboard, mustSignIn, router]);
 
-  if (mustOnboard) {
+  if (mustSignIn || mustOnboard) {
     return (
       <div className="flex min-h-dvh items-center justify-center px-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          Continuing setup…
+          {mustSignIn ? "Redirecting to Sign In…" : "Continuing setup…"}
         </p>
       </div>
     );

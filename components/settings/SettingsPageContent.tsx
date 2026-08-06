@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/navigation/BottomNav";
 import { NotificationSettingsSection } from "@/components/settings/NotificationSettingsSection";
 import { SectionCard, SectionLabel } from "@/components/ui/SectionCard";
 import { useTrueNorth } from "@/context/TrueNorthContext";
+import { SIGN_IN_PATH } from "@/lib/auth/paths";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -27,7 +28,7 @@ export function SettingsPageContent() {
         const supabase = createSupabaseBrowserClient();
         await supabase.auth.signOut();
       }
-      router.replace("/");
+      router.replace(SIGN_IN_PATH);
       router.refresh();
     } catch {
       setSigningOut(false);
