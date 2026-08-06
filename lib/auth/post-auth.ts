@@ -5,17 +5,17 @@ import { isOnboardingComplete } from "@/lib/database/profiles.repository";
 import { getLocalDateString } from "@/lib/database/utils";
 import {
   MORNING_COMMIT_PATH,
-  ONBOARDING_PATH,
   POST_AUTH_REDIRECT,
+  WELCOME_PATH,
 } from "@/lib/auth/paths";
 
 type Client = SupabaseClient<Database>;
 
 /**
  * Resolves where to send a user after authentication.
- * Incomplete onboarding → onboarding.
+ * Incomplete onboarding → welcome (once) / onboarding gate.
  * Missing today's commitment → Morning Commitment.
- * Otherwise → dashboard.
+ * Otherwise → Compass.
  */
 export async function resolvePostAuthPath(
   client: Client,
@@ -23,7 +23,7 @@ export async function resolvePostAuthPath(
 ): Promise<string> {
   const onboarded = await isOnboardingComplete(client, userId);
   if (!onboarded) {
-    return ONBOARDING_PATH;
+    return WELCOME_PATH;
   }
 
   const today = getLocalDateString();
