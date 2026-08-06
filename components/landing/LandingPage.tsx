@@ -39,6 +39,22 @@ export function LandingPage() {
           >
             Commit
           </Link>
+
+          <p className="mt-5 text-center text-[14px] text-muted">
+            <Link
+              href="/sign-in"
+              className="text-foreground/90 underline decoration-border-subtle underline-offset-4 transition-colors hover:decoration-muted"
+            >
+              Sign in
+            </Link>
+            <span className="mx-2 text-border-subtle">·</span>
+            <Link
+              href="/create-account"
+              className="text-foreground/90 underline decoration-border-subtle underline-offset-4 transition-colors hover:decoration-muted"
+            >
+              Create account
+            </Link>
+          </p>
         </div>
       </footer>
     </div>

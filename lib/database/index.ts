@@ -34,7 +34,11 @@ export {
   persistUpdateMission,
 } from "@/lib/database/persist-true-north-state";
 
-export { resolveUserSession } from "@/lib/database/profiles.repository";
+export {
+  resolveUserSession,
+  upsertProfile,
+  fetchProfile,
+} from "@/lib/database/profiles.repository";
 export { fetchStandards, seedStandardsIfEmpty } from "@/lib/database/standards.repository";
 export { fetchMissions, insertMission, updateMissionById, completeMissionById } from "@/lib/database/missions.repository";
 export { fetchMissionIntentForDate, upsertMissionIntent } from "@/lib/database/mission-intents.repository";
