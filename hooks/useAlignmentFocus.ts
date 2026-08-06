@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useTrueNorth } from "@/context/TrueNorthContext";
-import { useCompassAlignment } from "@/hooks/useCompassAlignment";
+import { useIdentityAlignment } from "@/hooks/useIdentityAlignment";
 import { useEvidenceEntries } from "@/hooks/useEvidenceEntries";
 import { getAlignmentFocus } from "@/lib/compass/alignment-focus";
 import { getLocalDateString } from "@/lib/database/utils";
@@ -15,7 +15,7 @@ export function useAlignmentFocus() {
     dailyDebriefHistory,
     missionIntentHistory,
   } = useTrueNorth();
-  const { established, alignment } = useCompassAlignment();
+  const { established, alignment } = useIdentityAlignment();
   const evidenceEntries = useEvidenceEntries();
   const today = getLocalDateString();
 

@@ -1,6 +1,7 @@
 import { getLocalDateString } from "@/lib/database/utils";
 import { getHeadingFromAlignment } from "@/lib/compass/alignment";
 import type { DatedDailyDebrief, DatedMissionIntent } from "@/lib/compass/types";
+import { shiftLocalDate } from "@/lib/identity-alignment/date-utils";
 import type { DailyDebrief } from "@/types/daily-debrief";
 import type { Mission } from "@/types/mission";
 import type { MissionIntent } from "@/types/mission-intent";
@@ -22,13 +23,6 @@ type AlignmentFocusInput = {
   missionIntentHistory: DatedMissionIntent[];
   evidenceCountToday: number;
 };
-
-function shiftLocalDate(isoDate: string, days: number): string {
-  const [year, month, day] = isoDate.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
-  date.setDate(date.getDate() + days);
-  return getLocalDateString(date);
-}
 
 function hasDebriefOnDate(
   history: DatedDailyDebrief[],
@@ -56,23 +50,24 @@ function standardsMissedThisWeek(history: DatedDailyDebrief[]): boolean {
 
 function statusLabelForHeading(heading: CompassHeading | null): string {
   if (!heading) {
-    return "Heading not yet established";
+    return "Identity Alignment not yet established";
   }
 
   switch (heading) {
     case "true_north":
-      return "On course";
+      return "Living Your Standard";
     case "drifting":
-      return "Slightly off course";
+      return "Minor Drift Detected";
     case "off_course":
+      return "Realigning";
     case "lost":
-      return "Off course";
+      return "Returning to True North";
   }
 }
 
 /**
  * Builds a lightweight alignment focus: status reasons + one recommendation.
- * Guides action — never reports scores.
+ * Guides action with identity language — never gamified metrics.
  */
 export function getAlignmentFocus(input: AlignmentFocusInput): AlignmentFocus {
   const today = getLocalDateString();
@@ -85,8 +80,10 @@ export function getAlignmentFocus(input: AlignmentFocusInput): AlignmentFocus {
   if (!input.established) {
     return {
       statusLabel: statusLabelForHeading(null),
-      reasons: ["Not enough Daily Debriefs yet to establish your heading."],
-      recommendation: "Complete today's debrief.",
+      reasons: [
+        "Begin with Morning Commitment and Daily Debrief to establish Identity Alignment.",
+      ],
+      recommendation: "Complete today's Morning Commitment.",
     };
   }
 
@@ -110,9 +107,9 @@ export function getAlignmentFocus(input: AlignmentFocusInput): AlignmentFocus {
   if (heading === "true_north") {
     return {
       statusLabel: statusLabelForHeading(heading),
-      reasons: ["Living in alignment with My Standard."],
+      reasons: ["Living in alignment with your Standard."],
       recommendation: hasDebriefToday
-        ? "Keep moving."
+        ? "Hold the line. Continue with quiet consistency."
         : "Complete today's debrief.",
     };
   }
@@ -120,10 +117,10 @@ export function getAlignmentFocus(input: AlignmentFocusInput): AlignmentFocus {
   const reasons: string[] = [];
 
   if (!hasIntentToday) {
-    reasons.push("Mission neglected today");
+    reasons.push("Morning Commitment not yet set today");
   }
   if (input.evidenceCountToday === 0) {
-    reasons.push("No evidence recorded");
+    reasons.push("No evidence recorded today");
   }
   if (standardsMissedThisWeek(input.dailyDebriefHistory)) {
     reasons.push("Standards missed this week");
@@ -136,11 +133,11 @@ export function getAlignmentFocus(input: AlignmentFocusInput): AlignmentFocus {
     reasons.push("A small correction will restore your bearing.");
   }
 
-  let recommendation = "Take the next right action.";
+  let recommendation = "Take the next right action toward your Standard.";
   if (!hasDebriefToday) {
     recommendation = "Complete today's debrief.";
   } else if (!hasIntentToday) {
-    recommendation = "Recommit to today's intent.";
+    recommendation = "Set today's Morning Commitment.";
   } else if (input.evidenceCountToday === 0) {
     recommendation = "Record one piece of evidence.";
   }

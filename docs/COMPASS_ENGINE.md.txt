@@ -2,128 +2,88 @@
 
 ## Purpose
 
-The Compass is the centrepiece of True North.
+The Compass is the emotional centre of True North.
 
-It is not a score.
+It is the living representation of identity and alignment.
 
-It is not a statistic.
+It answers:
 
-It answers one question:
+"How aligned are my actions with my standards?"
 
-"Am I becoming the man I said I would become?"
-
----
-
-## Philosophy
-
-The Compass measures alignment.
-
-Not achievement.
-
-Not productivity.
-
-Alignment with My Standard.
-
-The user should never chase numbers.
-
-The user should chase direction.
+"Am I becoming the person I committed to be?"
 
 ---
 
-## Compass States
+## Identity Alignment
 
-🟢 TRUE NORTH
+Identity Alignment is a measure of alignment between identity and behaviour — not productivity.
 
-Living consistently according to My Standard.
+Displayed as 0–100% on the instrument panel, with a seven-day trend.
 
----
-
-🟡 DRIFTING
-
-Small inconsistencies are appearing.
-
-A course correction is recommended.
+Never use gamified language: Score, XP, Level, Streak, Points.
 
 ---
 
-🟠 OFF COURSE
+## Calculation
 
-Recent actions no longer consistently align with My Standard.
+Implemented in `lib/identity-alignment/` — isolated from UI so weights can change without touching Compass components.
 
-Immediate attention is recommended.
+### Day score (equal pillars)
+
+1. Morning Commitment completed
+2. Mission progress
+3. Evidence recorded
+4. Daily Debrief completed
+
+### Temporal horizons
+
+| Horizon | Weight | Window |
+|---------|--------|--------|
+| Today's Alignment | 20% | Current local day |
+| Recent Alignment | 50% | Previous 30 local days (missing days = 0) |
+| Long-Term Character | 30% | Lifetime span from first activity |
+
+A single bad day barely moves the composite. Weeks of inconsistency produce visible drift. Lifetime changes slowly.
 
 ---
 
-🔴 LOST
+## Compass Behaviour
 
-Significant drift has occurred.
+| Alignment | Bearing |
+|-----------|---------|
+| 95–100% | Near True North |
+| 85–94% | Very slight drift |
+| 70–84% | Noticeable drift |
+| 50–69% | Clearly off course |
+| Below 50% | Significantly misaligned |
 
-Return to My Standard.
-
-One step at a time.
+Needle movement is subtle and elegant.
 
 ---
 
-## Dashboard
+## Instrument Panel
 
-The Compass is the largest element on the dashboard.
+After Morning Commitment, the Compass is the first thing users see.
 
 It displays:
 
-Compass
-
-Heading
-
-One sentence of guidance
-
-Example
-
-Stay the course.
+- Compass dial + needle
+- Identity Alignment %
+- Weekly trend (▲ / ▼)
+- Identity message (e.g. Living Your Standard, Minor Drift Detected, Realigning)
 
 ---
 
-## Alignment Report
+## Messaging Examples
 
-When the Compass is tapped it opens a full report.
+Living Your Standard
 
-The report contains:
+Returning to True North
 
-Current Heading
+Minor Drift Detected
 
-Strongest Standard
+Consistency Building Character
 
-Greatest Opportunity
+Realigning
 
-Current Drift
-
-Suggested Course Correction
-
-Mission Alignment
-
-Recent Progress
-
-Upcoming Focus
-
----
-
-## Future Version
-
-The Compass will calculate alignment using:
-
-Mission Intent
-
-Daily Debriefs
-
-Mission Progress
-
-Course Corrections
-
-Weekly Reviews
-
-The calculation will remain hidden.
-
-Only the Compass moves.
-
-Never display percentages.
-
-Never display scores.
+Back on Course

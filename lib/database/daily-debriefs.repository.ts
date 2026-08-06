@@ -11,7 +11,7 @@ type Client = SupabaseClient<Database>;
 export async function fetchRecentDailyDebriefs(
   client: Client,
   userId: string,
-  limit = 14
+  limit = 1000
 ): Promise<Array<{ debriefDate: string; debrief: DailyDebrief }>> {
   const { data, error } = await client
     .from("daily_debriefs")

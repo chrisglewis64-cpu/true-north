@@ -5,14 +5,18 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Compass } from "@/components/compass/Compass";
 import { AlignmentFocusContent } from "@/components/compass/AlignmentFocusContent";
 import { useAlignmentFocus } from "@/hooks/useAlignmentFocus";
-import { useCompassAlignment } from "@/hooks/useCompassAlignment";
+import { useIdentityAlignment } from "@/hooks/useIdentityAlignment";
 import {
   backdropTransition,
   contentRevealTransition,
 } from "@/lib/motion/transitions";
 
+/**
+ * Emotional centre of True North — Identity Alignment instrument panel.
+ * First thing users see after Morning Commitment.
+ */
 export function CompassDashboard() {
-  const { established, alignment, message } = useCompassAlignment();
+  const { established, alignment, message, trend } = useIdentityAlignment();
   const focus = useAlignmentFocus();
   const [open, setOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -48,6 +52,7 @@ export function CompassDashboard() {
           established={established}
           alignment={alignment}
           message={message}
+          trendLabel={trend?.label}
           size="large"
           showGuidance
         />
@@ -82,7 +87,7 @@ export function CompassDashboard() {
               key="alignment-modal"
               role="dialog"
               aria-modal="true"
-              aria-label="Alignment"
+              aria-label="Identity Alignment"
               initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={prefersReducedMotion ? undefined : { opacity: 0, y: 8 }}
