@@ -21,6 +21,7 @@ export interface Database {
           created_at: string;
           onboarding_completed_at: string | null;
           notification_preferences: Json;
+          timezone: string | null;
         };
         Insert: {
           id: string;
@@ -29,6 +30,7 @@ export interface Database {
           created_at?: string;
           onboarding_completed_at?: string | null;
           notification_preferences?: Json;
+          timezone?: string | null;
         };
         Update: {
           id?: string;
@@ -37,6 +39,7 @@ export interface Database {
           created_at?: string;
           onboarding_completed_at?: string | null;
           notification_preferences?: Json;
+          timezone?: string | null;
         };
         Relationships: [];
       };
@@ -67,6 +70,39 @@ export interface Database {
           auth?: string;
           created_at?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      notification_logs: {
+        Row: {
+          id: string;
+          user_id: string;
+          reminder_id: string;
+          period_key: string;
+          status: "sent" | "skipped_completed" | "failed";
+          endpoint: string | null;
+          error: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          reminder_id: string;
+          period_key: string;
+          status: "sent" | "skipped_completed" | "failed";
+          endpoint?: string | null;
+          error?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          reminder_id?: string;
+          period_key?: string;
+          status?: "sent" | "skipped_completed" | "failed";
+          endpoint?: string | null;
+          error?: string | null;
+          created_at?: string;
         };
         Relationships: [];
       };
