@@ -1,4 +1,10 @@
-export type NavItemId = "home" | "debrief" | "mission" | "evidence" | "review";
+export type NavItemId =
+  | "home"
+  | "debrief"
+  | "mission"
+  | "evidence"
+  | "review"
+  | "settings";
 
 export type NavItem = {
   id: NavItemId;
@@ -12,11 +18,24 @@ export const bottomNavItems: NavItem[] = [
   { id: "mission", label: "Mission", href: "/mission" },
   { id: "evidence", label: "Evidence", href: "/evidence" },
   { id: "review", label: "Review", href: "/review" },
+  { id: "settings", label: "Settings", href: "/settings" },
 ];
 
 export function isNavItemActive(pathname: string, item: NavItem): boolean {
   if (item.id === "home") {
     return pathname === "/operations" || pathname === "/dashboard";
+  }
+
+  if (item.id === "settings") {
+    return (
+      pathname === "/settings" ||
+      pathname.startsWith("/settings/") ||
+      pathname === "/about" ||
+      pathname === "/philosophy" ||
+      pathname === "/creed" ||
+      pathname === "/privacy" ||
+      pathname === "/terms"
+    );
   }
 
   return pathname === item.href || pathname.startsWith(`${item.href}/`);

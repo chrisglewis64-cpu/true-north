@@ -10,7 +10,7 @@ import {
   ValidationSummary,
   fieldErrorClass,
 } from "@/components/ui/ValidationMessage";
-import { ONBOARDING_PATH, SIGN_IN_PATH } from "@/lib/auth/paths";
+import { SIGN_IN_PATH, WELCOME_PATH } from "@/lib/auth/paths";
 import { upsertProfile } from "@/lib/database/profiles.repository";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -137,7 +137,7 @@ export function CreateAccountPage() {
           // Trigger may already have created the row; continue into the app.
         }
 
-        router.replace(ONBOARDING_PATH);
+        router.replace(WELCOME_PATH);
         router.refresh();
         return;
       }

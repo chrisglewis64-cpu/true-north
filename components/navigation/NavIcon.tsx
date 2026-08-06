@@ -11,7 +11,7 @@ export function NavIcon({ id, active }: NavIconProps) {
   switch (id) {
     case "home":
       return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
           <circle cx="12" cy="12" r="9" stroke={stroke} strokeWidth="1.5" />
           <circle cx="12" cy="12" r="2.5" fill={stroke} />
           <path
@@ -24,7 +24,7 @@ export function NavIcon({ id, active }: NavIconProps) {
       );
     case "debrief":
       return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
           <rect
             x="4"
             y="3"
@@ -44,7 +44,7 @@ export function NavIcon({ id, active }: NavIconProps) {
       );
     case "mission":
       return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
           <path
             d="M12 3L4 7v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V7l-8-4z"
             stroke={stroke}
@@ -62,7 +62,7 @@ export function NavIcon({ id, active }: NavIconProps) {
       );
     case "evidence":
       return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
           <rect
             x="4"
             y="4"
@@ -83,7 +83,7 @@ export function NavIcon({ id, active }: NavIconProps) {
       );
     case "review":
       return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
           <path
             d="M12 4a8 8 0 1 0 8 8"
             stroke={stroke}
@@ -96,6 +96,18 @@ export function NavIcon({ id, active }: NavIconProps) {
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
+          />
+        </svg>
+      );
+    case "settings":
+      return (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="12" cy="12" r="3" stroke={stroke} strokeWidth="1.5" />
+          <path
+            d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4l1.4-1.4M17 7l1.4-1.4"
+            stroke={stroke}
+            strokeWidth="1.5"
+            strokeLinecap="round"
           />
         </svg>
       );

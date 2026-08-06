@@ -34,6 +34,7 @@ export function createInitialTrueNorthState(): TrueNorthState {
     session: {
       id: "session-local",
       displayName: user.name,
+      email: null,
       startedAt: new Date().toISOString(),
       onboardingCompletedAt: new Date().toISOString(),
     },

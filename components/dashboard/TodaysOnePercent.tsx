@@ -3,6 +3,10 @@
 import { useTrueNorth } from "@/context/TrueNorthContext";
 import { SectionLabel } from "@/components/ui/SectionCard";
 
+/**
+ * Tomorrow's alignment note from debrief — kept for continuity.
+ * Prefer Today's Bearing on the Compass as the daily operational action.
+ */
 export function TodaysOnePercent() {
   const { todaysOnePercent } = useTrueNorth();
 
@@ -12,7 +16,7 @@ export function TodaysOnePercent() {
 
   return (
     <section className="animate-fade-in [animation-delay:160ms]">
-      <SectionLabel>Today&apos;s 1%</SectionLabel>
+      <SectionLabel>Tomorrow&apos;s Alignment</SectionLabel>
       <div className="rounded-2xl border border-accent/25 bg-accent-glow px-5 py-5 sm:px-6 sm:py-6">
         <p className="text-[15px] leading-relaxed text-foreground/90 sm:text-base">
           {todaysOnePercent.improvement}

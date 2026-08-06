@@ -12,12 +12,13 @@ export async function fetchProfile(
   userId: string
 ): Promise<{
   display_name: string;
+  email: string | null;
   created_at: string;
   onboarding_completed_at: string | null;
 } | null> {
   const { data, error } = await client
     .from("profiles")
-    .select("display_name, created_at, onboarding_completed_at")
+    .select("display_name, email, created_at, onboarding_completed_at")
     .eq("id", userId)
     .maybeSingle();
 
@@ -104,6 +105,7 @@ export async function resolveUserSession(client: Client): Promise<UserSession | 
     user.user_metadata?.display_name ??
     user.email?.split("@")[0] ??
     "Operator";
+  const email = profile?.email ?? user.email ?? null;
 
   if (!profile) {
     await upsertProfile(client, user.id, displayName, user.email);
@@ -113,6 +115,7 @@ export async function resolveUserSession(client: Client): Promise<UserSession | 
     user.id,
     displayName,
     profile?.created_at ?? user.created_at ?? new Date().toISOString(),
-    profile?.onboarding_completed_at ?? null
+    profile?.onboarding_completed_at ?? null,
+    email
   );
 }

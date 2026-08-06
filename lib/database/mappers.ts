@@ -165,11 +165,13 @@ export function mapAuthUserToSession(
   userId: string,
   displayName: string,
   startedAt: string,
-  onboardingCompletedAt: string | null = null
+  onboardingCompletedAt: string | null = null,
+  email: string | null = null
 ): UserSession {
   return {
     id: userId,
     displayName,
+    email,
     startedAt,
     onboardingCompletedAt,
   };

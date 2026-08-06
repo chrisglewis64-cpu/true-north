@@ -40,9 +40,9 @@ export const weeklyReviewPlaceholder: WeeklyReview = {
   biggestLesson:
     "Presence matters more than duration. Thirty focused minutes beats two distracted hours.",
   courseCorrection:
-    "Protect the 9:00 PM debrief. Do not rely on memory. Write it down before the day ends.",
+    "Protect the evening debrief. Honour today's bearing before the day ends.",
   planNextWeek:
-    "One family dinner. Phone in drawer by 8:30. Debrief every night without exception.",
+    "One family dinner. Phone away earlier. Debrief every night without exception.",
 };
 
 export const monthlyReviewPlaceholder: MonthlyReview = {
@@ -62,14 +62,14 @@ export const monthlyReviewPlaceholder: MonthlyReview = {
     "Kept my word on every client deliverable.",
   ],
   lessons: [
-    "Systems beat motivation when the week gets hard.",
-    "Small wins compound when recorded.",
+    "Alignment beats motivation when the week gets hard.",
+    "Small acts of integrity compound when recorded as evidence.",
     "Course corrections only work when written down the same night.",
   ],
   priorities: [
     "Protect evening debrief — non-negotiable.",
     "Advance family mission to Phase III.",
-    "Restore morning rhythm before phone.",
+    "Restore morning bearing before phone.",
   ],
 };
 

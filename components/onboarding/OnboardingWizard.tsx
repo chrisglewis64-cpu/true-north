@@ -197,11 +197,14 @@ export function OnboardingWizard() {
 
   if (step === 1) {
     return (
-      <OnboardingShell step={1} totalSteps={4} title="Welcome to True North.">
+      <OnboardingShell step={1} totalSteps={4} title="Define your Standard.">
         <div className="space-y-5 text-[17px] leading-relaxed text-muted">
-          <p>This is your personal operating system for intentional living.</p>
           <p>
-            Before using the app, define the standards you intend to live by.
+            Standards are the principles you live by. They rarely change.
+          </p>
+          <p>
+            Everything in True North — mission, bearings, evidence — serves
+            this identity.
           </p>
         </div>
         <button
@@ -209,7 +212,7 @@ export function OnboardingWizard() {
           onClick={() => setStep(2)}
           className="mt-10 flex h-14 w-full items-center justify-center rounded-2xl bg-accent font-mono text-sm font-medium uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-90 active:opacity-80 sm:h-16 sm:text-[15px]"
         >
-          Begin
+          Continue
         </button>
       </OnboardingShell>
     );
