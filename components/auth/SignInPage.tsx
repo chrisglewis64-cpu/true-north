@@ -10,10 +10,8 @@ import {
   ValidationSummary,
   fieldErrorClass,
 } from "@/components/ui/ValidationMessage";
-import {
-  CREATE_ACCOUNT_PATH,
-  POST_AUTH_REDIRECT,
-} from "@/lib/auth/paths";
+import { CREATE_ACCOUNT_PATH } from "@/lib/auth/paths";
+import { resolvePostAuthPath } from "@/lib/auth/post-auth";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -58,7 +56,7 @@ export function SignInPage() {
 
     try {
       const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
@@ -69,7 +67,12 @@ export function SignInPage() {
         return;
       }
 
-      router.replace(POST_AUTH_REDIRECT);
+      const userId = data.user?.id;
+      const path = userId
+        ? await resolvePostAuthPath(supabase, userId)
+        : "/operations";
+
+      router.replace(path);
       router.refresh();
     } catch {
       setSummary("Unable to sign in. Try again.");

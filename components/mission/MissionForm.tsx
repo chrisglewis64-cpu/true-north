@@ -25,6 +25,7 @@ type MissionFormProps = {
 const emptyValues: MissionInput = {
   name: "",
   purpose: "",
+  category: "",
   whyThisMatters: "",
   successCriteria: "",
   currentProgress: "Just started",

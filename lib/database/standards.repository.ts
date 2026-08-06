@@ -1,8 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/database/database.types";
 import { mapStandardRow } from "@/lib/database/mappers";
-import { createStandardsFromStatements } from "@/lib/true-north-defaults";
-import { theCode } from "@/lib/placeholder-data";
 import type { Standard } from "@/types/standard";
 
 type Client = SupabaseClient<Database>;
@@ -21,22 +19,36 @@ export async function fetchStandards(
   return (data ?? []).map(mapStandardRow);
 }
 
-export async function seedStandardsIfEmpty(
+/**
+ * Replaces all standards for a user with the provided ordered list.
+ * Used by first-time onboarding.
+ */
+export async function replaceStandards(
   client: Client,
-  userId: string
+  userId: string,
+  standards: Standard[]
 ): Promise<Standard[]> {
-  const existing = await fetchStandards(client, userId);
-  if (existing.length > 0) return existing;
+  const { error: deleteError } = await client
+    .from("standards")
+    .delete()
+    .eq("user_id", userId);
 
-  const principles = createStandardsFromStatements(theCode);
-  const rows = principles.map((standard) => ({
+  if (deleteError) throw deleteError;
+
+  if (standards.length === 0) {
+    return [];
+  }
+
+  const rows = standards.map((standard, index) => ({
     user_id: userId,
-    sort_order: standard.order,
-    statement: standard.statement,
+    sort_order: index + 1,
+    statement: standard.statement.trim(),
   }));
 
   const { data, error } = await client.from("standards").insert(rows).select("*");
 
   if (error) throw error;
-  return (data ?? []).map(mapStandardRow);
+  return (data ?? [])
+    .map(mapStandardRow)
+    .sort((a, b) => a.order - b.order);
 }

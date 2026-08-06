@@ -22,6 +22,7 @@ export interface Mission {
   id: string;
   name: string;
   purpose: string;
+  category: string;
   whyThisMatters: string;
   successCriteria: string;
   currentProgress: string;
@@ -43,6 +44,7 @@ export interface Mission {
 export interface MissionInput {
   name: string;
   purpose: string;
+  category: string;
   whyThisMatters: string;
   successCriteria: string;
   currentProgress: string;

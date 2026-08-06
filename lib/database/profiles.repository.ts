@@ -8,10 +8,14 @@ type Client = SupabaseClient<Database>;
 export async function fetchProfile(
   client: Client,
   userId: string
-): Promise<{ display_name: string; created_at: string } | null> {
+): Promise<{
+  display_name: string;
+  created_at: string;
+  onboarding_completed_at: string | null;
+} | null> {
   const { data, error } = await client
     .from("profiles")
-    .select("display_name, created_at")
+    .select("display_name, created_at, onboarding_completed_at")
     .eq("id", userId)
     .maybeSingle();
 
@@ -30,6 +34,27 @@ export async function upsertProfile(
   });
 
   if (error) throw error;
+}
+
+export async function markOnboardingComplete(
+  client: Client,
+  userId: string,
+  completedAt = new Date().toISOString()
+): Promise<void> {
+  const { error } = await client
+    .from("profiles")
+    .update({ onboarding_completed_at: completedAt })
+    .eq("id", userId);
+
+  if (error) throw error;
+}
+
+export async function isOnboardingComplete(
+  client: Client,
+  userId: string
+): Promise<boolean> {
+  const profile = await fetchProfile(client, userId);
+  return Boolean(profile?.onboarding_completed_at);
 }
 
 export async function resolveUserSession(client: Client): Promise<UserSession | null> {
@@ -54,6 +79,7 @@ export async function resolveUserSession(client: Client): Promise<UserSession | 
   return mapAuthUserToSession(
     user.id,
     displayName,
-    profile?.created_at ?? user.created_at ?? new Date().toISOString()
+    profile?.created_at ?? user.created_at ?? new Date().toISOString(),
+    profile?.onboarding_completed_at ?? null
   );
 }

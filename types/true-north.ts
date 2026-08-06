@@ -29,12 +29,15 @@ export interface TrueNorthContextValue extends TrueNorthState {
   currentMission: Mission | null;
   currentMissionStatus: MissionStatus | null;
   hasCompletedMorningCommit: boolean;
-  setTodaysMissionIntent: (intent: MissionIntent) => void;
+  hasCompletedOnboarding: boolean;
+  setMyStandard: (standards: Standard[]) => Promise<void>;
+  markOnboardingComplete: () => Promise<void>;
+  setTodaysMissionIntent: (intent: MissionIntent) => Promise<void>;
   setTodaysOnePercent: (value: DailyOnePercent) => void;
   setDailyDebriefSubmission: (value: DailyDebrief | null) => void;
   setDailyDebriefDraft: (value: DailyDebriefDraft | null) => void;
   updateDailyDebriefDraft: (partial: Partial<DailyDebriefDraft>) => void;
-  createMission: (input: MissionInput) => void;
+  createMission: (input: MissionInput) => Promise<void>;
   updateMission: (id: string, input: MissionInput) => void;
   completeMission: (id: string, lessonsLearned: string) => void;
   getMissionById: (id: string) => Mission | undefined;

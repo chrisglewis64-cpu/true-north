@@ -8,7 +8,7 @@ import {
 } from "@/lib/database/mission-intents.repository";
 import { fetchMissions } from "@/lib/database/missions.repository";
 import { resolveUserSession } from "@/lib/database/profiles.repository";
-import { seedStandardsIfEmpty } from "@/lib/database/standards.repository";
+import { fetchStandards } from "@/lib/database/standards.repository";
 import { getLocalDateString } from "@/lib/database/utils";
 import { createInitialTrueNorthState } from "@/lib/true-north-defaults";
 import type { TrueNorthState } from "@/types/true-north";
@@ -18,6 +18,7 @@ type Client = SupabaseClient<Database>;
 /**
  * Loads persisted True North state for the authenticated user.
  * Falls back to defaults for any missing daily records.
+ * Standards are never auto-seeded — users create them in onboarding.
  */
 export async function loadTrueNorthState(
   client: Client
@@ -30,7 +31,7 @@ export async function loadTrueNorthState(
 
   const [myStandard, missions, todaysMissionIntent, todaysOnePercent, debriefSubmission, dailyDebriefHistory, missionIntentHistory] =
     await Promise.all([
-      seedStandardsIfEmpty(client, session.id),
+      fetchStandards(client, session.id),
       fetchMissions(client, session.id),
       fetchMissionIntentForDate(client, session.id, today),
       fetchDailyOnePercentForDate(client, session.id, today),

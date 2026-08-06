@@ -19,6 +19,7 @@ export function mapMissionRow(row: Tables<"missions">): Mission {
     id: row.id,
     name: row.name,
     purpose: row.purpose,
+    category: row.category ?? "",
     whyThisMatters: row.why_this_matters,
     successCriteria: row.success_criteria,
     currentProgress: row.current_progress,
@@ -42,6 +43,7 @@ export function mapMissionToInsert(
     user_id: userId,
     name: mission.name,
     purpose: mission.purpose,
+    category: mission.category || "",
     why_this_matters: mission.whyThisMatters,
     success_criteria: mission.successCriteria,
     current_progress: mission.currentProgress,
@@ -70,6 +72,7 @@ export function mapMissionInputToUpdate(
   return {
     name: input.name,
     purpose: input.purpose,
+    category: input.category || "",
     why_this_matters: input.whyThisMatters,
     success_criteria: input.successCriteria,
     current_progress: input.currentProgress,
@@ -161,11 +164,13 @@ export function mapDailyOnePercentToInsert(
 export function mapAuthUserToSession(
   userId: string,
   displayName: string,
-  startedAt: string
+  startedAt: string,
+  onboardingCompletedAt: string | null = null
 ): UserSession {
   return {
     id: userId,
     displayName,
     startedAt,
+    onboardingCompletedAt,
   };
 }

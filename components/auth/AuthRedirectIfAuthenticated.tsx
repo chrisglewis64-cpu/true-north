@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { POST_AUTH_REDIRECT } from "@/lib/auth/paths";
+import { resolvePostAuthPath } from "@/lib/auth/post-auth";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -27,13 +27,14 @@ export function AuthRedirectIfAuthenticated({
     let cancelled = false;
     const supabase = createSupabaseBrowserClient();
 
-    void supabase.auth.getUser().then(({ data }) => {
+    void supabase.auth.getUser().then(async ({ data }) => {
       if (cancelled) {
         return;
       }
 
       if (data.user) {
-        router.replace(POST_AUTH_REDIRECT);
+        const path = await resolvePostAuthPath(supabase, data.user.id);
+        router.replace(path);
         return;
       }
 

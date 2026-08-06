@@ -18,16 +18,19 @@ export interface Database {
           id: string;
           display_name: string;
           created_at: string;
+          onboarding_completed_at: string | null;
         };
         Insert: {
           id: string;
           display_name: string;
           created_at?: string;
+          onboarding_completed_at?: string | null;
         };
         Update: {
           id?: string;
           display_name?: string;
           created_at?: string;
+          onboarding_completed_at?: string | null;
         };
         Relationships: [];
       };
@@ -61,6 +64,7 @@ export interface Database {
           user_id: string;
           name: string;
           purpose: string;
+          category: string;
           why_this_matters: string;
           success_criteria: string;
           current_progress: string;
@@ -78,6 +82,7 @@ export interface Database {
           user_id: string;
           name: string;
           purpose: string;
+          category?: string;
           why_this_matters?: string;
           success_criteria?: string;
           current_progress: string;
@@ -95,6 +100,7 @@ export interface Database {
           user_id?: string;
           name?: string;
           purpose?: string;
+          category?: string;
           why_this_matters?: string;
           success_criteria?: string;
           current_progress?: string;

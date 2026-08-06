@@ -38,8 +38,13 @@ export {
   resolveUserSession,
   upsertProfile,
   fetchProfile,
+  markOnboardingComplete,
+  isOnboardingComplete,
 } from "@/lib/database/profiles.repository";
-export { fetchStandards, seedStandardsIfEmpty } from "@/lib/database/standards.repository";
+export {
+  fetchStandards,
+  replaceStandards,
+} from "@/lib/database/standards.repository";
 export { fetchMissions, insertMission, updateMissionById, completeMissionById } from "@/lib/database/missions.repository";
 export { fetchMissionIntentForDate, upsertMissionIntent } from "@/lib/database/mission-intents.repository";
 export { fetchDailyDebriefForDate, upsertDailyDebrief } from "@/lib/database/daily-debriefs.repository";

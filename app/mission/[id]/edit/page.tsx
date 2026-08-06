@@ -32,6 +32,7 @@ export default function EditMissionPage({ params }: EditMissionPageProps) {
   const initialValues: MissionInput = {
     name: mission.name,
     purpose: mission.purpose,
+    category: mission.category,
     whyThisMatters: mission.whyThisMatters,
     successCriteria: mission.successCriteria,
     currentProgress: mission.currentProgress,

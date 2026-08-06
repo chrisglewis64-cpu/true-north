@@ -10,7 +10,7 @@ import {
   ValidationSummary,
   fieldErrorClass,
 } from "@/components/ui/ValidationMessage";
-import { POST_AUTH_REDIRECT, SIGN_IN_PATH } from "@/lib/auth/paths";
+import { ONBOARDING_PATH, SIGN_IN_PATH } from "@/lib/auth/paths";
 import { upsertProfile } from "@/lib/database/profiles.repository";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -98,7 +98,7 @@ export function CreateAccountPage() {
           // Trigger may already have created the row; continue into the app.
         }
 
-        router.replace(POST_AUTH_REDIRECT);
+        router.replace(ONBOARDING_PATH);
         router.refresh();
         return;
       }
@@ -142,7 +142,7 @@ export function CreateAccountPage() {
     <AuthRedirectIfAuthenticated>
       <AuthShell
         title="Create account."
-        subtitle="Begin with identity. Your Standard starts here."
+        subtitle="Create your account, then set up your Standard and Mission."
       >
         <form onSubmit={(event) => void handleSubmit(event)} className="space-y-5">
           <ValidationSummary message={summary} />

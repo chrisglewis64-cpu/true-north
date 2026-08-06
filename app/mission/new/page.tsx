@@ -13,8 +13,8 @@ export default function NewMissionPage() {
   const { missions, createMission } = useTrueNorth();
   const willBeUpcoming = hasActiveMission(missions);
 
-  function handleCreate(input: MissionInput) {
-    createMission(input);
+  async function handleCreate(input: MissionInput) {
+    await createMission(input);
     router.push("/mission");
   }
 

@@ -1,9 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import { SectionLabel } from "@/components/ui/SectionCard";
 import { MyStandardCard } from "@/components/landing/MyStandardCard";
-import { currentCampaign } from "@/lib/placeholder-data";
+import { useTrueNorth } from "@/context/TrueNorthContext";
 
+/**
+ * Daily identity screen — not account creation.
+ * First-time setup lives under /onboarding.
+ */
 export function LandingPage() {
+  const { currentMission, session } = useTrueNorth();
+
   return (
     <div className="flex min-h-dvh flex-col">
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-6 pb-8 pt-12 sm:max-w-xl sm:px-8 sm:pt-16 lg:max-w-2xl lg:pt-20">
@@ -23,10 +31,21 @@ export function LandingPage() {
           <MyStandardCard />
 
           <div className="animate-fade-in [animation-delay:160ms]">
-            <SectionLabel>Current Campaign</SectionLabel>
-            <p className="text-[17px] font-medium leading-relaxed tracking-tight text-foreground/90 sm:text-lg">
-              {currentCampaign.statement}
-            </p>
+            <SectionLabel>Current Mission</SectionLabel>
+            {currentMission ? (
+              <>
+                <p className="text-[17px] font-medium leading-relaxed tracking-tight text-foreground/90 sm:text-lg">
+                  {currentMission.name}
+                </p>
+                <p className="mt-2 text-[15px] leading-relaxed text-muted">
+                  {currentMission.purpose}
+                </p>
+              </>
+            ) : (
+              <p className="text-[15px] leading-relaxed text-muted">
+                No active mission yet.
+              </p>
+            )}
           </div>
         </div>
       </main>
@@ -40,21 +59,27 @@ export function LandingPage() {
             Commit
           </Link>
 
-          <p className="mt-5 text-center text-[14px] text-muted">
-            <Link
-              href="/sign-in"
-              className="text-foreground/90 underline decoration-border-subtle underline-offset-4 transition-colors hover:decoration-muted"
-            >
-              Sign in
-            </Link>
-            <span className="mx-2 text-border-subtle">·</span>
-            <Link
-              href="/create-account"
-              className="text-foreground/90 underline decoration-border-subtle underline-offset-4 transition-colors hover:decoration-muted"
-            >
-              Create account
-            </Link>
-          </p>
+          {session.id === "session-local" ? (
+            <p className="mt-5 text-center text-[14px] text-muted">
+              <Link
+                href="/sign-in"
+                className="text-foreground/90 underline decoration-border-subtle underline-offset-4 transition-colors hover:decoration-muted"
+              >
+                Sign in
+              </Link>
+              <span className="mx-2 text-border-subtle">·</span>
+              <Link
+                href="/create-account"
+                className="text-foreground/90 underline decoration-border-subtle underline-offset-4 transition-colors hover:decoration-muted"
+              >
+                Create account
+              </Link>
+            </p>
+          ) : (
+            <p className="mt-5 text-center text-[14px] text-muted">
+              {session.displayName}
+            </p>
+          )}
         </div>
       </footer>
     </div>

@@ -16,8 +16,12 @@ import {
   persistDailyDebrief,
   persistDailyOnePercent,
   persistMissionIntent,
+  markOnboardingComplete as persistOnboardingComplete,
+  replaceStandards,
 } from "@/lib/database";
-import { createInitialTrueNorthState } from "@/lib/true-north-defaults";
+import {
+  createInitialTrueNorthState,
+} from "@/lib/true-north-defaults";
 import {
   DEFAULT_MISSION_STATUS,
   resolveMissionProgressStatus,
@@ -40,6 +44,7 @@ import type { DailyDebrief } from "@/types/daily-debrief";
 import type { DailyOnePercent } from "@/types/one-percent";
 import type { Mission, MissionInput } from "@/types/mission";
 import type { MissionIntent } from "@/types/mission-intent";
+import type { Standard } from "@/types/standard";
 import type { UserSession } from "@/types/session";
 import type { TrueNorthContextValue } from "@/types/true-north";
 import type { TrueNorthState } from "@/types/true-north";
@@ -58,7 +63,7 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
   );
   const sessionRef = useRef(initial.session);
 
-  const [myStandard, setMyStandard] = useState(initial.myStandard);
+  const [myStandard, setMyStandardState] = useState(initial.myStandard);
   const [todaysMissionIntent, setTodaysMissionIntentState] = useState(
     initial.todaysMissionIntent
   );
@@ -102,6 +107,8 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     [todaysMissionIntent, missionIntentHistory]
   );
 
+  const onboardingComplete = Boolean(session.onboardingCompletedAt);
+
   function persistLocalSession(
     next: Pick<
       TrueNorthState,
@@ -131,7 +138,7 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
           sessionRef.current = persisted.session;
           setSession(persisted.session);
           setMissions(persisted.missions);
-          setMyStandard(persisted.myStandard);
+          setMyStandardState(persisted.myStandard);
           setTodaysMissionIntentState(persisted.todaysMissionIntent);
           setTodaysOnePercentState(persisted.todaysOnePercent);
           setDailyDebriefSubmissionState(persisted.dailyDebrief.submission);
@@ -154,8 +161,29 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
 
     void hydrateFromSupabase();
 
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        void hydrateFromSupabase();
+      }
+      if (event === "SIGNED_OUT") {
+        const defaults = createInitialTrueNorthState();
+        sessionRef.current = defaults.session;
+        setSession(defaults.session);
+        setMissions(defaults.missions);
+        setMyStandardState(defaults.myStandard);
+        setTodaysMissionIntentState(null);
+        setDailyDebriefSubmissionState(null);
+        setDailyDebriefDraft(null);
+        setDailyDebriefHistory([]);
+        setMissionIntentHistory([]);
+      }
+    });
+
     return () => {
       cancelled = true;
+      subscription.unsubscribe();
     };
   }, [supabaseEnabled]);
 
@@ -168,7 +196,52 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     });
   }
 
-  function setTodaysMissionIntent(intent: MissionIntent) {
+  async function persistAuthenticated(
+    task: (userId: string) => Promise<void>
+  ): Promise<void> {
+    const activeSession = sessionRef.current;
+    if (!supabaseRef.current || !isAuthenticatedSession(activeSession)) {
+      return;
+    }
+
+    await task(activeSession.id);
+  }
+
+  async function setMyStandard(standards: Standard[]) {
+    const normalized = standards.map((standard, index) => ({
+      ...standard,
+      order: index + 1,
+      statement: standard.statement.trim(),
+    }));
+    setMyStandardState(normalized);
+
+    await persistAuthenticated(async (userId) => {
+      const saved = await replaceStandards(
+        supabaseRef.current!,
+        userId,
+        normalized
+      );
+      setMyStandardState(saved);
+    });
+  }
+
+  async function markOnboardingComplete() {
+    const completedAt = new Date().toISOString();
+    setSession((current) => ({
+      ...current,
+      onboardingCompletedAt: completedAt,
+    }));
+    sessionRef.current = {
+      ...sessionRef.current,
+      onboardingCompletedAt: completedAt,
+    };
+
+    await persistAuthenticated((userId) =>
+      persistOnboardingComplete(supabaseRef.current!, userId, completedAt)
+    );
+  }
+
+  async function setTodaysMissionIntent(intent: MissionIntent) {
     const today = getLocalDateString();
     const nextHistory = upsertDatedMissionIntent(
       missionIntentHistory,
@@ -183,7 +256,8 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
       dailyDebriefHistory,
       missionIntentHistory: nextHistory,
     });
-    persistIfAuthenticated((userId) =>
+
+    await persistAuthenticated((userId) =>
       persistMissionIntent(supabaseRef.current!, userId, intent)
     );
   }
@@ -223,12 +297,15 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     return missions.find((mission) => mission.id === id);
   }
 
-  function createMission(input: MissionInput) {
+  async function createMission(input: MissionInput) {
+    const now = new Date().toISOString();
+    let created: Mission | null = null;
+
     setMissions((current) => {
-      const now = new Date().toISOString();
       const newMission: Mission = {
         id: createMissionUuid(),
         ...input,
+        category: input.category || "",
         status: resolveNewMissionStatus(current),
         missionStatus: input.missionStatus ?? DEFAULT_MISSION_STATUS,
         statusSource: "manual",
@@ -237,13 +314,20 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
         createdAt: now,
         completedAt: null,
       };
-
-      persistIfAuthenticated(async (userId) => {
-        await missionsService.create(supabaseRef.current!, userId, newMission);
-      });
-
+      created = newMission;
       return [...current, newMission];
     });
+
+    if (!created) return;
+
+    try {
+      await persistAuthenticated(async (userId) => {
+        await missionsService.create(supabaseRef.current!, userId, created!);
+      });
+    } catch (error) {
+      console.error("[TrueNorth] Persistence failed:", error);
+      throw error;
+    }
   }
 
   function updateMission(id: string, input: MissionInput) {
@@ -307,6 +391,9 @@ export function TrueNorthProvider({ children }: { children: ReactNode }) {
     currentMission,
     currentMissionStatus,
     hasCompletedMorningCommit: morningCommitComplete,
+    hasCompletedOnboarding: onboardingComplete,
+    setMyStandard,
+    markOnboardingComplete,
     setTodaysMissionIntent,
     setTodaysOnePercent,
     setDailyDebriefSubmission,

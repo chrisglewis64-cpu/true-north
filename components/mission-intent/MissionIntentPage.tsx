@@ -76,7 +76,7 @@ export function MissionIntentPage() {
     const finalCommitment =
       mode === "custom" ? customText.trim() : suggestion.trim();
 
-    setTodaysMissionIntent({
+    void setTodaysMissionIntent({
       commitment: finalCommitment,
       source: mode === "custom" ? "custom" : "suggested",
       createdAt: new Date().toISOString(),

@@ -6,6 +6,7 @@ export const placeholderMissions: Mission[] = [
     name: "Lead My Family With Integrity",
     purpose:
       "Build a home rooted in faith, discipline, and unconditional presence.",
+    category: "Family",
     whyThisMatters:
       "My family comes before everything except God. This season strengthens who I am as a husband and father.",
     successCriteria:
@@ -24,6 +25,7 @@ export const placeholderMissions: Mission[] = [
     id: "mission-2",
     name: "Discipline in My Work",
     purpose: "Pursue excellence and finish what I start in every project.",
+    category: "Work",
     whyThisMatters:
       "I pursue excellence in everything I do. My work reflects my character.",
     successCriteria:
@@ -42,6 +44,7 @@ export const placeholderMissions: Mission[] = [
     id: "mission-3",
     name: "Morning Presence With God",
     purpose: "Walk with God before the day begins.",
+    category: "Faith",
     whyThisMatters: "I walk with God. Everything else flows from this.",
     successCriteria: "Daily prayer before phone. Scripture every morning.",
     currentProgress: "Completed — 90 days consistent",
