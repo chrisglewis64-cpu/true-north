@@ -69,8 +69,21 @@ It displays:
 
 - Compass dial + needle
 - Identity Alignment %
+- Heading label (e.g. Living Your Standard)
 - Weekly trend (▲ / ▼)
-- Identity message (e.g. Living Your Standard, Minor Drift Detected, Realigning)
+- Identity Insight — one coaching sentence (why + next action)
+
+---
+
+## Identity Insight
+
+Active coach beneath Identity Alignment.
+
+Rule-based today (`lib/identity-insight/`); provider interface allows AI later without UI changes.
+
+Tone: trusted mentor — positive, constructive, action-oriented. Never shame or guilt.
+
+Focus priority: Morning Commitment → Debrief → Evidence → Mission → reinforce when strong.
 
 ---
 

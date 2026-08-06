@@ -8,7 +8,8 @@ import { useAlignmentFocus } from "@/hooks/useAlignmentFocus";
 import { useIdentityAlignment } from "@/hooks/useIdentityAlignment";
 
 export function AlignmentReportPage() {
-  const { established, alignment, message, trend } = useIdentityAlignment();
+  const { established, alignment, message, trend, insight } =
+    useIdentityAlignment();
   const focus = useAlignmentFocus();
 
   return (
@@ -31,8 +32,9 @@ export function AlignmentReportPage() {
               alignment={alignment}
               message={message}
               trendLabel={trend?.label}
+              insight={insight}
               size="medium"
-              showGuidance
+              showInsight
             />
           </div>
         </div>

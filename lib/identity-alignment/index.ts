@@ -20,3 +20,5 @@ export {
   type IdentityAlignmentHorizons,
   type IdentityAlignmentTrend,
 } from "@/lib/identity-alignment/types";
+
+export type { IdentityInsight } from "@/lib/identity-insight";

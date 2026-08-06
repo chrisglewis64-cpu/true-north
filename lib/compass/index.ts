@@ -30,3 +30,9 @@ export {
   IDENTITY_ALIGNMENT_WEIGHTS,
   type IdentityAlignmentResult,
 } from "@/lib/identity-alignment";
+
+export {
+  getIdentityInsight,
+  setIdentityInsightProvider,
+  type IdentityInsight,
+} from "@/lib/identity-insight";

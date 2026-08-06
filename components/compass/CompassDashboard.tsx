@@ -16,7 +16,8 @@ import {
  * First thing users see after Morning Commitment.
  */
 export function CompassDashboard() {
-  const { established, alignment, message, trend } = useIdentityAlignment();
+  const { established, alignment, message, trend, insight } =
+    useIdentityAlignment();
   const focus = useAlignmentFocus();
   const [open, setOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -53,8 +54,9 @@ export function CompassDashboard() {
           alignment={alignment}
           message={message}
           trendLabel={trend?.label}
+          insight={insight}
           size="large"
-          showGuidance
+          showInsight
         />
       </div>
 

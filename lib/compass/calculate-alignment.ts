@@ -25,6 +25,7 @@ export type CalculateAlignmentResult = {
   message?: string;
   trend?: IdentityAlignmentResult["trend"];
   horizons?: IdentityAlignmentResult["horizons"];
+  insight?: IdentityAlignmentResult["insight"];
 };
 
 export function calculateAlignment(
@@ -38,6 +39,7 @@ export function calculateAlignment(
     message: result.message,
     trend: result.trend,
     horizons: result.horizons,
+    insight: result.insight,
   };
 }
 

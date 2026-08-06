@@ -29,8 +29,13 @@ export type IdentityAlignmentResult = {
   alignment: number | null;
   horizons: IdentityAlignmentHorizons | null;
   trend: IdentityAlignmentTrend | null;
-  /** Identity-centred message for the instrument panel. */
+  /**
+   * Short identity label for the heading band (e.g. Living Your Standard).
+   * Not the coaching sentence — that lives in `insight`.
+   */
   message: string;
+  /** Active coaching sentence — UI reads `insight.text` only. */
+  insight: import("@/lib/identity-insight").IdentityInsight;
 };
 
 export const RECENT_ALIGNMENT_DAYS = 30;
