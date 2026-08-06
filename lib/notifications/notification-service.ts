@@ -1,10 +1,11 @@
+import {
+  getNotificationPermissionState,
+  requestNotificationPermissionOnce,
+  type NotificationPermissionState,
+} from "@/lib/notifications/permission";
 import type { NotificationSettings } from "@/types/notifications";
 
-export type NotificationPermissionState =
-  | "granted"
-  | "denied"
-  | "default"
-  | "unsupported";
+export type { NotificationPermissionState };
 
 /**
  * Abstraction for scheduling reminders.
@@ -19,19 +20,11 @@ export interface NotificationService {
 
 export const placeholderNotificationService: NotificationService = {
   getPermissionState() {
-    if (typeof window === "undefined" || !("Notification" in window)) {
-      return "unsupported";
-    }
-
-    return Notification.permission;
+    return getNotificationPermissionState();
   },
 
   async requestPermission() {
-    if (typeof window === "undefined" || !("Notification" in window)) {
-      return "unsupported";
-    }
-
-    return Notification.requestPermission();
+    return requestNotificationPermissionOnce();
   },
 
   async syncSchedules(settings) {

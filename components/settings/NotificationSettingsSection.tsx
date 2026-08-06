@@ -24,8 +24,13 @@ const REMINDER_ORDER: NotificationReminderId[] = [
 const DAY_OF_MONTH_OPTIONS = Array.from({ length: 31 }, (_, index) => index + 1);
 
 export function NotificationSettingsSection() {
-  const { settings, updateReminder, isLoading, saveError } =
-    useNotificationSettings();
+  const {
+    settings,
+    updateReminder,
+    isLoading,
+    saveError,
+    permissionMessage,
+  } = useNotificationSettings();
 
   function toggleDay(id: NotificationReminderId, day: WeekdayIndex) {
     const current = settings[id].days ?? [];
@@ -33,7 +38,7 @@ export function NotificationSettingsSection() {
       ? current.filter((value) => value !== day)
       : [...current, day].sort((a, b) => a - b);
 
-    updateReminder(id, {
+    void updateReminder(id, {
       days: next.length > 0 ? (next as WeekdayIndex[]) : [day],
     });
   }
@@ -49,6 +54,12 @@ export function NotificationSettingsSection() {
         {isLoading ? (
           <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
             Restoring preferences…
+          </p>
+        ) : null}
+
+        {permissionMessage ? (
+          <p className="text-[14px] leading-relaxed text-muted">
+            {permissionMessage}
           </p>
         ) : null}
 
@@ -82,7 +93,9 @@ export function NotificationSettingsSection() {
                       checked={preference.enabled}
                       disabled={isLoading}
                       onChange={(event) =>
-                        updateReminder(id, { enabled: event.target.checked })
+                        void updateReminder(id, {
+                          enabled: event.target.checked,
+                        })
                       }
                       className="peer sr-only"
                     />
@@ -104,7 +117,7 @@ export function NotificationSettingsSection() {
                     value={preference.time}
                     disabled={!preference.enabled || isLoading}
                     onChange={(event) =>
-                      updateReminder(id, { time: event.target.value })
+                      void updateReminder(id, { time: event.target.value })
                     }
                     className="rounded-xl border border-border bg-background px-3 py-2 font-mono text-sm text-foreground disabled:opacity-40"
                   />
@@ -154,7 +167,7 @@ export function NotificationSettingsSection() {
                       value={preference.dayOfMonth ?? 1}
                       disabled={!preference.enabled || isLoading}
                       onChange={(event) =>
-                        updateReminder(id, {
+                        void updateReminder(id, {
                           dayOfMonth: Number(event.target.value),
                         })
                       }
@@ -183,7 +196,7 @@ export function NotificationSettingsSection() {
                       value={annualDateToInputValue(preference.date)}
                       disabled={!preference.enabled || isLoading}
                       onChange={(event) =>
-                        updateReminder(id, {
+                        void updateReminder(id, {
                           date: annualDateFromInputValue(event.target.value),
                         })
                       }

@@ -8,6 +8,12 @@ import {
 } from "@/lib/database/profiles.repository";
 import { DEFAULT_NOTIFICATION_SETTINGS } from "@/lib/notifications/defaults";
 import {
+  getNotificationPermissionMessage,
+  getNotificationPermissionState,
+  requestNotificationPermissionOnce,
+  type NotificationPermissionState,
+} from "@/lib/notifications/permission";
+import {
   loadNotificationSettings,
   saveNotificationSettings,
 } from "@/lib/notifications/storage";
@@ -23,6 +29,10 @@ function isAuthenticatedSession(sessionId: string): boolean {
   return sessionId !== "session-local";
 }
 
+function hasAnyReminderEnabled(settings: NotificationSettings): boolean {
+  return Object.values(settings).some((reminder) => reminder.enabled);
+}
+
 export function useNotificationSettings() {
   const { session } = useTrueNorth();
   const [settings, setSettings] = useState<NotificationSettings>(() =>
@@ -32,6 +42,14 @@ export function useNotificationSettings() {
     () => isSupabaseConfigured() && isAuthenticatedSession(session.id)
   );
   const [saveError, setSaveError] = useState<string>();
+  const [permissionState, setPermissionState] =
+    useState<NotificationPermissionState>(() =>
+      getNotificationPermissionState()
+    );
+
+  useEffect(() => {
+    setPermissionState(getNotificationPermissionState());
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,10 +116,18 @@ export function useNotificationSettings() {
   );
 
   const updateReminder = useCallback(
-    (
+    async (
       id: NotificationReminderId,
       patch: Partial<NotificationReminderPreference>
     ) => {
+      const enabling =
+        patch.enabled === true && !hasAnyReminderEnabled(settings);
+
+      if (enabling) {
+        const nextPermission = await requestNotificationPermissionOnce();
+        setPermissionState(nextPermission);
+      }
+
       setSettings((current) => {
         const next: NotificationSettings = {
           ...current,
@@ -115,7 +141,7 @@ export function useNotificationSettings() {
         return next;
       });
     },
-    [persistSettings]
+    [persistSettings, settings]
   );
 
   return {
@@ -123,5 +149,7 @@ export function useNotificationSettings() {
     updateReminder,
     isLoading,
     saveError,
+    permissionState,
+    permissionMessage: getNotificationPermissionMessage(permissionState),
   };
 }
