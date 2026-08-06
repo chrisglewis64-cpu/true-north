@@ -77,14 +77,53 @@ export function CreateAccountPage() {
         },
       });
 
+      // TEMP: inspect complete Supabase signUp response
+      console.log("[create-account] signUp data", data);
+      console.log("[create-account] signUp error", error);
+      console.log("[create-account] signUp response", {
+        data: {
+          user: data.user
+            ? {
+                id: data.user.id,
+                email: data.user.email,
+                identities: data.user.identities?.length ?? 0,
+              }
+            : null,
+          session: data.session
+            ? {
+                userId: data.session.user?.id,
+                hasAccessToken: Boolean(data.session.access_token),
+              }
+            : null,
+        },
+        error: error
+          ? {
+              name: error.name,
+              message: error.message,
+              status: error.status,
+              code: error.code,
+            }
+          : null,
+      });
+
       if (error) {
-        setSummary(error.message);
+        const message =
+          error.message && error.message !== "{}"
+            ? error.message
+            : error.status
+              ? `Account creation failed (status ${error.status}).`
+              : "Unable to create your account. Try again.";
+        setSummary(message);
         setSubmitting(false);
         return;
       }
 
       const user = data.user;
       if (!user) {
+        console.log(
+          "[create-account] signUp returned no error but no user",
+          data
+        );
         setSummary("Account could not be created. Try again.");
         setSubmitting(false);
         return;
