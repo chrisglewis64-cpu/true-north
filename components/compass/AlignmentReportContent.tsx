@@ -2,7 +2,7 @@
 
 import { ReviewProse, ReviewSection } from "@/components/review/ReviewSection";
 import { SectionLabel } from "@/components/ui/SectionCard";
-import { useCompassAlignment } from "@/hooks/useCompassAlignment";
+import { useIdentityAlignment } from "@/hooks/useIdentityAlignment";
 import {
   getAlignmentReport,
   getCompassHeadingOption,
@@ -16,7 +16,7 @@ type AlignmentReportContentProps = {
 export function AlignmentReportContent({
   showHeader = true,
 }: AlignmentReportContentProps) {
-  const { established, alignment } = useCompassAlignment();
+  const { established, alignment } = useIdentityAlignment();
   const heading =
     established && alignment !== null
       ? getHeadingFromAlignment(alignment)

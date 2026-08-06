@@ -5,10 +5,11 @@ import { BottomNav } from "@/components/navigation/BottomNav";
 import { Compass } from "@/components/compass/Compass";
 import { AlignmentFocusContent } from "@/components/compass/AlignmentFocusContent";
 import { useAlignmentFocus } from "@/hooks/useAlignmentFocus";
-import { useCompassAlignment } from "@/hooks/useCompassAlignment";
+import { useIdentityAlignment } from "@/hooks/useIdentityAlignment";
 
 export function AlignmentReportPage() {
-  const { established, alignment, message } = useCompassAlignment();
+  const { established, alignment, message, trend, insight } =
+    useIdentityAlignment();
   const focus = useAlignmentFocus();
 
   return (
@@ -30,8 +31,10 @@ export function AlignmentReportPage() {
               established={established}
               alignment={alignment}
               message={message}
+              trendLabel={trend?.label}
+              insight={insight}
               size="medium"
-              showGuidance
+              showInsight
             />
           </div>
         </div>

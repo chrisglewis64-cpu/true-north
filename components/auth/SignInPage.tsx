@@ -138,7 +138,7 @@ export function SignInPage() {
             href={CREATE_ACCOUNT_PATH}
             className="text-foreground underline decoration-border-subtle underline-offset-4 transition-colors hover:decoration-muted"
           >
-            Create account
+            Create Account
           </Link>
         </p>
       </AuthShell>

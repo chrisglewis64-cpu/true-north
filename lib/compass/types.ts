@@ -1,11 +1,11 @@
-/** Minimum completed debriefs before the Compass shows a heading. */
+/** Minimum completed debriefs before the Compass shows a heading (legacy). */
 export const MIN_DEBRIEFS_FOR_HEADING = 3;
 
 export const INSUFFICIENT_DATA_MESSAGE =
-  "Complete more Daily Debriefs to establish your heading.";
+  "Begin living your Standard. Alignment will establish with consistent action.";
 
-/** Lookback window for recency-weighted signals. */
-export const ALIGNMENT_LOOKBACK_DAYS = 14;
+/** Recent Identity Alignment horizon (days). */
+export const ALIGNMENT_LOOKBACK_DAYS = 30;
 
 export type DatedDailyDebrief = {
   debriefDate: string;

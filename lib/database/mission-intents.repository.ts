@@ -11,7 +11,7 @@ type Client = SupabaseClient<Database>;
 export async function fetchRecentMissionIntents(
   client: Client,
   userId: string,
-  limit = 14
+  limit = 1000
 ): Promise<Array<{ intentDate: string; intent: MissionIntent }>> {
   const { data, error } = await client
     .from("mission_intents")

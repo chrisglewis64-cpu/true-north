@@ -23,3 +23,16 @@ export {
   getAlignmentFocus,
   type AlignmentFocus,
 } from "@/lib/compass/alignment-focus";
+
+/** Identity Alignment is the source of truth for Compass calculation. */
+export {
+  calculateIdentityAlignment,
+  IDENTITY_ALIGNMENT_WEIGHTS,
+  type IdentityAlignmentResult,
+} from "@/lib/identity-alignment";
+
+export {
+  getIdentityInsight,
+  setIdentityInsightProvider,
+  type IdentityInsight,
+} from "@/lib/identity-insight";

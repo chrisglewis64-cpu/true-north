@@ -40,6 +40,7 @@ export async function insertMission(
 
 export async function updateMissionById(
   client: Client,
+  userId: string,
   missionId: string,
   input: MissionInput
 ): Promise<void> {
@@ -47,13 +48,15 @@ export async function updateMissionById(
   const { error } = await client
     .from("missions")
     .update(mapMissionInputToUpdate(input, now))
-    .eq("id", missionId);
+    .eq("id", missionId)
+    .eq("user_id", userId);
 
   if (error) throw error;
 }
 
 export async function completeMissionById(
   client: Client,
+  userId: string,
   missionId: string,
   lessonsLearned: string
 ): Promise<void> {
@@ -68,7 +71,8 @@ export async function completeMissionById(
       lessons_learned: lessonsLearned,
       completed_at: now,
     })
-    .eq("id", missionId);
+    .eq("id", missionId)
+    .eq("user_id", userId);
 
   if (error) throw error;
 }

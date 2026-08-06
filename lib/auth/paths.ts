@@ -20,8 +20,28 @@ export const AUTH_PUBLIC_PATHS = [
 ] as const;
 
 export function isAuthPublicPath(pathname: string): boolean {
+  // Cron / API proxies authenticate via their own secrets, not the user session.
+  if (pathname === "/api" || pathname.startsWith("/api/")) {
+    return true;
+  }
+
   return AUTH_PUBLIC_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
+}
+
+export function isAuthEntryPath(pathname: string): boolean {
+  return (
+    pathname === SIGN_IN_PATH ||
+    pathname.startsWith(`${SIGN_IN_PATH}/`) ||
+    pathname === CREATE_ACCOUNT_PATH ||
+    pathname.startsWith(`${CREATE_ACCOUNT_PATH}/`)
+  );
+}
+
+export function isOnboardingPath(pathname: string): boolean {
+  return (
+    pathname === ONBOARDING_PATH || pathname.startsWith(`${ONBOARDING_PATH}/`)
   );
 }
 

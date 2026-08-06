@@ -40,17 +40,19 @@ export const missionsService = {
 
   async update(
     client: Client,
+    userId: string,
     missionId: string,
     input: MissionInput
   ): Promise<void> {
-    await updateMissionById(client, missionId, input);
+    await updateMissionById(client, userId, missionId, input);
   },
 
   async complete(
     client: Client,
+    userId: string,
     missionId: string,
     lessonsLearned: string
   ): Promise<void> {
-    await completeMissionById(client, missionId, lessonsLearned);
+    await completeMissionById(client, userId, missionId, lessonsLearned);
   },
 };
